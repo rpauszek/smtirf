@@ -5,6 +5,7 @@ smtirf >> datamodel >> __init__
 """
 from datetime import datetime
 
+# ==============================================================================
 class SMTraceID():
     """
         lightweight class implementing unique Trace identifier
@@ -40,3 +41,5 @@ class SMTraceID():
     def strftime(self, fmt="%Y-%m-%d %H:%M:%S"):
         dt = datetime.fromtimestamp(int(self.movID, base=16))
         return dt.strftime(fmt)
+
+# ==============================================================================

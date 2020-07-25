@@ -8,3 +8,4 @@ __version__ = "0.1.3"
 print(f"smtirf v{__version__}")
 
 from . import datamodel
+from .io import Experiment
