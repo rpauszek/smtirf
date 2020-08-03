@@ -16,10 +16,14 @@ class SMTraceID():
     def __init__(self, s):
         self.string = s
 
+    @staticmethod
+    def time2hex(dt):
+        return hex(int(dt.timestamp()))[2:] # trim 0x
+
     @classmethod
     def from_datetime(cls, dt, trcIndex=None):
         """ instantiate from datetime object """
-        hxdt = hex(int(dt.timestamp()))[2:] # trim 0x
+        hxdt = SMTraceID.time2hex(dt)
         try:
             return cls(f"{hxdt}:{trcIndex:04d}")
         except (TypeError, ValueError):
