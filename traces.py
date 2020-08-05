@@ -10,8 +10,9 @@ from abc import ABC, abstractmethod
 # ==============================================================================
 class BaseTrace(ABC):
 
-    def __init__(self, trcID, data, frameLength, pk, bleed, gamma):
-        pass
+    def __init__(self, trcID, data, frameLength, pk, bleed, gamma, clusterIndex=-1,
+                 isSelected=False, limits=None, offsets=None, model=None):
+        self.isSelected = isSelected
 
     @property
     @abstractmethod

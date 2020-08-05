@@ -16,6 +16,26 @@ class BaseExperiment():
         self.frameLength = frameLength
         self.comments = comments
 
+    # ==========================================================================
+    # sequence interface
+    # ==========================================================================
+    def __getitem__(self, index):
+        return self._traces[index]
+
+    def __len__(self):
+        return len(self._traces)
+
+    def __str__(self):
+        s = f"{self.__class__.__name__}\t{self.nSelected}/{len(self)} selected"
+        return s
+
+    # ==========================================================================
+    # properties
+    # ==========================================================================
+    @property
+    def nSelected(self):
+        return sum(1 for trc in self if trc.isSelected)
+
 
 
 
