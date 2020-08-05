@@ -13,9 +13,33 @@ import os.path
 # public API
 # ==============================================================================
 def read(filename):
+    """ import data from IDL-generated files of .pma movies
+        N traces of length T frames
+        output = {
+            D0          : raw donor (ch1) signal [NxT]
+            A0          : raw acceptor (ch2) signal [NxT]
+            S0          : initial signal state-labels [NxT] -> 0
+            SP          : initial state-path [NxT] -> -1
+            nTraces     : N
+            nFrames     : T
+            pks         : spot coordinates (ch1_x, ch1_y, ch2_x, ch2_y) [Nx4]
+            info =      {filename   : original .trace file path
+                         nTraces    : N
+                         nFrames    : T
+                         ccdGain    : camera gain
+                         dataScaler : PMA data scaler option
+                        }
+            frameLength : camera integration time, sec
+            recordTime  : recording timestamp -> datetime instance
+            img         : static average image (first 10 frames, 512x512 pixels)
+        }
+    """
     output = _read_traces(filename)
     output["pks"] = _read_pks(filename)
-    log = _read_log(filename)
+    log, info = _read_log(filename)
+    info["nTraces"] = output.pop("nTraces")
+    info["nFrames"] = output.pop("nFrames")
+    output["info"] = info
     output = {**output, **log}
     output["img"] = _read_tif(filename)
     return output
@@ -53,19 +77,20 @@ def _read_pks(filename):
     return np.hstack((data[::2, 1:-1], data[1::2, 1:-1]))
 
 def _read_log(filename):
-    output = {"info": {"filename": filename}}
+    info = {"filename": filename}
+    output = {}
     filename, ext = os.path.splitext(filename)
     with open(filename + ".log", "r") as f:
         for line in f:
             if "Gain" in line:
-                output["info"]["ccdGain"] = int(next(f))
+                info["ccdGain"] = int(next(f))
             elif "Exposure Time" in line:
-                output["frameLength"] = float(next(f))/1000 # msec => sec
+                log["frameLength"] = float(next(f))/1000 # msec => sec
             elif "Filming Date and Time" in line:
-                output["recordTime"] = datetime.strptime(next(f).strip(), "%a %b %d %H:%M:%S %Y")
+                log["recordTime"] = datetime.strptime(next(f).strip(), "%a %b %d %H:%M:%S %Y")
             elif "Data Scaler" in line:
-                output["info"]["dataScaler"] = int(next(f))
-    return output
+                info["dataScaler"] = int(next(f))
+    return log, info
 
 def _read_tif(filename):
     filename, ext = os.path.splitext(filename)
