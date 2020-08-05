@@ -93,6 +93,11 @@ class SMMovieList(OrderedDict):
             keys = [k for k in self.keys()]
             return self[keys[key]]
 
+class SMSpotCoordinate():
+
+    def __init__(self, coords):
+        self._coords = coords            
+
 
 # ==============================================================================
 # PACKAGE IMPORTS

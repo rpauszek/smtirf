@@ -26,8 +26,7 @@ class BaseExperiment():
         return len(self._traces)
 
     def __str__(self):
-        s = f"{self.__class__.__name__}\t{self.nSelected}/{len(self)} selected"
-        return s
+        return f"{self.__class__.__name__}\t{self.nSelected}/{len(self)} selected"
 
     # ==========================================================================
     # properties
