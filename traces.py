@@ -26,10 +26,10 @@ class BaseTrace(ABC):
         self.isSelected = isSelected
         self.clusterIndex = clusterIndex
         self.model = model
-        # self.dwells = DwellTable(self) if self.model is not None else None
+        self.dwells = None #DwellTable(self) if self.model is not None else None
 
     def __str__(self):
-        return f"{self.__clas__.__name__}\tID={self._id}  selected={self.isSelected}"
+        return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
 
     def __len__(self):
         return self.D0.size
