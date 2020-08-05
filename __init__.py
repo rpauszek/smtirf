@@ -61,17 +61,38 @@ class SMTraceID():
         return dt.strftime(fmt)
 
 
-class Movie():
+class SMMovie():
 
-    def __init__(self, img, info):
-        print(img.ndim)
+    def __init__(self, movID, img, info):
+        self._id = movID
+        if img.ndim != 2:
+            raise ValueError("image must be flat (not RGB channels)")
         self.img = img
         self.info = info
 
-class MovieList(OrderedDict):
+    def __str__(self):
+        s = f"{self.__class__.__name__}\t{self._id}\n"
+        for key, item in self.info.items():
+            s += f"-> {key}\n\t{item}\n"
+        s += "\n"
+        return s
+
+
+class SMMovieList(OrderedDict):
 
     def __init__(self):
         super().__init__(self)
+
+    def append(self, key, img, info):
+        self[key] = SMMovie(key, img, info)
+
+    def __getitem__(self, key):
+        try:
+            return super().__getitem__(key)
+        except KeyError: # lookup by index
+            keys = [k for k in self.keys()]
+            return self[keys[key]]
+
 
 # ==============================================================================
 # PACKAGE IMPORTS

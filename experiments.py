@@ -10,12 +10,12 @@ from . import traces
 # ==============================================================================
 class BaseExperiment():
 
-    def __init__(self):
-        pass
+    def __init__(self, movies, traces, frameLength, comments=""):
+        self._movies = movies
+        self._traces = traces
+        self.frameLength = frameLength
+        self.comments = comments
 
-    @classmethod
-    def build_trace(cls, trcID, data, frameLength, pk, bleed, gamma):
-        pass
 
 
 

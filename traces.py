@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 # ==============================================================================
 class BaseTrace(ABC):
 
-    def __init__(self):
+    def __init__(self, trcID, data, frameLength, pk, bleed, gamma):
         pass
 
     @property

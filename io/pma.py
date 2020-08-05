@@ -76,7 +76,7 @@ def _read_pks(filename):
     return np.hstack((data[::2, 1:-1], data[1::2, 1:-1]))
 
 def _read_log(filename):
-    info = {"filename": filename}
+    info = {"filename": str(filename)}
     log = {}
     with open(filename.with_suffix(".log"), "r") as f:
         for line in f:
