@@ -78,7 +78,7 @@ def _read_pks(filename):
 
 def _read_log(filename):
     info = {"filename": filename}
-    output = {}
+    log = {}
     filename, ext = os.path.splitext(filename)
     with open(filename + ".log", "r") as f:
         for line in f:

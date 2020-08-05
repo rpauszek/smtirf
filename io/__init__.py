@@ -5,8 +5,7 @@ smtirf >> io >> __init__
 """
 from pathlib import Path
 from . import pma
-# from .experiments import *
-from ..datamodel import experiments
+from .. import experiments
 
 # ==============================================================================
 # EXPERIMENT FACTORY CLASS

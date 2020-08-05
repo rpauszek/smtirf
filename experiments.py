@@ -15,5 +15,5 @@ class BaseExperiment():
         pass
 
     @classmethod
-    build_trace(cls, trcID, data, frameLength, pk, bleed, gamma):
+    def build_trace(cls, trcID, data, frameLength, pk, bleed, gamma):
         pass
