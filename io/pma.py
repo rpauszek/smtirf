@@ -8,6 +8,7 @@ from skimage.io import imread
 from skimage import color
 from datetime import datetime
 import os.path
+# from pathlib import Path
 
 # ==============================================================================
 # public API
@@ -49,8 +50,7 @@ def read(filename):
 # private API
 # ==============================================================================
 def _read_traces(filename):
-    filename, ext = os.path.splitext(filename)
-    with open(filename + ".traces", "rb") as F:
+    with open(filename.with_suffix(".traces"), "rb") as F:
         nFrames = np.fromfile(F, dtype=np.int32, count=1)[0]
         nRecords = np.fromfile(F, dtype=np.int16, count=1)[0]
         # check number of traces is integer
@@ -70,8 +70,7 @@ def _read_traces(filename):
     return {"D0":D0, "A0":A0, "S0":S0, "SP":SP, "nTraces":nTraces, "nFrames":nFrames}
 
 def _read_pks(filename):
-    filename, ext = os.path.splitext(filename)
-    with open(filename + ".pks", "r") as F:
+    with open(filename.with_suffix(".pks"), "r") as F:
         data = np.loadtxt(F)
     # [dx, dy, ax, ay]
     return np.hstack((data[::2, 1:-1], data[1::2, 1:-1]))
@@ -79,8 +78,7 @@ def _read_pks(filename):
 def _read_log(filename):
     info = {"filename": filename}
     log = {}
-    filename, ext = os.path.splitext(filename)
-    with open(filename + ".log", "r") as f:
+    with open(filename.with_suffix(".log"), "r") as f:
         for line in f:
             if "Gain" in line:
                 info["ccdGain"] = int(next(f))
@@ -93,7 +91,5 @@ def _read_log(filename):
     return log, info
 
 def _read_tif(filename):
-    filename, ext = os.path.splitext(filename)
-    img = imread(filename + "_ave.tif")
-    img = color.rgb2gray(img)
-    return img
+    filename = filename.parent / (filename.stem + "_ave.tif")
+    return color.rgb2gray(imread(filename))

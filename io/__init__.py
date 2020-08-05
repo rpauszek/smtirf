@@ -32,5 +32,5 @@ class Experiment():
     def from_pma(filename):
         filename = Path(filename)
         data = pma.read(filename.absolute())
-        print(data["frameLength"])
+        print(data)
         # cls = Experiment.CLASS_TYPES[experimentType]

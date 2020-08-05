@@ -8,6 +8,7 @@ __version__ = "0.1.3"
 print(f"smtirf v{__version__}")
 
 from datetime import datetime
+from collections import OrderedDict
 
 # ==============================================================================
 # AUXILIARY CLASSES
@@ -62,8 +63,15 @@ class SMTraceID():
 
 class Movie():
 
+    def __init__(self, img, info):
+        print(img.ndim)
+        self.img = img
+        self.info = info
+
+class MovieList(OrderedDict):
+
     def __init__(self):
-        pass
+        super().__init__(self)
 
 # ==============================================================================
 # PACKAGE IMPORTS
