@@ -4,8 +4,9 @@
 smtirf >> traces
 """
 import numpy as np
+import json
 from abc import ABC, abstractmethod
-from . import SMSpotCoordinate
+from . import SMSpotCoordinate, SMJsonDecoder, SMJsonEncoder
 
 # ==============================================================================
 # BASE TRACE CLASSES
@@ -42,14 +43,14 @@ class BaseTrace(ABC):
         return np.vstack((self.D0, self.A0, self.S0, self._SP))
 
     def _as_json(self):
-        return {"pk" : self.pk,
-                "clusterIndex" : self.clusterIndex,
-                "frameLength" : self.frameLength,
-                "bleed" : self.bleed,
-                "gamma" : self.gamma,
-                "limits" : self.limits,
-                "offsets" : self.offsets,
-                "isSelected" : self.isSelected}
+        return json.dumps({"pk" : self.pk,
+                           "clusterIndex" : self.clusterIndex,
+                           "frameLength" : self.frameLength,
+                           "bleed" : self.bleed,
+                           "gamma" : self.gamma,
+                           "limits" : self.limits,
+                           "offsets" : self.offsets,
+                           "isSelected" : self.isSelected}, cls=SMJsonEncoder)
 
     @property
     def SP(self): # state path
