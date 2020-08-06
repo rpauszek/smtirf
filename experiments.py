@@ -153,9 +153,7 @@ class Experiment():
                     d = {"id": key+":XXXX", "position": pos, "contents": item}
                     tmp[pos] = d
                 movInfo = tmp
-            movies = SMMovieList()
-            for item in movInfo:
-                movies.append(item["id"], images[item["position"]], item["contents"])
+            movies = SMMovieList().load(images, movInfo)
 
             # load Traces ------------------------------------------------------
             traces = []

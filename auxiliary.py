@@ -79,6 +79,13 @@ class SMMovieList(OrderedDict):
     def __init__(self):
         super().__init__(self)
 
+    @classmethod
+    def load(cls, images, movInfo):
+        movies = cls()
+        for item in movInfo:
+            movies.append(item["id"], images[item["position"]], item["contents"])
+        return movies
+
     def append(self, key, img, info):
         self[key] = SMMovie(key, img, info)
 
