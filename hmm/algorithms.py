@@ -7,7 +7,7 @@ import numpy as np
 from scipy.special import gammaln, digamma
 from numba import jit
 import warnings
-from smtirf.stats import row, col
+from smtirf.hmm import row, col
 
 # ==============================================================================
 # forward-backward algorithm
@@ -77,4 +77,25 @@ def _viterbi(x, pi, A, B):
     for t in range(1, T):
         Q[-(t+1)] = psi[-t, Q[-t]]
 
-    return Q    
+    return Q
+
+# ==============================================================================
+# draw statepath
+# ==============================================================================
+@jit(nopython=True)
+def sample_statepath(K, pi, A, T):
+    S = np.zeros(T, dtype=np.uint32)
+    S[0] = catrnd(pi)
+    for t in range(1, T):
+        S[t] = catrnd(A[S[t-1]])
+    return S
+
+@jit(nopython=True)
+def catrnd(p):
+    """ from Presse iHMM beam sampler """
+    K = p.size
+    p = np.cumsum(p)
+    for k in range(K):
+        if np.random.uniform(0, p[-1]) < p[k]:
+            break
+    return k
