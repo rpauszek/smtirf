@@ -12,7 +12,10 @@ class Dirichlet():
 
     def __init__(self, alpha):
         self._alpha = alpha
-        self._isStack = alpha.ndim > 1
+
+    @property
+    def K(self):
+        return self.alpha.size
 
     @property
     def alpha(self):
@@ -20,10 +23,7 @@ class Dirichlet():
 
     @property
     def alpha0(self):
-        if self._isStack:
-            return np.sum(self._alpha, axis=1)
-        else:
-            return np.sum(self._alpha)
+        return np.sum(self._alpha)
 
     @property
     def mu(self):
@@ -34,17 +34,22 @@ class Dirichlet():
         return digamma(self.alpha) - col(digamma(self.alpha0))
 
     def sample(self):
-        if self._isStack:
-            return np.vstack([np.random.dirichlet(ak) for ak in self.alpha])
-        else:
-            return np.random.dirichlet(self.alpha)
+        return np.random.dirichlet(self.alpha)
 
 
-# class DirichletArray(Dirichlet):
-#
-#     @property
-#     def alpha0(self):
-#         return np.sum(self._alpha, axis=1)
+class DirichletArray(Dirichlet):
+
+    @property
+    def K(self):
+        _, K = self.alpha.shape
+        return K
+
+    @property
+    def alpha0(self):
+        return np.sum(self._alpha, axis=1)
+
+    def sample(self):
+        return np.vstack([np.random.dirichlet(ak) for ak in self.alpha])
 
 
 class Normal():
