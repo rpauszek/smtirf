@@ -104,13 +104,80 @@ class NormalSharedVariance(Normal):
     #     return np.full(self.K, self._tau)
 
 
-class NormalGamma():
+class NormalGamma(Normal):
+    """ NG(μ,τ|m,β,a,b) """
 
-    def __init__(self):
-        pass
+    def __init__(self, m, beta, a, b):
+        assert m.ndim == 1 and beta.ndim == 1
+        assert a.ndim == 1 and b.ndim == 1
+        self._m = m
+        self._beta = beta
+        self._a = a
+        self._b = b
+
+    @property
+    def K(self):
+        return self._m.size
+
+    @property
+    def m(self):
+        return self._m
+
+    @property
+    def beta(self):
+        return self._beta
+
+    @property
+    def a(self):
+        return self._a
+
+    @property
+    def b(self):
+        return self._b
+
+    @property
+    def mu(self):
+        return self._m
+
+    @property
+    def tau(self):
+        return self.a/self.b
+
+    def p_mu(self, m):
+        """ P(μ|m,βτ) """
+        X = row(m) - col(self.m)
+        tau = col(self.beta * self.tau)
+        lnP = -0.5 * np.log(2*np.pi/tau) - tau/2 * X**2
+        return np.exp(lnP)
+
+    def p_tau(self, t):
+        """ P(τ|a,b) """
+        t = row(t)
+        lnP = -gammaln(col(self.a)) + col(self.a*np.log(self.b)) + col(self.a-1)*np.log(t) - col(self.b)*t
+        return np.exp(lnP)
+
+    @property
+    def lnTauStar(self):
+        return digamma(self.a) - np.log(self.b)
+
+    def mahalanobis(self, x):
+        Delta2 = row(1/self.beta) + row(self.tau)*(col(x)-row(self.m))**2
+        return 0.5*row(self.lnTauStar) - 0.5*np.log(2*np.pi) - 0.5*Delta2
+
+    def sample(self):
+        sigma = np.sqrt(1/(self.beta*self.tau))
+        mu = np.sort(np.random.normal(loc=self.m, scale=sigma))
+        tau = np.random.gamma(shape=self.a, scale=1/self.b)
+        return mu, tau
 
 
-class NormalGammaSharedVariance():
+class NormalGammaSharedVariance(NormalGamma):
 
-    def __init__(self):
-        pass
+    def __init__(self, m, beta, a, b):
+        assert m.ndim == 1 and beta.ndim == 1
+        assert not isinstance(a, (np.ndarray, list, tuple))
+        assert not isinstance(b, (np.ndarray, list, tuple))
+        self._m = m
+        self._beta = beta
+        self._a = a
+        self._b = b
