@@ -87,15 +87,16 @@ class SMMovieList(OrderedDict):
             keys = [k for k in self.keys()]
             return self[keys[key]]
 
-    def serialize(self):
-        """ return stack of images and json-serialized list of info dicts  """
-        images, infos = [], []
-        for j, (key, mov) in enumerate(self.items()):
-            images.append(mov.img)
-            infos.append({"id": str(mov._id),
-                         "position": j,
-                         "contents": mov.info})
-        return np.stack(images, axis=2), infos
+    def _as_image_stack(self):
+        """ return stack of images (ndarray) """
+        images = [mov.img for j, (key, mov) in enumerate(self.items())]
+        return np.stack(images, axis=2)
+
+    def _as_json(self):
+        """ json-serialized list of info dicts  """
+        return [{"id": str(mov._id), "position": j, "contents": mov.info}
+                for j, (key, mov) in enumerate(self.items())]
+                
 
 class SMSpotCoordinate():
 

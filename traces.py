@@ -28,21 +28,6 @@ class BaseTrace(ABC):
         self.model = model
         self.dwells = None #DwellTable(self) if self.model is not None else None
 
-    def serialize(self):
-        data = np.vstack((self.D0, self.A0, self.S0, self._SP))
-        return data, self._properties, self.model
-
-    @property
-    def _properties(self):
-        return {"pk" : self.pk,
-                "clusterIndex" : self.clusterIndex,
-                "frameLength" : self.frameLength,
-                "bleed" : self.bleed,
-                "gamma" : self.gamma,
-                "limits" : self.limits,
-                "offsets" : self.offsets,
-                "isSelected" : self.isSelected}
-
     def __str__(self):
         return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
 
@@ -51,6 +36,20 @@ class BaseTrace(ABC):
 
     def _set_data(self, data):
         self.D0, self.A0, self.S0, self._SP = data
+
+    @property
+    def _raw_data(self):
+        return np.vstack((self.D0, self.A0, self.S0, self._SP))
+
+    def _as_json(self):
+        return {"pk" : self.pk,
+                "clusterIndex" : self.clusterIndex,
+                "frameLength" : self.frameLength,
+                "bleed" : self.bleed,
+                "gamma" : self.gamma,
+                "limits" : self.limits,
+                "offsets" : self.offsets,
+                "isSelected" : self.isSelected}
 
     @property
     def SP(self): # state path

@@ -107,7 +107,6 @@ class Experiment():
     @staticmethod
     def write_to_hdf(filename, experiment):
         filename = Path(filename).absolute()
-        print(filename)
         with h5py.File(filename, "w") as HF:
             # store Experiment -------------------------------------------------
             HF.attrs["experimentType"] = experiment.classLabel
@@ -115,18 +114,18 @@ class Experiment():
             HF.attrs["comments"] = experiment.comments
 
             # store MovieList --------------------------------------------------
-            images, movInfo = experiment._movies.serialize()
-            dataset = HF.create_dataset("movies", data=images, compression="gzip")
-            dataset.attrs["movies"] = json.dumps(movInfo, cls=SMJsonEncoder)
+            # images, movInfo = experiment._movies.serialize()
+            dataset = HF.create_dataset("movies", data=experiment._movies._as_image_stack(), compression="gzip")
+            dataset.attrs["movies"] = json.dumps(experiment._movies._as_json(), cls=SMJsonEncoder)
 
             # store Traces -----------------------------------------------------
             traceGroup = HF.create_group("traces")
             for trc in experiment:
-                data, props, model = trc.serialize()
-                dataset = traceGroup.create_dataset(str(trc._id), data=data, compression="gzip")
-                dataset.attrs["properties"] = json.dumps(props, cls=SMJsonEncoder)
+                # data, props, model = trc.serialize()
+                dataset = traceGroup.create_dataset(str(trc._id), data=trc._raw_data, compression="gzip")
+                dataset.attrs["properties"] = json.dumps(trc._as_json(), cls=SMJsonEncoder)
                 try:
-                    dataset.attrs["model"] = json.dumps(model.serialize(), cls=SMJsonEncoder)
+                    dataset.attrs["model"] = json.dumps(trc.model._as_json(), cls=SMJsonEncoder)
                 except AttributeError:
                     pass
 
@@ -138,7 +137,40 @@ class Experiment():
 
     @staticmethod
     def load(filename):
+        filename = Path(filename).absolute()
         print(filename)
+        with h5py.File(filename, "r") as HF:
+            # load Experiment --------------------------------------------------
+            cls = Experiment.CLASS_TYPES[HF.attrs["experimentType"]]
+            frameLength = HF.attrs["frameLength"]
+            comments = HF.attrs["comments"]
+
+            # load MovieList ---------------------------------------------------
+            images = HF["movies"][:]
+            movInfo = json.loads(HF["movies"].attrs["movies"])
+            if isinstance(movInfo, dict): # re-format if < v0.1.3
+                tmp = [None] * len(movInfo)
+                for key, item in movInfo.items():
+                    pos = item.pop("position")
+                    d = {"id": key+":XXXX", "position": pos, "contents": item}
+                    tmp[pos] = d
+                movInfo = tmp
+            movies = SMMovieList()
+            for item in movInfo:
+                movies.append(item["id"], images[item["position"]], item["contents"])
+
+            # load Traces ------------------------------------------------------
+            traces = []
+            for key, item in HF["traces"].items():
+                _id = SMTraceID(key)
+                try:
+                    model = json.loads(item.attrs["model"], cls=SMJsonDecoder)
+                except KeyError:
+                    model = None
+                props = json.loads(item.attrs["properties"], cls=SMJsonDecoder)
+                traces.append(cls.traceClass(_id, item[:], model=model, **props))
+
+            return cls(movies, traces, frameLength, comments)
 
         # @staticmethod
         # def load(filename):
