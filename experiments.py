@@ -5,7 +5,11 @@ smtirf >> experiments
 """
 import numpy as np
 from pathlib import Path
+from datetime import datetime
+import h5py, json
+import smtirf
 from . import SMTraceID, SMMovieList
+from . import SMJsonDecoder, SMJsonEncoder
 from . import traces
 from . import io
 
@@ -104,21 +108,45 @@ class Experiment():
     def write_to_hdf(filename, experiment):
         filename = Path(filename).absolute()
         print(filename)
-        print(type(filename))
+        with h5py.File(filename, "w") as HF:
+            # store Experiment -------------------------------------------------
+            HF.attrs["experimentType"] = experiment.classLabel
+            HF.attrs["frameLength"] = experiment.frameLength
+            HF.attrs["comments"] = experiment.comments
 
+            # store MovieList --------------------------------------------------
+            images, movInfo = experiment._movies.serialize()
+            dataset = HF.create_dataset("movies", data=images, compression="gzip")
+            dataset.attrs["movies"] = json.dumps(movInfo, cls=SMJsonEncoder)
 
-        # def save(self, savename):
-        # savename = os.path.abspath(savename)
-        # with h5py.File(savename, "w") as HF:
-        #     HF.attrs["experimentType"] = self.classLabel
-        #     HF.attrs["frameLength"] = self.frameLength
-        #     HF.attrs["comments"] = self.comments
-        #     self._movies.to_hdf(HF)
-        #     traceGroup = HF.create_group("traces")
-        #     for trc in self:
-        #         trc.to_hdf(traceGroup)
-        #     # following attributes can be used for display in file manager
-        #     HF.attrs["nTraces"] = len(self)
-        #     HF.attrs["nSelected"] = self.nSelected
-        #     HF.attrs["dateModified"] = datetime.now().strftime("%a %b %d, %Y\t%H:%M:%S")
-        #     HF.attrs["version"] = smtirf.__version__
+            # store Traces -----------------------------------------------------
+            traceGroup = HF.create_group("traces")
+            for trc in experiment:
+                data, props, model = trc.serialize()
+                dataset = traceGroup.create_dataset(str(trc._id), data=data, compression="gzip")
+                dataset.attrs["properties"] = json.dumps(props, cls=SMJsonEncoder)
+                try:
+                    dataset.attrs["model"] = json.dumps(model.serialize(), cls=SMJsonEncoder)
+                except AttributeError:
+                    pass
+
+            # store auxiliary attributes ---------------------------------------
+            HF.attrs["nTraces"] = len(experiment)
+            HF.attrs["nSelected"] = experiment.nSelected
+            HF.attrs["dateModified"] = datetime.now().strftime("%a %b %d, %Y\t%H:%M:%S")
+            HF.attrs["version"] = smtirf.__version__
+
+    @staticmethod
+    def load(filename):
+        print(filename)
+
+        # @staticmethod
+        # def load(filename):
+        #     filename = os.path.abspath(filename)
+        #     with h5py.File(filename, "r") as HF:
+        #         cls = Experiment._CLASS_TYPES[HF.attrs["experimentType"]]
+        #         frameLength = HF.attrs["frameLength"]
+        #         comments = HF.attrs["comments"]
+        #         movies = smtirf.data.MovieList.from_hdf(HF["movies"])
+        #         traces = [cls.traceClass.from_hdf(key,item) for key, item in HF["traces"].items()]
+        #     return cls(movies, traces, frameLength, comments)

@@ -16,7 +16,7 @@ class BaseTrace(ABC):
                  isSelected=False, limits=None, offsets=None, model=None):
         self._id = trcID
         self._set_data(data)
-        self.set_frame_length = frameLength # => set self.t
+        self.set_frame_length(frameLength) # => set self.t
         self._bleed = bleed
         self._gamma = gamma
         self.set_offsets(offsets) # => triggers _correct_signals()
@@ -27,6 +27,21 @@ class BaseTrace(ABC):
         self.clusterIndex = clusterIndex
         self.model = model
         self.dwells = None #DwellTable(self) if self.model is not None else None
+
+    def serialize(self):
+        data = np.vstack((self.D0, self.A0, self.S0, self._SP))
+        return data, self._properties, self.model
+
+    @property
+    def _properties(self):
+        return {"pk" : self.pk,
+                "clusterIndex" : self.clusterIndex,
+                "frameLength" : self.frameLength,
+                "bleed" : self.bleed,
+                "gamma" : self.gamma,
+                "limits" : self.limits,
+                "offsets" : self.offsets,
+                "isSelected" : self.isSelected}
 
     def __str__(self):
         return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
