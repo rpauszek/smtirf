@@ -6,7 +6,7 @@ smtirf >> traces
 import numpy as np
 import json
 from abc import ABC, abstractmethod
-from . import SMSpotCoordinate, SMJsonDecoder, SMJsonEncoder
+from . import SMSpotCoordinate, SMJsonEncoder
 
 # ==============================================================================
 # BASE TRACE CLASSES

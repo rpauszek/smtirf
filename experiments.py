@@ -114,19 +114,17 @@ class Experiment():
             HF.attrs["comments"] = experiment.comments
 
             # store MovieList --------------------------------------------------
-            # images, movInfo = experiment._movies.serialize()
             dataset = HF.create_dataset("movies", data=experiment._movies._as_image_stack(), compression="gzip")
-            dataset.attrs["movies"] = json.dumps(experiment._movies._as_dict(), cls=SMJsonEncoder)
+            dataset.attrs["movies"] = experiment._movies._as_json()
 
             # store Traces -----------------------------------------------------
             traceGroup = HF.create_group("traces")
             for trc in experiment:
-                # data, props, model = trc.serialize()
                 dataset = traceGroup.create_dataset(str(trc._id), data=trc._raw_data, compression="gzip")
-                dataset.attrs["properties"] = trc._as_json()#json.dumps(trc._as_json(), cls=SMJsonEncoder)
+                dataset.attrs["properties"] = trc._as_json()
                 try:
                     dataset.attrs["model"] = json.dumps(trc.model._as_json(), cls=SMJsonEncoder)
-                except AttributeError:
+                except AttributeError: # model is None
                     pass
 
             # store auxiliary attributes ---------------------------------------

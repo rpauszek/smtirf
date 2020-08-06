@@ -4,8 +4,10 @@
 smtirf >> auxiliary
 """
 import numpy as np
+import json
 from datetime import datetime
 from collections import OrderedDict
+from . import SMJsonEncoder
 
 class SMTraceID():
     """
@@ -92,10 +94,10 @@ class SMMovieList(OrderedDict):
         images = [mov.img for j, (key, mov) in enumerate(self.items())]
         return np.stack(images, axis=2)
 
-    def _as_dict(self):
+    def _as_json(self):
         """ json-serialized list of info dicts  """
-        return [{"id": str(mov._id), "position": j, "contents": mov.info}
-                for j, (key, mov) in enumerate(self.items())]
+        return json.dumps([{"id": str(mov._id), "position": j, "contents": mov.info}
+                            for j, (key, mov) in enumerate(self.items())], cls=SMJsonEncoder)
 
 
 class SMSpotCoordinate():
