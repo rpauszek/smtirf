@@ -116,7 +116,7 @@ class Experiment():
             # store MovieList --------------------------------------------------
             # images, movInfo = experiment._movies.serialize()
             dataset = HF.create_dataset("movies", data=experiment._movies._as_image_stack(), compression="gzip")
-            dataset.attrs["movies"] = json.dumps(experiment._movies._as_json(), cls=SMJsonEncoder)
+            dataset.attrs["movies"] = json.dumps(experiment._movies._as_dict(), cls=SMJsonEncoder)
 
             # store Traces -----------------------------------------------------
             traceGroup = HF.create_group("traces")
