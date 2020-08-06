@@ -40,4 +40,5 @@ class SMJsonDecoder(json.JSONDecoder):
 
 from .auxiliary import SMTraceID, SMMovieList, SMSpotCoordinate
 from .auxiliary import where
+from . import hmm
 from .experiments import Experiment

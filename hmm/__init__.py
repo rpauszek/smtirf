@@ -30,3 +30,5 @@ def normalize_rows(x):
         return x/x.sum()
     except AttributeError:
         return normalize_rows(np.array(x))
+
+from . import distributions        
