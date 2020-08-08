@@ -4,7 +4,7 @@
 smtirf >> hmm >> models
 """
 import numpy as np
-from . import row, col
+from . import row, col, normalize_rows
 from . import algorithms as hmmalg
 from .distributions import *
 
@@ -25,10 +25,10 @@ class BaseHiddenMarkovModel():
 # ==============================================================================
 class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
 
-    def __init__(self, K, rho, alpha, mu, tau, sharedVariance):
+    def __init__(self, K, pi, A, mu, tau, sharedVariance):
         self._K = K
-        self._pi = Categorical(rho)
-        self._A = CategoricalArray(alpha)
+        self._pi = Categorical(pi)
+        self._A = CategoricalArray(A)
         if sharedVariance:
             self._phi = NormalSharedVariance(mu, tau)
         else:
@@ -67,6 +67,22 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
 
     def train(self, x, maxIter=1000, tol=1e-5, printWarnings=True):
         self.exitFlag = hmmalg.train_baumwelch(x, self, maxIter=maxIter, tol=tol, printWarnings=printWarnings)
+
+    @classmethod
+    def train_new(cls, x, K, sharedVariance, maxIter=1000, tol=1e-5, printWarnings=True):
+        # initial guess for parameters
+        pi = np.ones(K)/K
+        A = normalize_rows(np.eye(K)*1 + np.ones((K,K)))
+        mu = np.linspace(0, 1, K+2)[1:-1]
+        if sharedVariance:
+            sigma = 0.1
+        else:
+            sigma = np.ones(K)*0.1
+        theta = cls(K, pi, A, mu, 1/sigma**2, sharedVariance)
+        # TRAIN
+        theta.train(x)
+        return theta
+
 
 
 class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
