@@ -38,7 +38,6 @@ def train_variational(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
     L = np.zeros(maxIter)
     isConverged = False
     for itr in range(maxIter):
-        print(itr)
         # E-step
         gamma, xi, lnZ = fwdback(np.exp(w.lnPiStar), np.exp(w.lnAStar), np.exp(w.mahalanobis(x)))
         # Evaluate ELBO

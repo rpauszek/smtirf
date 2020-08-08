@@ -7,6 +7,7 @@ import numpy as np
 from . import row, col, normalize_rows
 from . import algorithms as hmmalg
 from .distributions import *
+from . import hyperparameters as hyper
 
 # ==============================================================================
 # BASE MODEL CLASS
@@ -129,6 +130,23 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
     def train(self, x, maxIter=1000, tol=1e-5, printWarnings=True):
         self.exitFlag = hmmalg.train_variational(x, self, maxIter=maxIter, tol=tol, printWarnings=printWarnings)
         self._w.sort()
+
+    @classmethod
+    def train_new(cls, x, K, sharedVariance, repeats=5, maxIter=1000, tol=1e-5, printWarnings=False):
+        # initialize prior
+        if sharedVariance:
+            u = hyper.HMMHyperParametersSharedVariance.uninformative(K)
+        else:
+            u = hyper.HMMHyperParameters.uninformative(K)
+        # sample posteriors from prior for r repeats
+        thetas = [cls(K, u, u.sample_from_prior(u), sharedVariance) for r in range(repeats)]
+        # TODO => update by kmeans
+        # TRAIN
+        for theta in thetas:
+            theta.train(x, printWarnings=printWarnings)
+        # select most likely model (largest Lmax)
+        thetas.sort(reverse=True, key=lambda theta: theta.exitFlag.Lmax)
+        return thetas[0]
 
 
 # ==============================================================================
