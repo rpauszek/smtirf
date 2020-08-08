@@ -59,4 +59,5 @@ class ExitFlag():
         return self.L[-1]
 
 
+from . import hyperparameters
 from . import models

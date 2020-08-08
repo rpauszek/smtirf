@@ -28,8 +28,6 @@ def train_baumwelch(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
                 isConverged = True
                 break
         # M-step
-        # Nk, xbar, S = calc_sufficient_statistics(x, gamma)
-        # theta.update(x, gamma, xi, Nk, xbar, S)
         theta.update(x, gamma, xi)
 
     return ExitFlag(L[:itr+1], isConverged)

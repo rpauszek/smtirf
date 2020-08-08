@@ -25,12 +25,10 @@ class Categorical():
         self._mu = mu
 
     @property
-    def K(self):
-        return self.mu.size
+    def K(self): return self.mu.size
 
     @property
-    def mu(self):
-        return self._mu
+    def mu(self): return self._mu
 
     def update(self, p):
         self._mu = p
@@ -53,27 +51,27 @@ class Dirichlet():
         self._alpha = alpha
 
     @property
-    def K(self):
-        return self.alpha.size
+    def K(self): return self.alpha.size
 
     @property
-    def alpha(self):
-        return self._alpha
+    def alpha(self): return self._alpha
 
     @property
-    def alpha0(self):
-        return np.sum(self._alpha)
+    def alpha0(self): return np.sum(self._alpha)
 
     @property
-    def mu(self):
-        return normalize_rows(self.alpha)
+    def mu(self): return normalize_rows(self.alpha)
 
     @property
-    def lnMuStar(self):
-        return digamma(self.alpha) - col(digamma(self.alpha0))
+    def lnMuStar(self): return digamma(self.alpha) - col(digamma(self.alpha0))
 
-    def sample(self):
-        return np.random.dirichlet(self.alpha)
+    def sample(self): return np.random.dirichlet(self.alpha)
+
+    def update(self, uAlpha, X):
+        self._alpha = uAlpha.alpha + X
+
+    def reorder(self, ix):
+        self._alpha = self._alpha[ix]
 
 
 class DirichletArray(Dirichlet):
@@ -85,11 +83,12 @@ class DirichletArray(Dirichlet):
         return K
 
     @property
-    def alpha0(self):
-        return np.sum(self._alpha, axis=1)
+    def alpha0(self): return np.sum(self._alpha, axis=1)
 
-    def sample(self):
-        return np.vstack([np.random.dirichlet(ak) for ak in self.alpha])
+    def sample(self): return np.vstack([np.random.dirichlet(ak) for ak in self.alpha])
+
+    def reorder(self, ix):
+        self._alpha = self._alpha[ix,:][:,ix]
 
 
 class Normal():
@@ -102,24 +101,19 @@ class Normal():
         self._tau = tau
 
     @property
-    def K(self):
-        return self._mu.size
+    def K(self): return self._mu.size
 
     @property
-    def mu(self):
-        return self._mu
+    def mu(self): return self._mu
 
     @property
-    def tau(self):
-        return self._tau
+    def tau(self): return self._tau
 
     @property
-    def var(self):
-        return 1/self.tau
+    def var(self): return 1/self.tau
 
     @property
-    def sigma(self):
-        return np.sqrt(1/self.tau)
+    def sigma(self): return np.sqrt(1/self.tau)
 
     def p_X(self, x):
         """ P(x|μ,τ) """
@@ -170,32 +164,25 @@ class NormalGamma(Normal):
         self._b = b
 
     @property
-    def K(self):
-        return self._m.size
+    def K(self): return self._m.size
 
     @property
-    def m(self):
-        return self._m
+    def m(self): return self._m
 
     @property
-    def beta(self):
-        return self._beta
+    def beta(self): return self._beta
 
     @property
-    def a(self):
-        return self._a
+    def a(self): return self._a
 
     @property
-    def b(self):
-        return self._b
+    def b(self): return self._b
 
     @property
-    def mu(self):
-        return self._m
+    def mu(self): return self._m
 
     @property
-    def tau(self):
-        return self.a/self.b
+    def tau(self): return self.a/self.b
 
     def p_mu(self, m):
         """ P(μ|m,βτ) """
@@ -211,8 +198,7 @@ class NormalGamma(Normal):
         return np.exp(lnP)
 
     @property
-    def lnTauStar(self):
-        return digamma(self.a) - np.log(self.b)
+    def lnTauStar(self): return digamma(self.a) - np.log(self.b)
 
     def mahalanobis(self, x):
         Delta2 = row(1/self.beta) + row(self.tau)*(col(x)-row(self.m))**2
@@ -223,6 +209,18 @@ class NormalGamma(Normal):
         mu = np.sort(np.random.normal(loc=self.m, scale=sigma))
         tau = np.random.gamma(shape=self.a, scale=1/self.b)
         return mu, tau
+
+    def update(self, uPhi, Nk, xbar, S):
+        self._beta = uPhi.beta + Nk
+        self._m = (uPhi.beta*uPhi.m + Nk*xbar)/self.beta
+        self._a = uPhi.a + (Nk+1)/2
+        self._b = uPhi.b + 0.5*(Nk*S) + 0.5*(uPhi.beta*Nk/(uPhi.beta+Nk))*(xbar-uPhi.m)**2
+
+    def reorder(self, ix):
+        self._beta = self._beta[ix]
+        self._m = self._m[ix]
+        self._a = self._a[ix]
+        self._b = self._b[ix]
 
 
 class NormalGammaSharedVariance(NormalGamma):
