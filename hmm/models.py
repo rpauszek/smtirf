@@ -71,6 +71,7 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
     def train(self, x, maxIter=1000, tol=1e-5, printWarnings=True):
         self.exitFlag = hmmalg.train_baumwelch(x, self, maxIter=maxIter, tol=tol, printWarnings=printWarnings)
 
+    # TODO => muScale for PIFE data
     @classmethod
     def train_new(cls, x, K, sharedVariance, maxIter=1000, tol=1e-5, printWarnings=True):
         # initial guess for parameters
@@ -158,14 +159,15 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
 # ==============================================================================
 class HiddenMarkovModel():
 
-    # _MODEL_TYPES = {"em" : (models.ClassicHiddenMarkovModel, svmodels.ClassicHiddenMarkovModelSharedVariance),
-    #                 "vb" : (models.BayesianHiddenMarkovModel, svmodels.BayesianHiddenMarkovModelSharedVariance),
-    #                 "piecewise" : (models.PiecewiseHiddenMarkovModel, svmodels.PiecewiseHiddenMarkovModelSharedVariance),
-    #                 "multimer" : (None, svmodels.MultimerHiddenMarkovModel)}
+    MODEL_TYPES = {"em" : ClassicHiddenMarkovModel,
+                   "vb" : VariationalHiddenMarkovModel}
 
     # ==========================================================================
     # initializers
     # ==========================================================================
     @staticmethod
-    def new(K, modelType="em", sharedVariance=True, maxIter=1000, tol=1e-5):
-        pass
+    def train_new(modelType, x, K, sharedVariance, **kwargs):
+        """ kwargs -> maxIter, tol, printWarnings, {repeats} """
+        cls = HiddenMarkovModel.MODEL_TYPES[modelType]
+        theta = cls.train_new(x, K, sharedVariance, **kwargs)
+        return theta

@@ -61,3 +61,4 @@ class ExitFlag():
 
 from . import hyperparameters
 from . import models
+from .models import HiddenMarkovModel
