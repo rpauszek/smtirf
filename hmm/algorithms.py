@@ -7,7 +7,8 @@ import numpy as np
 from scipy.special import gammaln, digamma
 from numba import jit
 import warnings
-from smtirf.hmm import row, col, ExitFlag
+from . import row, col, ExitFlag
+from .distributions import *
 
 # ==============================================================================
 # training algorithms
@@ -29,6 +30,31 @@ def train_baumwelch(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
                 break
         # M-step
         theta.update(x, gamma, xi)
+
+    return ExitFlag(L[:itr+1], isConverged)
+
+def train_variational(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
+    u, w = theta._u, theta._w
+    L = np.zeros(maxIter)
+    isConverged = False
+    for itr in range(maxIter):
+        print(itr)
+        # E-step
+        gamma, xi, lnZ = fwdback(np.exp(w.lnPiStar), np.exp(w.lnAStar), np.exp(w.mahalanobis(x)))
+        # Evaluate ELBO
+        L[itr] = lnZ - kldiv(u, w)
+        # Check for convergence
+        if itr > 0:
+            deltaL = L[itr]-L[itr-1]
+            if deltaL < 0 and printWarnings:
+                warnings.warn(f"lower bound decreasing by {np.abs(deltaL):0.4f}")
+            if np.abs(deltaL) < tol:
+                isConverged = True
+                break
+        # M-step
+        theta.update(u, x, gamma, xi)
+
+    # TODO: need to sort mu
 
     return ExitFlag(L[:itr+1], isConverged)
 
@@ -101,6 +127,16 @@ def _viterbi(x, pi, A, B):
         Q[-(t+1)] = psi[-t, Q[-t]]
 
     return Q
+
+# ==============================================================================
+# Kullback-Leibler divergence
+# ==============================================================================
+def kldiv(u, w):
+    DKL = Dirichlet.kldiv(u._rho, w._rho)
+    DKL += DirichletArray.kldiv(u._alpha, w._alpha)
+    DKL += NormalGamma.kldiv(u._phi, w._phi)
+    return DKL
+
 
 # ==============================================================================
 # draw statepath

@@ -73,6 +73,13 @@ class Dirichlet():
     def reorder(self, ix):
         self._alpha = self._alpha[ix]
 
+    @staticmethod
+    def kldiv(u, w):
+        p, q = u.alpha, w.alpha
+        return gammaln(p.sum()) - gammaln(q.sum()) \
+               - np.sum(gammaln(p) - gammaln(q)) \
+               + np.sum((p-q)*(digamma(q)-digamma(q.sum())))
+
 
 class DirichletArray(Dirichlet):
     _NDIM = 2
@@ -89,6 +96,15 @@ class DirichletArray(Dirichlet):
 
     def reorder(self, ix):
         self._alpha = self._alpha[ix,:][:,ix]
+
+    @staticmethod
+    def kldiv(u, w):
+        DKL = 0
+        for p, q in zip(u.alpha, w.alpha):
+            DKL += gammaln(p.sum()) - gammaln(q.sum()) \
+                   - np.sum(gammaln(p) - gammaln(q)) \
+                   + np.sum((p-q)*(digamma(q)-digamma(q.sum())))
+        return DKL
 
 
 class Normal():
@@ -224,6 +240,20 @@ class NormalGamma(Normal):
             self._b = self._b[ix]
         except IndexError: # for SharedVariance=True
             pass
+
+    @staticmethod
+    def kldiv(u, w):
+        ln_p_mutau_1 = 0.5*np.sum(np.log(u.beta/(2*np.pi)) + w.lnTauStar - u.beta/w.beta
+                                  - u.beta*w.a/w.b*(w.m-u.m)**2)
+        ln_p_mutau_2 = np.sum(u.a*np.log(u.b) - gammaln(u.a))
+        ln_p_mutau_3 = np.sum((u.a-1)*w.lnTauStar) + np.sum(w.a*u.b/w.b)
+        ln_p_mutau = ln_p_mutau_1 + ln_p_mutau_2 + ln_p_mutau_3
+
+        ln_q_mutau = 0.5*w.lnTauStar + 0.5*np.log(w.beta/(2*np.pi)) - 0.5 - gammaln(w.a) \
+                     + (w.a-1)*digamma(w.a) + np.log(w.b) - w.a
+        ln_q_mutau = ln_q_mutau.sum()
+
+        return ln_p_mutau - ln_q_mutau
 
 
 class NormalGammaSharedVariance(NormalGamma):

@@ -60,6 +60,15 @@ class HMMHyperParameters():
     @property
     def sigma(self): return self._phi.sigma
 
+    @property
+    def lnPiStar(self): return self._rho.lnMuStar
+
+    @property
+    def lnAStar(self): return self._alpha.lnMuStar
+
+    def mahalanobis(self, x):
+        return self._phi.mahalanobis(x)
+
     def update(self, u, gamma, xiSum, Nk, xbar, S):
         self._rho.update(u._rho, gamma[0])
         self._alpha.update(u._alpha, xiSum)

@@ -91,7 +91,7 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
         self._K = K
         self._u = u
         self._w = w
-        assert self._u.K == K and self.w.K == K
+        assert self._u.K == K and self._w.K == K
         self.sharedVariance = sharedVariance
         self.exitFlag = None
 
@@ -117,6 +117,18 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
 
     def p_X(self, x):
         return self._w.p_X(x)
+
+    def update(self, u, x, gamma, xi):
+        # calculate sufficient calculate sufficient statistics
+        Nk = gamma.sum(axis=0)
+        xbar = np.sum(gamma*col(x), axis=0)/Nk
+        S = np.sum(gamma*(col(x)-row(xbar))**2, axis=0)/Nk # variance
+        # update posterior
+        self._w.update(u, gamma, xi, Nk, xbar, S)
+
+    def train(self, x, maxIter=1000, tol=1e-5, printWarnings=True):
+        self.exitFlag = hmmalg.train_variational(x, self, maxIter=maxIter, tol=tol, printWarnings=printWarnings)
+        self._w.sort()
 
 
 # ==============================================================================
