@@ -7,7 +7,32 @@ import numpy as np
 from scipy.special import gammaln, digamma
 from numba import jit
 import warnings
-from smtirf.hmm import row, col
+from smtirf.hmm import row, col, ExitFlag
+
+# ==============================================================================
+# training algorithms
+# ==============================================================================
+def train_baumwelch(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
+    L = np.zeros(maxIter)
+    isConverged = False
+    for itr in range(maxIter):
+        # E-step
+        gamma, xi, lnZ = fwdback(theta.pi, theta.A, theta.p_X(x).T)
+        L[itr] = lnZ
+        # Check for convergence
+        if itr > 1:
+            deltaL = L[itr]-L[itr-1]
+            if deltaL < 0 and printWarnings:
+                warnings.warn(f"log likelihood decreasing by {np.abs(deltaL):0.4f}")
+            if np.abs(deltaL) < tol:
+                isConverged = True
+                break
+        # M-step
+        # Nk, xbar, S = calc_sufficient_statistics(x, gamma)
+        # theta.update(x, gamma, xi, Nk, xbar, S)
+        theta.update(x, gamma, xi)
+
+    return ExitFlag(L[:itr+1], isConverged)
 
 # ==============================================================================
 # forward-backward algorithm

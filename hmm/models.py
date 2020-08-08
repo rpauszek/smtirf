@@ -4,6 +4,7 @@
 smtirf >> hmm >> models
 """
 import numpy as np
+from . import row, col
 from . import algorithms as hmmalg
 from .distributions import *
 
@@ -33,6 +34,8 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
         else:
             self._phi = Normal(mu, tau)
         assert self._pi.K == K and self._A.K == K and self._phi.K == K
+        self.sharedVariance = sharedVariance
+        self.exitFlag = None
 
     @property
     def K(self):
@@ -57,7 +60,47 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
     def p_X(self, x):
         return self._phi.p_X(x)
 
+    def update(self, x, gamma, xi):
+        self._pi.update(gamma[0])
+        self._A.update(xi/col(gamma[:-1].sum(axis=0)))
+        self._phi.update(x, gamma)
 
+    def train(self, x, maxIter=1000, tol=1e-5, printWarnings=True):
+        self.exitFlag = hmmalg.train_baumwelch(x, self, maxIter=maxIter, tol=tol, printWarnings=printWarnings)
+
+
+class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
+
+    def __init__(self, K, u, w, sharedVariance):
+        self._K = K
+        self._u = u
+        self._w = w
+        assert self._u.K == K and self.w.K == K
+        self.sharedVariance = sharedVariance
+        self.exitFlag = None
+
+    @property
+    def K(self):
+        return self._K
+
+    @property
+    def pi(self):
+        return self._w.pi
+
+    @property
+    def A(self):
+        return self._w.A
+
+    @property
+    def mu(self):
+        return self._w.mu
+
+    @property
+    def sigma(self):
+        return self._w.sigma
+
+    def p_X(self, x):
+        return self._w.p_X(x)
 
 
 # ==============================================================================

@@ -32,6 +32,9 @@ class Categorical():
     def mu(self):
         return self._mu
 
+    def update(self, p):
+        self._mu = p
+
 
 class CategoricalArray(Categorical):
     _NDIM = 2
@@ -124,6 +127,18 @@ class Normal():
         lnP = -0.5 * np.log(2*np.pi/col(self.tau)) - col(self.tau)/2 * X**2
         return np.exp(lnP)
 
+    @staticmethod
+    def calc_sufficient_statistics(x, gamma):
+        Nk = gamma.sum(axis=0)
+        xbar = np.sum(gamma*col(x), axis=0)/Nk
+        S = np.sum(gamma*(col(x)-row(xbar))**2, axis=0)/Nk # variance
+        return Nk, xbar, S
+
+    def update(self, x, gamma):
+        Nk, xbar, S = self.calc_sufficient_statistics(x, gamma)
+        self._mu = xbar
+        self._tau = 1/S
+
 
 class NormalSharedVariance(Normal):
 
@@ -132,6 +147,11 @@ class NormalSharedVariance(Normal):
         assert not isinstance(tau, (np.ndarray, list, tuple))
         self._mu = mu
         self._tau = tau
+
+    def update(self, x, gamma):
+        Nk, xbar, S = self.calc_sufficient_statistics(x, gamma)
+        self._mu = xbar
+        self._tau = 1/((S*Nk).sum()/Nk.sum()) # un-normalize S, sum, re-normalize
 
     # @property
     # def tau(self):
