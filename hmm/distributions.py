@@ -219,8 +219,11 @@ class NormalGamma(Normal):
     def reorder(self, ix):
         self._beta = self._beta[ix]
         self._m = self._m[ix]
-        self._a = self._a[ix]
-        self._b = self._b[ix]
+        try:
+            self._a = self._a[ix]
+            self._b = self._b[ix]
+        except IndexError: # for SharedVariance=True
+            pass
 
 
 class NormalGammaSharedVariance(NormalGamma):
@@ -233,3 +236,9 @@ class NormalGammaSharedVariance(NormalGamma):
         self._beta = beta
         self._a = a
         self._b = b
+
+    def update(self, uPhi, Nk, xbar, S):
+        self._beta = uPhi.beta + Nk
+        self._m = (uPhi.beta*uPhi.m + Nk*xbar)/self.beta
+        self._a = uPhi.a + (Nk.sum()+1)/2
+        self._b = uPhi.b + 0.5*np.sum(Nk*S) + 0.5*np.sum((uPhi.beta*Nk/(uPhi.beta+Nk))*(xbar-uPhi.m)**2)

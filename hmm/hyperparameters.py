@@ -31,14 +31,14 @@ class HMMHyperParameters():
     def draw_parameter_sample(self):
         pi = self._rho.sample()
         A = self._alpha.sample()
-        mu, tau = self._phi.sample() # convert to variance in return
-        return pi, A, mu, 1/tau
+        mu, tau = self._phi.sample()
+        return pi, A, mu, tau
 
     @staticmethod
     def sample_from_prior(u, T=1000):
         gamma0, xiSum, xbar, tau = u.draw_parameter_sample()
         gamma0 = row(gamma0)
-        S = 1/tau
+        S = 1/tau # precision -> variance
         Nk = np.ones(u.K) * T/u.K
         w = copy.deepcopy(u)
         w.update(u, gamma0*T, xiSum*T, Nk, xbar, S)
