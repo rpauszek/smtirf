@@ -61,6 +61,8 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
     def p_X(self, x):
         return self._phi.p_X(x)
 
+    # TODO => update_global, train_new_global
+
     def update(self, x, gamma, xi):
         self._pi.update(gamma[0])
         self._A.update(xi/col(gamma[:-1].sum(axis=0)))
@@ -127,6 +129,8 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
         # update posterior
         self._w.update(u, gamma, xi, Nk, xbar, S)
 
+    # TODO => update_global, train_new_global
+
     def train(self, x, maxIter=1000, tol=1e-5, printWarnings=True):
         self.exitFlag = hmmalg.train_variational(x, self, maxIter=maxIter, tol=tol, printWarnings=printWarnings)
         self._w.sort()
@@ -139,7 +143,7 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
         else:
             u = hyper.HMMHyperParameters.uninformative(K)
         # sample posteriors from prior for r repeats
-        thetas = [cls(K, u, u.sample_from_prior(u), sharedVariance) for r in range(repeats)]
+        thetas = [cls(K, u, u.sample_posterior(), sharedVariance) for r in range(repeats)]
         # TODO => update by kmeans
         # TRAIN
         for theta in thetas:
