@@ -6,6 +6,7 @@ smtirf >> hmm >> distributions
 import numpy as np
 from numpy import AxisError
 from scipy.special import gammaln, digamma
+from sklearn.cluster import KMeans
 from . import row, col, normalize_rows
 
 __all__ = ["Categorical", "CategoricalArray",
@@ -137,6 +138,18 @@ class Normal():
         lnP = -0.5 * np.log(2*np.pi/col(self.tau)) - col(self.tau)/2 * X**2
         return np.exp(lnP)
 
+    # ==> TODO: change to static method
+    # ==>       use SharedVariance as base class??
+    def refine_by_kmeans(self, x):
+        kmodel = KMeans(n_clusters=self.K)
+        labels = kmodel.fit_predict(col(x))
+        # refined means
+        self._mu = np.sort(kmodel.cluster_centers_.squeeze())
+        # refined precisions
+        x0 = x-self.mu[labels]
+        tau = 1/np.std(x0)**2
+        self._tau = np.full(self.K, tau)
+
     @staticmethod
     def calc_sufficient_statistics(x, gamma):
         Nk = gamma.sum(axis=0)
@@ -163,9 +176,9 @@ class NormalSharedVariance(Normal):
         self._mu = xbar
         self._tau = 1/((S*Nk).sum()/Nk.sum()) # un-normalize S, sum, re-normalize
 
-    # @property
-    # def tau(self):
-    #     return np.full(self.K, self._tau)
+    def refine_by_kmeans(self, x):
+        super().refine_by_kmeans(x)
+        self._tau = self._tau[0]
 
 
 class NormalGamma(Normal):
@@ -254,6 +267,19 @@ class NormalGamma(Normal):
         ln_q_mutau = ln_q_mutau.sum()
 
         return ln_p_mutau - ln_q_mutau
+
+    def refine_by_kmeans(self, x, u):
+        kmodel = KMeans(n_clusters=self.K)
+        labels = kmodel.fit_predict(col(x)) # TODO => use this to make pseudo-gamma
+        # binary gamma, 1 if in cluster else 0
+        T = x.size
+        gamma = np.zeros((x.size, self.K))
+        gamma[np.arange(T),labels] = 1
+        # psuedo sufficient stats and update posterior hyperparameters
+        Nk = gamma.sum(axis=0)
+        xbar = np.sum(gamma*col(x), axis=0)/Nk
+        S = np.sum(gamma*(col(x)-row(xbar))**2, axis=0)/Nk # variance
+        self.update(u._phi, Nk, xbar, S)
 
 
 class NormalGammaSharedVariance(NormalGamma):

@@ -73,7 +73,7 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
 
     # TODO => muScale for PIFE data
     @classmethod
-    def train_new(cls, x, K, sharedVariance, maxIter=1000, tol=1e-5, printWarnings=True):
+    def train_new(cls, x, K, sharedVariance, refineByKmeans=True, maxIter=1000, tol=1e-5, printWarnings=True):
         # initial guess for parameters
         pi = np.ones(K)/K
         A = normalize_rows(np.eye(K)*1 + np.ones((K,K)))
@@ -84,8 +84,13 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
             sigma = np.ones(K)*0.1
         theta = cls(K, pi, A, mu, 1/sigma**2, sharedVariance)
         # TRAIN
+        if refineByKmeans:
+            theta.refine_by_kmeans(x)
         theta.train(x)
         return theta
+
+    def refine_by_kmeans(self, x):
+        self._phi.refine_by_kmeans(x)
 
 
 
@@ -137,7 +142,7 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
         self._w.sort()
 
     @classmethod
-    def train_new(cls, x, K, sharedVariance, repeats=5, maxIter=1000, tol=1e-5, printWarnings=False):
+    def train_new(cls, x, K, sharedVariance, refineByKmeans=True, repeats=5, maxIter=1000, tol=1e-5, printWarnings=False):
         # initialize prior
         if sharedVariance:
             u = hyper.HMMHyperParametersSharedVariance.uninformative(K)
@@ -148,10 +153,15 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
         # TODO => update by kmeans
         # TRAIN
         for theta in thetas:
+            if refineByKmeans:
+                theta.refine_by_kmeans(x)
             theta.train(x, printWarnings=printWarnings)
         # select most likely model (largest Lmax)
         thetas.sort(reverse=True, key=lambda theta: theta.exitFlag.Lmax)
         return thetas[0]
+
+    def refine_by_kmeans(self, x):
+        self._w.refine_by_kmeans(x, self._u)
 
 
 # ==============================================================================

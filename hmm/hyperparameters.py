@@ -79,6 +79,9 @@ class HMMHyperParameters():
         self._alpha.reorder(ix)
         self._phi.reorder(ix)
 
+    def refine_by_kmeans(self, x, u):
+        self._phi.refine_by_kmeans(x, u)
+
 
 
 class HMMHyperParametersSharedVariance(HMMHyperParameters):
