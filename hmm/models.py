@@ -179,7 +179,10 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
 
     def train(self, x, maxIter=1000, tol=1e-5, printWarnings=True):
         self.exitFlag = hmmalg.train_variational(x, self, maxIter=maxIter, tol=tol, printWarnings=printWarnings)
-        self._w.sort()
+        try:
+            self._w.sort()
+        except IndexError: # multimer model has no sort method
+            pass
 
     @classmethod
     def train_new(cls, x, K, sharedVariance, refineByKmeans=True, repeats=5, maxIter=1000, tol=1e-5, printWarnings=False):
@@ -204,13 +207,74 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
         self._w.refine_by_kmeans(x, self._u)
 
 
+class MultimerHiddenMarkovModel(VariationalHiddenMarkovModel):
+    modelType = "multimer"
+
+    def __init__(self, K, u, w, sharedVariance=True, exitFlag=None):
+        sharedVariance = True # *** model only defined for shared variance ***
+        super().__init__(K, u, w, sharedVariance, exitFlag)
+
+    @classmethod
+    def _from_json(cls, d):
+        hcls = hyper.HmmHyperParametersMultimer
+        for p in ("u", "w"):
+            d[p] = hcls(**d[p])
+        d["exitFlag"] = ExitFlag(**d["exitFlag"])
+        return cls(**d)
+
+    @property
+    def delta(self): return self._w.delta
+
+    @property
+    def mu0(self): return self._w.mu0
+
+    @classmethod
+    def train_new(cls, x, K, sharedVariance, refineByKmeans=False, repeats=5, maxIter=1000, tol=1e-5, printWarnings=False):
+        # initialize prior
+        if sharedVariance:
+            u = hyper.HmmHyperParametersMultimer.uninformative(K)
+        else:
+            u = hyper.HmmHyperParametersMultimer.uninformative(K)
+        # sample posteriors from prior for r repeats
+        thetas = [cls(K, u, u.sample_posterior(), sharedVariance) for r in range(repeats)]
+        # TODO => update by kmeans
+        # TRAIN
+        for theta in thetas:
+            if refineByKmeans:
+                # theta.refine_by_kmeans(x)
+                # TODO => warn not implemented
+                pass
+            theta.train(x, printWarnings=printWarnings)
+        # select most likely model (largest Lmax)
+        thetas.sort(reverse=True, key=lambda theta: theta.exitFlag.Lmax)
+        return thetas[0]
+
+    def update(self, u, x, gamma, xi):
+        # calculate sufficient calculate sufficient statistics
+        T, K = gamma.shape
+        Nk = gamma.sum(axis=0)
+        # average baseline offset
+        dbar = np.sum(gamma[:,0]*x)/Nk[0] # [1, ]
+        # correct signal for offset, estimate monomer intensity
+        xk = np.repeat(col(x), K-1, axis=1) - dbar # [T x K-1]
+        xk = xk/row(np.arange(1,K))
+        xbar = np.sum(gamma[:,1:]*xk)/Nk[1:].sum() # [1, ]
+        mu = np.arange(K)*xbar + dbar # [K, ]
+        S = np.sum(gamma*(col(x)-row(mu))**2, axis=0).sum()/Nk.sum() # variance
+        # update posterior
+        self._w.update(u, gamma, xi, Nk, dbar, xbar, S)
+
+
+
+
 # ==============================================================================
 # MODEL FACTORY CLASS
 # ==============================================================================
 class HiddenMarkovModel():
 
     MODEL_TYPES = {"em" : ClassicHiddenMarkovModel,
-                   "vb" : VariationalHiddenMarkovModel}
+                   "vb" : VariationalHiddenMarkovModel,
+                   "multimer" : MultimerHiddenMarkovModel}
 
     # ==========================================================================
     # initializers

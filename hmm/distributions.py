@@ -12,7 +12,8 @@ from . import row, col, normalize_rows
 __all__ = ["Categorical", "CategoricalArray",
            "Dirichlet", "DirichletArray",
            "Normal", "NormalSharedVariance",
-           "NormalGamma", "NormalGammaSharedVariance"]
+           "NormalGamma", "NormalGammaSharedVariance",
+           "MultimerNormalGamma"]
 
 class Categorical():
     _NDIM = 1
@@ -298,3 +299,76 @@ class NormalGammaSharedVariance(NormalGamma):
         self._m = (uPhi.beta*uPhi.m + Nk*xbar)/self.beta
         self._a = uPhi.a + (Nk.sum()+1)/2
         self._b = uPhi.b + 0.5*np.sum(Nk*S) + 0.5*np.sum((uPhi.beta*Nk/(uPhi.beta+Nk))*(xbar-uPhi.m)**2)
+
+
+class MultimerNormalGamma(NormalGammaSharedVariance):
+
+    def __init__(self, K, d0, epsilon, m0, beta, a, b):
+        self._K = K
+        self._d0 = d0
+        self._epsilon = epsilon
+        self._m0 = m0
+        self._beta = beta
+        self._a = a
+        self._b = b
+
+    @property
+    def K(self): return self._K
+
+    @property
+    def d0(self): return self._d0
+
+    @property
+    def epsilon(self): return self._epsilon
+
+    @property
+    def m0(self): return self._m0
+
+    @property
+    def _m(self):
+        return np.arange(self.K)*self.m0 + self.d0
+
+    @property
+    def m(self): return self._m
+
+    def p_delta(self, d):
+        X = d-self.d0
+        tau = self.epsilon * self.tau
+        lnP = -0.5 * np.log(2*np.pi/tau) - tau/2 * X**2
+        return np.exp(lnP)
+
+    def p_mu0(self, m):
+        X = m-self.m0
+        tau = self.beta * self.tau
+        lnP = -0.5 * np.log(2*np.pi/tau) - tau/2 * X**2
+        return np.exp(lnP)
+
+    def mahalanobis(self, x):
+        epsilonbeta = row(np.hstack((self.epsilon, np.ones(self.K-1)*self.beta)))
+        Delta2 = 1/epsilonbeta + self.tau*(col(x)-row(self.m))**2
+        return 0.5*self.lnTauStar - 0.5*np.log(2*np.pi) - 0.5*Delta2
+
+    def sample(self):
+        # draw offset
+        sigma = np.sqrt(1/(self.epsilon*self.tau))
+        delta = np.random.normal(loc=self.d0, scale=sigma)
+        # draw monomer
+        sigma = np.sqrt(1/(self.beta*self.tau))
+        mu0 = np.random.normal(loc=self.m0, scale=sigma)
+        tau = np.random.gamma(shape=self.a, scale=1/self.b)
+        return delta, mu0, tau
+
+    def update(self, uPhi, Nk, dbar, xbar, S):
+        N0 = Nk[0]
+        Nk = Nk[1:].sum()
+
+        self._epsilon = uPhi.epsilon + N0
+        self._d0 = (uPhi.epsilon*uPhi.d0 + N0*dbar)/self.epsilon
+
+        self._beta = uPhi.beta + Nk
+        self._m0 = (uPhi.beta*uPhi.m0 + Nk*xbar)/self.beta
+
+        self._a = uPhi.a + (N0+Nk+1)/2
+        b1 = (uPhi.epsilon*N0/(uPhi.epsilon+N0))*(dbar-uPhi.d0)**2
+        b2 = (uPhi.beta*Nk/(uPhi.beta+Nk))*(xbar-uPhi.m0)**2
+        self._b = uPhi.b + 0.5*((N0+Nk)*S) + 0.5*(b1+b2)
