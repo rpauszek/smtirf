@@ -5,8 +5,8 @@ smtirf >> hmm >> models
 """
 import numpy as np
 import json
-from .. import SMJsonEncoder
-from . import row, col, normalize_rows
+from .. import SMJsonEncoder, SMJsonDecoder
+from . import row, col, normalize_rows, ExitFlag
 from . import algorithms as hmmalg
 from .distributions import *
 from . import hyperparameters as hyper
@@ -29,7 +29,7 @@ class BaseHiddenMarkovModel():
 class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
     modelType = "em"
 
-    def __init__(self, K, pi, A, mu, tau, sharedVariance):
+    def __init__(self, K, pi, A, mu, tau, sharedVariance, exitFlag=None):
         self._K = K
         self._pi = Categorical(pi)
         self._A = CategoricalArray(A)
@@ -39,7 +39,7 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
             self._phi = Normal(mu, tau)
         assert self._pi.K == K and self._A.K == K and self._phi.K == K
         self.sharedVariance = sharedVariance
-        self.exitFlag = None
+        self.exitFlag = exitFlag
 
     def _as_json(self):
         return json.dumps({"modelType": self.modelType,
@@ -50,6 +50,11 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
                            "tau": self.tau,
                            "sharedVariance": self.sharedVariance,
                            "exitFlag": self.exitFlag}, cls=SMJsonEncoder)
+
+    @classmethod
+    def _from_json(cls, d):
+        d["exitFlag"] = ExitFlag(**d["exitFlag"])
+        return cls(**d)
 
     @property
     def K(self): return self._K
@@ -108,13 +113,13 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
 class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
     modelType = "vb"
 
-    def __init__(self, K, u, w, sharedVariance):
+    def __init__(self, K, u, w, sharedVariance, exitFlag=None):
         self._K = K
         self._u = u
         self._w = w
         assert self._u.K == K and self._w.K == K
         self.sharedVariance = sharedVariance
-        self.exitFlag = None
+        self.exitFlag = exitFlag
 
     def _as_json(self):
         return json.dumps({"modelType": self.modelType,
@@ -123,6 +128,14 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
                            "w": self._w,
                            "sharedVariance": self.sharedVariance,
                            "exitFlag": self.exitFlag}, cls=SMJsonEncoder)
+
+    @classmethod
+    def _from_json(cls, d):
+        hcls = hyper.HMMHyperParametersSharedVariance if d["sharedVariance"] else hyper.HMMHyperParameters
+        for p in ("u", "w"):
+            d[p] = hcls(**d[p])
+        d["exitFlag"] = ExitFlag(**d["exitFlag"])
+        return cls(**d)
 
     @property
     def K(self):
@@ -201,3 +214,15 @@ class HiddenMarkovModel():
         cls = HiddenMarkovModel.MODEL_TYPES[modelType]
         theta = cls.train_new(x, K, sharedVariance, **kwargs)
         return theta
+
+    # ==========================================================================
+    # de-serialization
+    # ==========================================================================
+    @staticmethod
+    def from_json(jString):
+        model = json.loads(jString, cls=SMJsonDecoder)
+        modelType = model.pop("modelType")
+        # sharedVariance = model.pop("sharedVariance")
+        cls = HiddenMarkovModel.MODEL_TYPES[modelType]
+        # model = cls._parse_dict(model)
+        return cls._from_json(model)
