@@ -4,6 +4,8 @@
 smtirf >> hmm >> models
 """
 import numpy as np
+import json
+from .. import SMJsonEncoder
 from . import row, col, normalize_rows
 from . import algorithms as hmmalg
 from .distributions import *
@@ -25,6 +27,7 @@ class BaseHiddenMarkovModel():
 # CONCRETE MODEL SUBCLASSES
 # ==============================================================================
 class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
+    modelType = "em"
 
     def __init__(self, K, pi, A, mu, tau, sharedVariance):
         self._K = K
@@ -38,25 +41,33 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
         self.sharedVariance = sharedVariance
         self.exitFlag = None
 
-    @property
-    def K(self):
-        return self._K
+    def _as_json(self):
+        return json.dumps({"modelType": self.modelType,
+                           "K": self.K,
+                           "pi": self.pi,
+                           "A": self.A,
+                           "mu": self.mu,
+                           "tau": self.tau,
+                           "sharedVariance": self.sharedVariance,
+                           "exitFlag": self.exitFlag}, cls=SMJsonEncoder)
 
     @property
-    def pi(self):
-        return self._pi.mu
+    def K(self): return self._K
 
     @property
-    def A(self):
-        return self._A.mu
+    def pi(self): return self._pi.mu
 
     @property
-    def mu(self):
-        return self._phi.mu
+    def A(self): return self._A.mu
 
     @property
-    def sigma(self):
-        return self._phi.sigma
+    def mu(self): return self._phi.mu
+
+    @property
+    def tau(self): return self._phi.tau
+
+    @property
+    def sigma(self): return self._phi.sigma
 
     def p_X(self, x):
         return self._phi.p_X(x)
@@ -95,6 +106,7 @@ class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
 
 
 class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
+    modelType = "vb"
 
     def __init__(self, K, u, w, sharedVariance):
         self._K = K
@@ -103,6 +115,14 @@ class VariationalHiddenMarkovModel(BaseHiddenMarkovModel):
         assert self._u.K == K and self._w.K == K
         self.sharedVariance = sharedVariance
         self.exitFlag = None
+
+    def _as_json(self):
+        return json.dumps({"modelType": self.modelType,
+                           "K": self.K,
+                           "u": self._u,
+                           "w": self._w,
+                           "sharedVariance": self.sharedVariance,
+                           "exitFlag": self.exitFlag}, cls=SMJsonEncoder)
 
     @property
     def K(self):

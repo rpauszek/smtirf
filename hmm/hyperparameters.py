@@ -18,6 +18,15 @@ class HMMHyperParameters():
         self._alpha = DirichletArray(alpha)
         self._phi = NormalGamma(m, beta, a, b)
 
+    def _as_dict(self):
+        return {"K": self.K,
+                "rho": self._rho.alpha,
+                "alpha": self._alpha.alpha,
+                "m": self._phi.m,
+                "beta": self._phi.beta,
+                "a": self._phi.a,
+                "b": self._phi.b}
+
     @classmethod
     def uninformative(cls, K, rho0=1, alpha0_ii=1, m0=0.5, beta0=0.25, a0=2.5, b0=0.1): #b0=0.01
         rho = np.ones(K) * rho0
