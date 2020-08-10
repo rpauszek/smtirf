@@ -77,6 +77,9 @@ class HMMHyperParameters():
     def mahalanobis(self, x):
         return self._phi.mahalanobis(x)
 
+    def p_X(self, x):
+        return self._phi.p_X(x)
+
     def update(self, u, gamma, xiSum, Nk, xbar, S):
         self._rho.update(u._rho, gamma[0])
         self._alpha.update(u._alpha, xiSum)
