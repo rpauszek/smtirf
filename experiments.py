@@ -46,6 +46,18 @@ class BaseExperiment():
     def nSelected(self):
         return sum(1 for trc in self if trc.isSelected)
 
+    # ==========================================================================
+    # instance methods
+    # ==========================================================================
+    def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,
+                        maxIter=50, tol=1e-3, printWarnings=False,
+                        where="first", correctOffsets=True):
+        M = smtirf.util.AutoBaselineModel(self, baselineCutoff=baselineCutoff)
+        M.train_gmm(nComponents=nComponents, nPoints=nPoints)
+        M.train_hmm(maxIter=maxIter, tol=tol, printWarnings=printWarnings)
+        for trc, sp in zip(self, M.SP):
+            trc.set_signal_labels(sp, where=where, correctOffsets=correctOffsets)
+
 
 
 # ==============================================================================
@@ -167,14 +179,3 @@ class Experiment():
                 traces.append(cls.traceClass(_id, item[:], model=model, **props))
 
             return cls(movies, traces, frameLength, comments)
-
-        # @staticmethod
-        # def load(filename):
-        #     filename = os.path.abspath(filename)
-        #     with h5py.File(filename, "r") as HF:
-        #         cls = Experiment._CLASS_TYPES[HF.attrs["experimentType"]]
-        #         frameLength = HF.attrs["frameLength"]
-        #         comments = HF.attrs["comments"]
-        #         movies = smtirf.data.MovieList.from_hdf(HF["movies"])
-        #         traces = [cls.traceClass.from_hdf(key,item) for key, item in HF["traces"].items()]
-        #     return cls(movies, traces, frameLength, comments)

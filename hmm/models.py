@@ -22,7 +22,7 @@ class BaseHiddenMarkovModel():
         Y = [np.random.normal(loc=self.mu[s], scale=self.sigma[s]) for s in S]
         return [(s, y) for s, y in zip(S,Y)]
 
-    def label(self, x, delbur=False):
+    def label(self, x, deBlur=False, deSpike=False):
         SP = hmmalg._viterbi(x, self.pi, self.A, self.p_X(x).T).astype(np.int)
         return SP
 

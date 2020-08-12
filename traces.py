@@ -5,8 +5,9 @@ smtirf >> traces
 """
 import numpy as np
 import scipy.stats
-import json
+import json, warnings
 from abc import ABC, abstractmethod
+import smtirf
 from . import SMSpotCoordinate, SMJsonEncoder
 from . import HiddenMarkovModel
 
@@ -54,11 +55,18 @@ class BaseTrace(ABC):
                            "gamma" : self.gamma,
                            "limits" : self.limits,
                            "offsets" : self.offsets,
-                           "isSelected" : self.isSelected}, cls=SMJsonEncoder)
+                           "isSelected" : self.isSelected,
+                           "deBlur" : self.deBlur,
+                           "deSpike" : self.deSpike}, cls=SMJsonEncoder)
 
     @property
     def SP(self): # state path
         return self._SP[self.limits].astype(np.int)
+
+    def set_statepath(self, sp):
+        SP = np.full(self._SP.shape, -1)
+        SP[self.limits] = sp
+        self._SP = SP
 
     @property
     def frameLength(self):
@@ -171,11 +179,54 @@ class BaseTrace(ABC):
     def toggle(self):
         self.isSelected = not self.isSelected
 
+    def set_signal_labels(self, sp, where="first", correctOffsets=True):
+        self.S0 = sp
+        if correctOffsets:
+            if np.any(sp == 2):
+                rng, = np.where(sp == 2)
+            elif np.any(sp == 1):
+                rng, = np.where(sp == 1)
+            try:
+                self.set_offsets([np.median(self.D0[rng]), np.median(self.A0[rng])])
+            except UnboundLocalError:
+                pass
+        # find indices of signal dwells
+        if where.lower() in ("first", "longest"):
+            ix = smtirf.where(sp == 0)
+        # set limits
+        if where.lower() == "first":
+            self.set_limits(ix[0])
+        elif where.lower() == "longest":
+            dt = np.diff(ix, axis=1).squeeze()
+            self.set_limits(ix[np.argmax(dt)])
+        elif where.lower() == "all":
+            pass
+        else:
+            raise ValueError("where keyword unrecognized")
+
+    # def reset_signal_labels(self):
+    #     self.S0 = np.zeros(self.S0.shape)
+    #     self._correct_signals() # this really should be implemented as a setter for all S0 changes
+    #
+    # def reset_offsets(self):
+    #     self.offsets = (0, 0)
+    #
+    # def reset_limits(self):
+    #     self.limits = (0, len(self))
+
     @property
     @abstractmethod
     def X(self):
         ...
 
+    def label_statepath(self):
+        if self.model is not None:
+            self.set_statepath(self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike))
+            # self.dwells = DwellTable(self)
+
+    @property
+    def EP(self):
+        return self.model.get_emission_path(self.SP)
 
 # ==============================================================================
 # Experiment Trace Subclasses
