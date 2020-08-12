@@ -179,3 +179,44 @@ class Experiment():
                 traces.append(cls.traceClass(_id, item[:], model=model, **props))
 
             return cls(movies, traces, frameLength, comments)
+
+    @staticmethod
+    def merge(filenames, selectedOnly=True):
+        filenames = [Path(filename).absolute() for filename in filenames]
+        # check that types are compatible
+        frameLength, experimentType = Experiment._check_file_compatibility(filenames)
+        # aggregate data
+        movies = SMMovieList()
+        traces = []
+        for filename in filenames:
+            e = Experiment.load(filename)
+            tmpMovies = {key: mov for key, mov in e._movies.items()}
+            if selectedOnly:
+                tmpTraces = [trc for trc in e if trc.isSelected]
+                tmpIds = set([f"{trc.movID}:XXXX" for trc in e if trc.isSelected])
+            else:
+                tmpTraces = [trc for trc in e]
+                tmpIds = set([f"{trc.movID}:XXXX" for trc in e])
+            traces.extend(tmpTraces)
+            for key, mov in e._movies.items():
+                if key in tmpIds:
+                    print(mov)
+                    movies.add_movie(key, mov)
+        if len(traces) == 0:
+            raise ValueError("No traces selected")
+        cls = Experiment.CLASS_TYPES[experimentType]
+        return cls(movies, traces, frameLength)
+
+    @staticmethod
+    def _check_file_compatibility(filenames):
+        frameLengths = set()
+        experimentTypes = set()
+        for filename in filenames:
+            with h5py.File(filename, "r") as HF:
+                frameLengths.add(HF.attrs["frameLength"])
+                experimentTypes.add(HF.attrs["experimentType"])
+        if not len(frameLengths)==1:
+            raise ValueError("Integration times are not compatible for all files")
+        if not len(experimentTypes)==1:
+            raise ValueError("Experiment types are not compatible for all files")
+        return frameLengths.pop(), experimentTypes.pop()

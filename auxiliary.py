@@ -89,6 +89,9 @@ class SMMovieList(OrderedDict):
     def append(self, key, img, info):
         self[key] = SMMovie(key, img, info)
 
+    def add_movie(self, key, mov):
+        self[key] = mov
+
     def __getitem__(self, key):
         try:
             return super().__getitem__(key)
