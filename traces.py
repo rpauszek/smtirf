@@ -152,6 +152,25 @@ class BaseTrace(ABC):
     def corrcoef(self):
         return scipy.stats.pearsonr(self.D[self.limits], self.A[self.limits])[0]
 
+    def _time2frame(self, t): # copy from old
+        # find frame index closest to time t
+        return np.argmin(np.abs(self.t-t))
+
+    def set_offset_time_window(self, start, stop):
+        rng = slice(self._time2frame(start), self._time2frame(stop))
+        self.set_offsets([np.median(self.D0[rng]), np.median(self.A0[rng])])
+
+    def set_start_time(self, time, refreshStatePath=True):
+        fr = self._time2frame(time)
+        self.set_limits([fr, self.limits.stop], refreshStatePath=refreshStatePath)
+
+    def set_stop_time(self, time, refreshStatePath=True):
+        fr = self._time2frame(time)
+        self.set_limits([self.limits.start, fr], refreshStatePath=refreshStatePath)
+
+    def toggle(self):
+        self.isSelected = not self.isSelected
+
     @property
     @abstractmethod
     def X(self):
