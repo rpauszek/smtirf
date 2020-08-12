@@ -208,11 +208,11 @@ class BaseTrace(ABC):
     #     self.S0 = np.zeros(self.S0.shape)
     #     self._correct_signals() # this really should be implemented as a setter for all S0 changes
     #
-    # def reset_offsets(self):
-    #     self.offsets = (0, 0)
-    #
-    # def reset_limits(self):
-    #     self.limits = (0, len(self))
+    def reset_offsets(self):
+        self.set_offsets((0, 0))
+
+    def reset_limits(self):
+        self.set_limits((0, len(self)))
 
     @property
     @abstractmethod
