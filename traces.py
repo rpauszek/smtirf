@@ -4,6 +4,7 @@
 smtirf >> traces
 """
 import numpy as np
+import scipy.stats
 import json
 from abc import ABC, abstractmethod
 from . import SMSpotCoordinate, SMJsonEncoder
@@ -26,7 +27,7 @@ class BaseTrace(ABC):
 
         self.pk = SMSpotCoordinate(pk)
         self.isSelected = isSelected
-        self.clusterIndex = clusterIndex
+        self.set_cluster_index(clusterIndex)
         self.model = HiddenMarkovModel.from_json(model)
         self.deBlur = deBlur
         self.deSpike = deSpike
@@ -130,6 +131,26 @@ class BaseTrace(ABC):
             self._limits = values
         if refreshStatePath:
             self.label_statepath()
+
+    @property
+    def clusterIndex(self):
+        return self._clusterIndex
+
+    def set_cluster_index(self, val):
+        #TODO => catch ValueError for non-int val
+        self._clusterIndex = int(val)
+
+    @property
+    def movID(self):
+        return self._id.movID
+
+    @property
+    def I0(self):
+        return self.D0 + self.A0
+
+    @property
+    def corrcoef(self):
+        return scipy.stats.pearsonr(self.D[self.limits], self.A[self.limits])[0]
 
     @property
     @abstractmethod
