@@ -38,8 +38,9 @@ class SMJsonDecoder(json.JSONDecoder):
                 obj[key] = np.array(val)
         return obj
 
+from . import hmm
+from . import util
 from .auxiliary import SMTraceID, SMMovieList, SMSpotCoordinate
 from .auxiliary import where
-# from . import hmm
 from .hmm.models import HiddenMarkovModel
 from .experiments import Experiment
