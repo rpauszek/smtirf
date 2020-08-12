@@ -291,9 +291,12 @@ class HiddenMarkovModel():
     # ==========================================================================
     @staticmethod
     def from_json(jString):
-        model = json.loads(jString, cls=SMJsonDecoder)
+        if jString is None:
+            return None
+        try:
+            model = json.loads(jString, cls=SMJsonDecoder)
+        except TypeError:
+            model = jString # already dict
         modelType = model.pop("modelType")
-        # sharedVariance = model.pop("sharedVariance")
         cls = HiddenMarkovModel.MODEL_TYPES[modelType]
-        # model = cls._parse_dict(model)
         return cls._from_json(model)

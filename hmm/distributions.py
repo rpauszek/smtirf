@@ -20,10 +20,10 @@ class Categorical():
 
     def __init__(self, mu):
         assert mu.ndim == self._NDIM
-        if self._NDIM == 1:
-            assert np.sum(mu) == 1
-        elif self._NDIM == 2:
-            assert np.all(np.sum(mu, axis=1) == 1)
+        # if self._NDIM == 1:
+        #     assert np.sum(mu) == 1
+        # elif self._NDIM == 2:
+        #     assert np.all(np.sum(mu, axis=1) == 1)
         self._mu = mu
 
     @property

@@ -7,6 +7,7 @@ import numpy as np
 import json
 from abc import ABC, abstractmethod
 from . import SMSpotCoordinate, SMJsonEncoder
+from . import HiddenMarkovModel
 
 # ==============================================================================
 # BASE TRACE CLASSES
@@ -14,7 +15,7 @@ from . import SMSpotCoordinate, SMJsonEncoder
 class BaseTrace(ABC):
 
     def __init__(self, trcID, data, frameLength, pk, bleed, gamma, clusterIndex=-1,
-                 isSelected=False, limits=None, offsets=None, model=None):
+                 isSelected=False, limits=None, offsets=None, model=None, deBlur=False, deSpike=False):
         self._id = trcID
         self._set_data(data)
         self.set_frame_length(frameLength) # => set self.t
@@ -26,7 +27,9 @@ class BaseTrace(ABC):
         self.pk = SMSpotCoordinate(pk)
         self.isSelected = isSelected
         self.clusterIndex = clusterIndex
-        self.model = model
+        self.model = HiddenMarkovModel.from_json(model)
+        self.deBlur = deBlur
+        self.deSpike = deSpike
         self.dwells = None #DwellTable(self) if self.model is not None else None
 
     def __str__(self):
@@ -54,7 +57,7 @@ class BaseTrace(ABC):
 
     @property
     def SP(self): # state path
-        return self._SP#[self.limits].astype(np.int)
+        return self._SP[self.limits].astype(np.int)
 
     @property
     def frameLength(self):
