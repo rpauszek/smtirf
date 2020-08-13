@@ -200,7 +200,6 @@ class Experiment():
             traces.extend(tmpTraces)
             for key, mov in e._movies.items():
                 if key in tmpIds:
-                    print(mov)
                     movies.add_movie(key, mov)
         if len(traces) == 0:
             raise ValueError("No traces selected")

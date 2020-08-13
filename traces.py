@@ -219,6 +219,11 @@ class BaseTrace(ABC):
     def X(self):
         ...
 
+    def train(self, modelType, K, sharedVariance=True, **kwargs):
+        theta = smtirf.HiddenMarkovModel.train_new(modelType, self.X, K, sharedVariance, **kwargs)
+        self.model = theta
+        self.label_statepath()
+
     def label_statepath(self):
         if self.model is not None:
             self.set_statepath(self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike))
@@ -256,7 +261,7 @@ class FretTrace(BaseTrace):
 
     @property
     def X(self):
-        return 0
+        return self.E[self.limits]
 
     def _correct_signals(self):
         super()._correct_signals()
