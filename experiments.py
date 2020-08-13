@@ -75,9 +75,9 @@ class PifeExperiment(BaseExperiment):
     traceClass = traces.PifeTrace
     classLabel = "pife"
 
-class PifeCh2Experiment(BaseExperiment):
-    traceClass = traces.PifeCh2Trace
-    classLabel = "pife2"
+# class PifeCh2Experiment(BaseExperiment):
+#     traceClass = traces.PifeCh2Trace
+#     classLabel = "pife2"
 
 class MultimerExperiment(BaseExperiment):
     traceClass = traces.MultimerTrace
@@ -93,7 +93,7 @@ class Experiment():
     CLASS_TYPES = {"fret": FretExperiment,
                    "piecewise": PiecewiseExperiment,
                    "pife": PifeExperiment,
-                   "pife2": PifeCh2Experiment,
+                   # "pife2": PifeCh2Experiment,
                    "multimer": MultimerExperiment}
 
     @staticmethod

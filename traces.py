@@ -47,17 +47,22 @@ class BaseTrace(ABC):
     def _raw_data(self):
         return np.vstack((self.D0, self.A0, self.S0, self._SP))
 
+    @property
+    def _attr_dict(self):
+        return {"pk" : self.pk,
+                "clusterIndex" : self.clusterIndex,
+                "frameLength" : self.frameLength,
+                "bleed" : self.bleed,
+                "gamma" : self.gamma,
+                "limits" : self.limits,
+                "offsets" : self.offsets,
+                "isSelected" : self.isSelected,
+                "deBlur" : self.deBlur,
+                "deSpike" : self.deSpike}
+
     def _as_json(self):
-        return json.dumps({"pk" : self.pk,
-                           "clusterIndex" : self.clusterIndex,
-                           "frameLength" : self.frameLength,
-                           "bleed" : self.bleed,
-                           "gamma" : self.gamma,
-                           "limits" : self.limits,
-                           "offsets" : self.offsets,
-                           "isSelected" : self.isSelected,
-                           "deBlur" : self.deBlur,
-                           "deSpike" : self.deSpike}, cls=SMJsonEncoder)
+        return json.dumps(self._attr_dict, cls=SMJsonEncoder)
+
 
     @property
     def SP(self): # state path
@@ -236,25 +241,49 @@ class BaseTrace(ABC):
 # ==============================================================================
 # Experiment Trace Subclasses
 # ==============================================================================
-class PifeTrace(BaseTrace):
+class SingleColorTrace(BaseTrace):
+
+    def __init__(self, trcID, data, frameLength, pk, bleed, gamma, channel=1, **kwargs):
+        super().__init__(trcID, data, frameLength, pk, bleed, gamma, **kwargs)
+        self.channel = channel
+
+    @property
+    def _attr_dict(self):
+        d = super()._attr_dict
+        d["channel"] = channel
+        return d
+
+class PifeTrace(SingleColorTrace):
 
     @property
     def X(self):
         return 2
 
 
-class PifeCh2Trace(BaseTrace):
+# class PifeCh2Trace(BaseTrace):
+#
+#     @property
+#     def X(self):
+#         return 3
 
-    @property
-    def X(self):
-        return 3
 
-
-class MultimerTrace(BaseTrace):
+class MultimerTrace(SingleColorTrace):
 
     @property
     def X(self):
         return 4
+
+    # @property
+    # def X(self):
+    #     return self.D[self.limits]
+    #
+    # def train(self, K, modelType="multimer", guess_with_kmeans=False, sharedVariance=True, printWarnings=False):
+    #     theta = smtirf.HiddenMarkovModel.new(K, self.X, modelType=modelType,
+    #                                          guess_with_kmeans=guess_with_kmeans,
+    #                                          sharedVariance=sharedVariance,
+    #                                          trainNow=True, printWarnings=printWarnings)
+    #     self.model = theta
+    #     self.label_statepath()
 
 
 class FretTrace(BaseTrace):
