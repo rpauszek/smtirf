@@ -135,7 +135,7 @@ class HmmHyperParametersMultimer(HMMHyperParametersSharedVariance):
                 "b": self._phi.b}
 
     @classmethod
-    def uninformative(cls, K, rho0=1, alpha0_ii=1, d0=20, epsilon0=0.25, m0=250, beta0=0.25, a0=2, b0=200):
+    def uninformative(cls, K, rho0=1, alpha0_ii=1, d0=20, epsilon0=0.25, m0=250, beta0=0.25, a0=10, b0=25000):
         rho = np.ones(K) * rho0
         alpha = np.eye(K) * alpha0_ii + np.ones((K,K))
         return cls(K, rho, alpha, d0, epsilon0, m0, beta0, a0, b0)

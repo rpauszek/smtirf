@@ -280,12 +280,11 @@ class PifeTrace(SingleColorTrace):
 
 class MultimerTrace(SingleColorTrace):
 
-    pass
+    def train(self, K, sharedVariance=True, **kwargs):
+        theta = smtirf.HiddenMarkovModel.train_new("multimer", self.X, K, sharedVariance, **kwargs)
+        self.model = theta
+        self.label_statepath()
 
-    # @property
-    # def X(self):
-    #     return self.D[self.limits]
-    #
     # def train(self, K, modelType="multimer", guess_with_kmeans=False, sharedVariance=True, printWarnings=False):
     #     theta = smtirf.HiddenMarkovModel.new(K, self.X, modelType=modelType,
     #                                          guess_with_kmeans=guess_with_kmeans,
