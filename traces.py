@@ -250,14 +250,25 @@ class SingleColorTrace(BaseTrace):
     @property
     def _attr_dict(self):
         d = super()._attr_dict
-        d["channel"] = channel
+        d["channel"] = self.channel
         return d
 
-class PifeTrace(SingleColorTrace):
+    def __str__(self):
+        s = super().__str__()
+        s += f" [Channel {self.channel}]"
+        return s
 
     @property
     def X(self):
-        return 2
+        return self.D[self.limits] if self.channel == 1 else self.A[self.limits]
+
+class PifeTrace(SingleColorTrace):
+
+    pass
+
+    # @property
+    # def X(self):
+    #     return 2
 
 
 # class PifeCh2Trace(BaseTrace):
@@ -269,9 +280,7 @@ class PifeTrace(SingleColorTrace):
 
 class MultimerTrace(SingleColorTrace):
 
-    @property
-    def X(self):
-        return 4
+    pass
 
     # @property
     # def X(self):

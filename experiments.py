@@ -98,23 +98,23 @@ class Experiment():
 
     @staticmethod
     def build(cls, D0, A0, S0, SP, pks, recordTime, frameLength,
-                          info, img, bleed, gamma, comments=""):
+                          info, img, bleed, gamma, comments="", trcArgs=None):
 
         movID = SMTraceID.from_datetime(recordTime)
         movies = SMMovieList()
         movies.append(movID, img, info)
 
         traces = [cls.traceClass(movID.new_trace(j), np.vstack((d, a, s0, sp)),
-                                 frameLength, pk=pk, bleed=bleed, gamma=gamma)
+                                 frameLength, pk=pk, bleed=bleed, gamma=gamma, **trcArgs)
                   for j, (d, a, s0, sp, pk) in enumerate(zip(D0, A0, S0, SP, pks))]
         return cls(movies, traces, frameLength, comments)
 
     @staticmethod
-    def from_pma(filename, experimentType, bleed=0.05, gamma=1, comments=""):
+    def from_pma(filename, experimentType, bleed=0.05, gamma=1, comments="", **kwargs):
         filename = Path(filename)
         data = io.pma.read(filename.absolute())
         cls = Experiment.CLASS_TYPES[experimentType.lower()]
-        return Experiment.build(cls, bleed=bleed, gamma=gamma, comments=comments, **data)
+        return Experiment.build(cls, bleed=bleed, gamma=gamma, comments=comments, trcArgs=kwargs, **data)
 
     @staticmethod
     def write_to_hdf(filename, experiment):
