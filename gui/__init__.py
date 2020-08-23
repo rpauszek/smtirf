@@ -42,19 +42,44 @@ class SMTirfMainWindow(QtWidgets.QMainWindow):
         QtWidgets.QShortcut("Ctrl+Q", self, activated=self.close)
         self.setWindowIcon(QtGui.QIcon(":/icons/dna.png"))
 
-    @staticmethod
-    def add_toolbar_button(toolbar, icon, label, callback=None, **kwargs):
-        icon = QtGui.QIcon(f":/icons/{icon}.png")
-        action = QtWidgets.QAction(icon, label, toolbar.parent(), **kwargs)
-        with contextlib.suppress(TypeError):
-            action.triggered.connect(callback)
-        toolbar.addAction(action)
 
-    @staticmethod
-    def format_toolbar(toolbar):
-        toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        toolbar.setMovable(False)
-        toolbar.setIconSize(QtCore.QSize(*CONFIG.qt["TOOLBUTTON_SIZE"]))
-        for action in toolbar.actions():
-            widget = toolbar.widgetForAction(action)
-            widget.setFixedSize(widget.sizeHint().width(), CONFIG.qt["BUTTON_HEIGHT"])
+class SMTirfPanel(QtWidgets.QWidget):
+
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(parent=parent, *args, **kwargs)
+        # self.controller = self.parent().controller
+        self.setup_toolbar()
+        self.layout()
+
+        # self.controller.filenameChanged.connect(self.parent().set_title)
+
+        # try:
+        #     SMTirfApp.format_toolbar(self.toolbar)
+        #     self.parent().addToolBar(self.toolbar)
+        # except AttributeError:
+        #     pass
+
+    def setup_toolbar(self):
+        pass
+
+    def layout(self):
+        pass
+
+
+# ==============================================================================
+# utility functions
+# ==============================================================================
+def add_toolbar_button(toolbar, icon, label, callback=None, **kwargs):
+    icon = QtGui.QIcon(f":/icons/{icon}.png")
+    action = QtWidgets.QAction(icon, label, toolbar.parent(), **kwargs)
+    with contextlib.suppress(TypeError):
+        action.triggered.connect(callback)
+    toolbar.addAction(action)
+
+def format_toolbar(toolbar):
+    toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+    toolbar.setMovable(False)
+    toolbar.setIconSize(QtCore.QSize(*CONFIG.qt["TOOLBUTTON_SIZE"]))
+    for action in toolbar.actions():
+        widget = toolbar.widgetForAction(action)
+        widget.setFixedSize(widget.sizeHint().width(), CONFIG.qt["BUTTON_HEIGHT"])
