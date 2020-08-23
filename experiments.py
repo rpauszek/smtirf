@@ -58,6 +58,31 @@ class BaseExperiment():
         for trc, sp in zip(self, M.SP):
             trc.set_signal_labels(sp, where=where, correctOffsets=correctOffsets)
 
+    def sort(self, key="corrcoef"):
+        if key == "corrcoef":
+            fcn = lambda x : x.corrcoef
+            reverse = False  # ascending
+        elif key == "index":
+            fcn = lambda x : str(x._id)
+            reverse = False # ascending
+        elif key == "cluster":
+            fcn = lambda x : str(x.clusterIndex)
+            reverse = False # ascending
+        elif key == "selected":
+            fcn = lambda x : x.isSelected
+            reverse = True # descending
+        else:
+            raise KeyError(f"cannot sort by key '{key}'")
+        self._traces.sort(key=fcn, reverse=reverse)
+
+    def select_all(self):
+        for trc in self:
+            trc.isSelected = True
+
+    def select_none(self):
+        for trc in self:
+            trc.isSelected = False
+
 
 
 # ==============================================================================
