@@ -5,7 +5,16 @@ smtirf >> gui >> __init__
 """
 from PyQt5 import QtWidgets, QtCore, QtGui
 
+# ==============================================================================
+# config
+# ==============================================================================
+from . import resources
 
+
+# ==============================================================================
+# window base classes
+# ==============================================================================
+from . import resources
 class SMTirfMainWindow(QtWidgets.QMainWindow):
     """ base class for GUI main window """
 
@@ -13,3 +22,4 @@ class SMTirfMainWindow(QtWidgets.QMainWindow):
         super().__init__(windowTitle=title, **kwargs)
         self.resize(1000, 600)
         QtWidgets.QShortcut("Ctrl+Q", self, activated=self.close)
+        self.setWindowIcon(QtGui.QIcon(":/icons/dna.png"))
