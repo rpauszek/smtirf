@@ -11,6 +11,9 @@ class ExperimentController(QtCore.QObject):
     currentTraceChanged = QtCore.pyqtSignal(object)
     # MPL
     mplMotionNotifyEvent = QtCore.pyqtSignal(object)
+    # data update
+    traceEdited = QtCore.pyqtSignal(object)
+    selectedEdited = QtCore.pyqtSignal(object)
 
     def __init__(self):
         super().__init__()
@@ -28,6 +31,10 @@ class ExperimentController(QtCore.QObject):
         self.index = value
         self.trc = self.expt[self.index]
         self.currentTraceChanged.emit(self.trc)
+
+    def toggle_selected(self):
+        self.trc.toggle()
+        self.selectedEdited.emit(self.trc)
 
     # ==========================================================================
     # matplotlib
@@ -66,6 +73,30 @@ class ExperimentController(QtCore.QObject):
     def train_selected_traces(self):
         pass
 
+    def sort_by_index(self):
+        self.expt.sort("index")
+        self.update_index(self.index)
+
+    def sort_by_selected(self):
+        self.expt.sort("selected")
+        self.update_index(self.index)
+
+    def sort_by_correlation(self):
+        self.expt.sort("corrcoef")
+        self.update_index(self.index)
+
+    def sort_by_cluster(self):
+        self.expt.sort("cluster")
+        self.update_index(self.index)
+
+    def select_all(self):
+        self.expt.select_all()
+        self.selectedEdited.emit(self.trc)
+
+    def select_none(self):
+        self.expt.select_none()
+        self.selectedEdited.emit(self.trc)
+
     # ==========================================================================
     # trace
     # ==========================================================================
@@ -91,9 +122,6 @@ class ExperimentController(QtCore.QObject):
         pass
 
     def set_trace_cluster_index(self):
-        pass
-
-    def toggle_trace(self):
         pass
 
     def train_trace(self):
