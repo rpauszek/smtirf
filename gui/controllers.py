@@ -22,6 +22,10 @@ class ExperimentController(QtCore.QObject):
         self.trc = None
         self.index = None
 
+    @property
+    def isReady(self):
+        return self.expt is not None and self.trc is not None
+
     # ==========================================================================
     # navigation
     # ==========================================================================

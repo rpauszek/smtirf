@@ -4,6 +4,7 @@
 smtirf >> gui >> __init__
 """
 from PyQt5 import QtWidgets, QtCore, QtGui
+from . import controllers
 
 # ==============================================================================
 # config
@@ -17,6 +18,8 @@ from . import resources
 from . import resources
 class SMTirfMainWindow(QtWidgets.QMainWindow):
     """ base class for GUI main window """
+
+    controller = controllers.ExperimentController()
 
     def __init__(self, title="TIRF Analysis", **kwargs):
         super().__init__(windowTitle=title, **kwargs)
