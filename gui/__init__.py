@@ -68,6 +68,20 @@ def add_toolbar_button(toolbar, icon, label, callback=None, **kwargs):
         action.triggered.connect(callback)
     toolbar.addAction(action)
 
+def add_toolbar_menu(toolbar, icon, label, actions):
+    """ actions dictionary {"label": callback} """
+    btn = QtWidgets.QToolButton()
+    btn.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+    btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+    btn.setIcon(QtGui.QIcon(f":/icons/{icon}.png"))
+    btn.setText(label)
+    toolbar.addWidget(btn)
+    for lbl, callback in actions.items():
+        action = QtWidgets.QAction(lbl, toolbar.parent())
+        with contextlib.suppress(TypeError):
+            action.triggered.connect(callback)
+        btn.addAction(action)
+
 def format_toolbar(toolbar):
     toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     toolbar.setMovable(False)
