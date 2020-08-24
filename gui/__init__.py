@@ -57,6 +57,9 @@ class SMTirfPanel(QtWidgets.QWidget):
     def layout(self):
         pass
 
+    def unbind(self):
+        self.parent().removeToolBar(self.toolbar)
+
 
 # ==============================================================================
 # utility functions
