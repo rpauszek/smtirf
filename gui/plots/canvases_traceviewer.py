@@ -36,5 +36,5 @@ class FretExperimentViewerPlot(BaseTraceViewerPlot):
     def layout(self):
         gs = GridSpec(3, 1)
         self.axE = self.fig.add_subplot(gs[0], projection="fret")
-    #     self.axDA = self.fig.add_subplot(gs[1], projection="donoracceptor")
-    #     self.axI = self.fig.add_subplot(gs[2], projection="total")
+        self.axDA = self.fig.add_subplot(gs[1], projection="donoracceptor")
+        self.axI = self.fig.add_subplot(gs[2], projection="total")
