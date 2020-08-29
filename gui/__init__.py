@@ -46,8 +46,9 @@ class SMTirfMainWindow(QtWidgets.QMainWindow):
 class SMTirfPanel(QtWidgets.QWidget):
     """ base class for switchable panel in MainWindow """
 
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, toolbarName, *args, **kwargs):
         super().__init__(parent=parent, *args, **kwargs)
+        self.toolbar = QtWidgets.QToolBar(toolbarName, parent=self)
         self.setup_toolbar()
         self.layout()
 
