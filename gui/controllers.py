@@ -5,6 +5,8 @@ smtirf >> gui >> controllers
 """
 import pathlib
 from PyQt5 import QtCore
+from PyQt5.QtWidgets import QFileDialog
+import smtirf
 
 class NavigationController(QtCore.QObject):
 
@@ -19,6 +21,9 @@ class NavigationController(QtCore.QObject):
 class ExperimentController(NavigationController):
     # navigation
     currentTraceChanged = QtCore.pyqtSignal(object)
+    # file I/O
+    experimentLoaded = QtCore.pyqtSignal(object)
+    filenameChanged = QtCore.pyqtSignal(object)
     # MPL
     mplMotionNotifyEvent = QtCore.pyqtSignal(object)
     # data update
@@ -66,7 +71,16 @@ class ExperimentController(NavigationController):
         pass
 
     def open_experiment(self):
-        pass
+        fdArgs = {"caption":"Load experiment",
+                  "filter":"smTIRF Experiment (*.smtrc)"}
+        filename, filetype = QFileDialog.getOpenFileName(**fdArgs)
+        # check that filename isn't null, then load and signal
+        if filename:
+            filename = pathlib.Path(filename)
+            self.expt = smtirf.Experiment.load(filename)
+            self.filename = filename
+            self.filenameChanged.emit(self.filename)
+            self.experimentLoaded.emit(self.expt)
 
     def save_experiment(self):
         pass

@@ -36,11 +36,10 @@ class QtCanvas(FigureCanvas):
 class ScrollableCanvas(QtCanvas):
 
     def connect(self):
-        # self.mpl_connect("scroll_event", self._trigger_scroll)
-        self.mpl_connect("scroll_event", self.controller.stepIndexTriggered.emit)
+        self.mpl_connect("scroll_event", self._trigger_scroll)
 
-    # def _trigger_scroll(self, evt):
-    #     self.controller.stepIndexTriggered.emit(evt.step)
+    def _trigger_scroll(self, evt):
+        self.controller.stepIndexTriggered.emit(evt.step)
 
 
 from . import axes_trace
