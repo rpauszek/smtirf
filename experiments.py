@@ -173,7 +173,6 @@ class Experiment():
     @staticmethod
     def load(filename):
         filename = Path(filename).absolute()
-        print(filename)
         with h5py.File(filename, "r") as HF:
             # load Experiment --------------------------------------------------
             cls = Experiment.CLASS_TYPES[HF.attrs["experimentType"]]
