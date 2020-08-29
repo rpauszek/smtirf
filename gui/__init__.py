@@ -23,6 +23,7 @@ class SMTirfAppConfig():
         #     mpl.rc(key, **d)
         # self.colors = J["colors"]
         self.qt = J["qtParams"]
+        self.opts = J["opts"]
 
 CONFIG = SMTirfAppConfig()
 
@@ -48,6 +49,7 @@ class SMTirfPanel(QtWidgets.QWidget):
 
     def __init__(self, parent, toolbarName, *args, **kwargs):
         super().__init__(parent=parent, *args, **kwargs)
+        self.controller = self.parent().controller
         self.toolbar = QtWidgets.QToolBar(toolbarName, parent=self)
         self.setup_toolbar()
         self.layout()
@@ -93,3 +95,6 @@ def format_toolbar(toolbar):
     for action in toolbar.actions():
         widget = toolbar.widgetForAction(action)
         widget.setFixedSize(widget.sizeHint().width(), CONFIG.qt["BUTTON_HEIGHT"])
+
+# ==============================================================================
+from . import plots
