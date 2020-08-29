@@ -3,6 +3,8 @@
 @author: Raymond F. Pauszek III, Ph.D. (2020)
 smtirf >> gui >> plots >> __init__
 """
+import numpy as np
+from PyQt5 import QtWidgets, QtGui
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 
@@ -15,6 +17,10 @@ class QtCanvas(FigureCanvas):
         self.controller = controller
         self.fig = Figure()
         super().__init__(self.fig)
+
+        bgcolor = QtWidgets.QWidget().palette().color(QtGui.QPalette.Background)
+        self.fig.set_facecolor(np.array(bgcolor.getRgb()[:-1])/255)
+
         self.fig.set_tight_layout(True)
         self.layout()
         self.fig.align_labels()
