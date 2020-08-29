@@ -6,7 +6,17 @@ smtirf >> gui >> controllers
 import pathlib
 from PyQt5 import QtCore
 
-class ExperimentController(QtCore.QObject):
+class NavigationController(QtCore.QObject):
+
+    stepIndexTriggered = QtCore.pyqtSignal(int)
+
+    def update_index(self, value):
+        """ handles indexChanged events from widgets;
+            sets internal index broadcast current trace """
+        self.index = value
+
+
+class ExperimentController(NavigationController):
     # navigation
     currentTraceChanged = QtCore.pyqtSignal(object)
     # MPL
@@ -30,9 +40,8 @@ class ExperimentController(QtCore.QObject):
     # navigation
     # ==========================================================================
     def update_index(self, value):
-        """ handles indexChanged events from widgets;
-            sets internal index broadcast current trace """
-        self.index = value
+        """ broadcast current trace """
+        super().update_index(value)
         self.trc = self.expt[self.index]
         self.currentTraceChanged.emit(self.trc)
 
