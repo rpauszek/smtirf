@@ -76,9 +76,18 @@ class DonorAcceptorAxes(TraceAxes):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._lineD, = self.plot([], [], CONFIG.colors["donor"]["active"])
+        self._lineA, = self.plot([], [], CONFIG.colors["acceptor"]["active"])
+
         self.margins(x=0, y=0.05)
 
     def set_trace(self, trc):
+        key = "selected" if trc.isSelected else "active"
+        self._lineD.set_data(trc.t, trc.D)
+        self._lineD.set_color(CONFIG.colors["donor"][key])
+        self._lineA.set_data(trc.t, trc.A)
+        self._lineA.set_color(CONFIG.colors["acceptor"][key])
+
         self.relim()
         self.autoscale(enable=True, axis="both")
 
@@ -89,9 +98,20 @@ class TotalIntensityAxes(TraceAxes):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._lineInactive, = self.plot([], [], CONFIG.colors["total"]["background"])
+        self._lineActive, = self.plot([], [], CONFIG.colors["total"]["active"])
+
         self.margins(x=0, y=0.05)
 
     def set_trace(self, trc):
+        key = "selected" if trc.isSelected else "active"
+        self._lineInactive.set_data(trc.t, trc.I)
+        Isig = trc.I.copy()
+        Isig[trc.S0 != 0] = np.nan
+        self._lineActive.set_data(trc.t, Isig)
+        self._lineActive.set_color(CONFIG.colors["total"][key])
+
+
         self.relim()
         self.autoscale(enable=True, axis="both")
 
