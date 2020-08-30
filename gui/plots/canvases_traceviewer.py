@@ -24,7 +24,6 @@ class TraceViewerPlot(ScrollableCanvas, InteractiveCanvas):
     def refresh(self, expt):
         for ax in self.fig.axes:
             ax.remove()
-        print(expt.classLabel)
         gs = GridSpec(3, 1)
         self.ax1 = self.fig.add_subplot(gs[0], projection=expt.classLabel)
         self.ax2 = self.fig.add_subplot(gs[1], projection="donoracceptor")
