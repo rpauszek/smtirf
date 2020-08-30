@@ -43,33 +43,6 @@ class TraceAxes(mpl.axes.Axes):
         self.set_yticklabels("")
 
 
-class FretAxes(TraceAxes):
-    name = "fret"
-    YLABEL = "FRET"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._lineInactive, = self.plot([], [], CONFIG.colors["fret"]["inactive"])
-        self._lineActive, = self.plot([], [], CONFIG.colors["fret"]["active"])
-        self._lineFit, = self.plot([], [], CONFIG.colors["fret"]["fit"], lw=2)
-
-        self.margins(x=0)
-        self.set_ylim(*CONFIG.opts["fretLims"])
-
-    def set_trace(self, trc):
-        key = "selected" if trc.isSelected else "active"
-        self._lineInactive.set_data(trc.t, trc.E)
-        self._lineActive.set_data(trc.t[trc.limits], trc.X)
-        self._lineActive.set_color(CONFIG.colors["fret"][key])
-        if trc.model is not None:
-            self._lineFit.set_data(trc.t[trc.limits], trc.EP)
-        else:
-            self._lineFit.set_data([], [])
-
-        self.relim()
-        self.autoscale(enable=True, axis="x")
-
-
 class DonorAcceptorAxes(TraceAxes):
     name = "donoracceptor"
     YLABEL = "D/A signal"
@@ -115,7 +88,71 @@ class TotalIntensityAxes(TraceAxes):
         self.relim()
         self.autoscale(enable=True, axis="both")
 
+# ==============================================================================
+# fit-able traces
+# ==============================================================================
+class FretAxes(TraceAxes):
+    name = "fret"
+    YLABEL = "FRET"
 
-mpl.projections.register_projection(FretAxes)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._lineInactive, = self.plot([], [], CONFIG.colors["fret"]["inactive"])
+        self._lineActive, = self.plot([], [], CONFIG.colors["fret"]["active"])
+        self._lineFit, = self.plot([], [], CONFIG.colors["fret"]["fit"], lw=CONFIG.opts["fitLineWidth"])
+
+        self.margins(x=0)
+        self.set_ylim(*CONFIG.opts["fretLims"])
+
+    def set_trace(self, trc):
+        key = "selected" if trc.isSelected else "active"
+        self._lineInactive.set_data(trc.t, trc.E)
+        self._lineActive.set_data(trc.t[trc.limits], trc.X)
+        self._lineActive.set_color(CONFIG.colors["fret"][key])
+        if trc.model is not None:
+            self._lineFit.set_data(trc.t[trc.limits], trc.EP)
+        else:
+            self._lineFit.set_data([], [])
+
+        self.relim()
+        self.autoscale(enable=True, axis="x")
+
+
+class MultimerAxes(mpl.axes.Axes):
+    name = "multimer"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._lineInactive, = self.plot([], [], CONFIG.colors["donor"]["inactive"])
+        self._lineActive, = self.plot([], [], CONFIG.colors["donor"]["active"])
+        self._lineFit, = self.plot([], [], CONFIG.colors["donor"]["fit"], lw=CONFIG.opts["fitLineWidth"])
+        self.margins(x=0)
+
+    def set_trace(self, trc):
+        if trc.channel == 1:
+            signal = trc.D
+            channel = "donor"
+        elif trc.channel == 2:
+            signal = trc.A
+            channel = "acceptor"
+        else:
+            raise ValueError("channel not defined")
+        key = "selected" if trc.isSelected else "active"
+        self._lineInactive.set_data(trc.t, signal)
+        self._lineActive.set_data(trc.t[trc.limits], trc.X)
+        self._lineActive.set_color(CONFIG.colors[channel][key])
+        if trc.model is not None:
+            self._lineFit.set_data(trc.t[trc.limits], trc.EP)
+            self._lineFit.set_color(CONFIG.colors[channel]["fit"])
+        else:
+            self._lineFit.set_data([], [])
+
+        self.relim()
+        self.autoscale(enable=True, axis="both")
+
+
+
 mpl.projections.register_projection(DonorAcceptorAxes)
 mpl.projections.register_projection(TotalIntensityAxes)
+mpl.projections.register_projection(FretAxes)
+mpl.projections.register_projection(MultimerAxes)

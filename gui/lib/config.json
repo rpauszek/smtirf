@@ -39,10 +39,11 @@
         }
     },
     "qtParams": {
-        "TOOLBUTTON_SIZE" : [48,48],
-        "BUTTON_HEIGHT" : 75
+        "TOOLBUTTON_SIZE": [48,48],
+        "BUTTON_HEIGHT": 75
     },
     "opts": {
-        "fretLims" : [-0.1, 1.1]
+        "fretLims": [-0.1, 1.1],
+        "fitLineWidth": 1.5
     }
 }

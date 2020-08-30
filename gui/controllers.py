@@ -35,7 +35,7 @@ class ExperimentController(NavigationController):
         self.filename = None
         self.expt = None
         self.trc = None
-        self.index = None
+        self.index = 0
 
     @property
     def isReady(self):
@@ -81,6 +81,7 @@ class ExperimentController(NavigationController):
             self.filename = filename
             self.filenameChanged.emit(self.filename)
             self.experimentLoaded.emit(self.expt)
+            self.update_index(self.index)
 
     def save_experiment(self):
         pass
