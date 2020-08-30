@@ -143,11 +143,13 @@ class ExperimentController(NavigationController):
     def set_trace_limits(self):
         pass
 
-    def set_trace_start_time(self):
-        pass
+    def set_trace_start_time(self, time):
+        self.trc.set_start_time(time)
+        self.traceEdited.emit(self.trc)
 
-    def set_trace_stop_time(self):
-        pass
+    def set_trace_stop_time(self, time):
+        self.trc.set_stop_time(time)
+        self.traceEdited.emit(self.trc)
 
     def reset_trace_limits(self):
         pass

@@ -45,4 +45,8 @@ class TraceViewerPlot(ScrollableCanvas, InteractiveCanvas):
         self.draw()
 
     def on_release(self, evt):
-        pass
+        if evt.inaxes == self.ax2 and evt.xdata is not None:
+            if evt.button == 1: # start
+                self.controller.set_trace_start_time(evt.xdata)
+            elif evt.button == 3: # stop
+                self.controller.set_trace_stop_time(evt.xdata)
