@@ -7,6 +7,7 @@ import numpy as np
 from PyQt5 import QtWidgets, QtGui
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.widgets import SpanSelector
 
 # ==============================================================================
 # base canvas classes
@@ -40,6 +41,36 @@ class ScrollableCanvas(QtCanvas):
 
     def _trigger_scroll(self, evt):
         self.controller.stepIndexTriggered.emit(evt.step)
+
+# ==============================================================================
+# Interactive axes "interfaces"
+# ==============================================================================
+class InteractiveCanvas():
+
+    def set_zoom_axes(self, ax, button=1):
+        rectProps = {"alpha": 0.5, "facecolor": "#99ED12"}
+        spanArgs = {"useblit": True, "button": button, "rectprops": rectProps}
+        self.zoomSpan = SpanSelector(ax, self.on_zoom, 'horizontal', **spanArgs)
+
+    def set_baseline_axes(self, ax, button=3):
+        rectProps = {"alpha": 0.5, "facecolor": "#2F4F4F"} #"#4b0082"}
+        spanArgs = {"useblit": True, "button": button, "rectprops": rectProps, "minspan": 0.5}
+        self.baselineSpan = SpanSelector(ax, self.controller.set_trace_offset_time_window,
+                                         'horizontal', **spanArgs)
+
+    # def set_blink_axes(self, ax, button=1):
+    #     rectProps = {"alpha": 0.5, "facecolor": "#D30000"}
+    #     spanArgs = {"useblit": True, "button": button, "rectprops": rectProps}
+    #     self.blinkSpan = SpanSelector(ax, self.controller.set_blink_time_window,
+    #                                      'horizontal', **spanArgs)
+
+    def on_zoom(self, xmin, xmax):
+        if xmax-xmin > 1:
+            for ax in self.fig.axes:
+                ax.set_xlim(xmin, xmax)
+            self.draw()
+
+
 
 
 from . import axes_trace

@@ -130,8 +130,11 @@ class ExperimentController(NavigationController):
     def set_trace_offsets(self):
         pass
 
-    def set_trace_offset_time_window(self):
-        pass
+    def set_trace_offset_time_window(self, tmin, tmax):
+        # TODO => should also handle this in Trace class for validation in scripts
+        # if tmax-tmin > 0.5: # actually this is in SpanSelector...look up!
+        self.trc.set_offset_time_window(tmin, tmax)
+        self.traceEdited.emit(self.trc)
 
     def reset_trace_offsets(self):
         pass

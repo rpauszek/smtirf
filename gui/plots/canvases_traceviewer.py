@@ -3,15 +3,14 @@
 @author: Raymond F. Pauszek III, Ph.D. (2020)
 smtirf >> gui >> plots >> canvases_traceviewer
 """
-from matplotlib.widgets import SpanSelector
 from matplotlib.gridspec import GridSpec
 import matplotlib as mpl
 
-from . import QtCanvas, ScrollableCanvas
+from . import QtCanvas, ScrollableCanvas, InteractiveCanvas
 
 __all__ = ["FretExperimentViewerPlot"]
 
-class BaseTraceViewerPlot(ScrollableCanvas):
+class BaseTraceViewerPlot(ScrollableCanvas, InteractiveCanvas):
 
     def connect(self):
         super().connect()
@@ -28,14 +27,14 @@ class BaseTraceViewerPlot(ScrollableCanvas):
 
     def on_release(self, evt):
         pass
-        
+
 
 class FretExperimentViewerPlot(BaseTraceViewerPlot):
 
     def __init__(self, controller):
         super().__init__(controller)
-        # self.set_zoom_axes(self.axE, button=1)
-        # self.set_baseline_axes(self.axI, button=3)
+        self.set_zoom_axes(self.axE, button=1)
+        self.set_baseline_axes(self.axI, button=3)
 
     def layout(self):
         gs = GridSpec(3, 1)
