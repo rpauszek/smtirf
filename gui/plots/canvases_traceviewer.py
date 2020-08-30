@@ -39,6 +39,8 @@ class TraceViewerPlot(ScrollableCanvas, InteractiveCanvas):
             try:
                 ax.set_trace(trc)
             except AttributeError:
+                # thrown when Experiment type changes, because ref still active
+                # til garbage collected
                 pass
         self.draw()
 

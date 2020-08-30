@@ -139,6 +139,7 @@ class MultimerAxes(mpl.axes.Axes):
             raise ValueError("channel not defined")
         key = "selected" if trc.isSelected else "active"
         self._lineInactive.set_data(trc.t, signal)
+        self._lineInactive.set_color(CONFIG.colors[channel]["inactive"])
         self._lineActive.set_data(trc.t[trc.limits], trc.X)
         self._lineActive.set_color(CONFIG.colors[channel][key])
         if trc.model is not None:
@@ -146,6 +147,35 @@ class MultimerAxes(mpl.axes.Axes):
             self._lineFit.set_color(CONFIG.colors[channel]["fit"])
         else:
             self._lineFit.set_data([], [])
+
+        self.relim()
+        self.autoscale(enable=True, axis="both")
+
+
+class PifeAxes(mpl.axes.Axes):
+    name = "pife"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._lineInactive, = self.plot([], [], CONFIG.colors["donor"]["inactive"])
+        self._lineActive, = self.plot([], [], CONFIG.colors["donor"]["active"])
+
+        self.margins(x=0)
+
+    def set_trace(self, trc):
+        if trc.channel == 1:
+            signal = trc.D
+            channel = "donor"
+        elif trc.channel == 2:
+            signal = trc.A
+            channel = "acceptor"
+        else:
+            raise ValueError("channel not defined")
+        key = "selected" if trc.isSelected else "active"
+        self._lineInactive.set_data(trc.t, signal)
+        self._lineInactive.set_color(CONFIG.colors[channel]["inactive"])
+        self._lineActive.set_data(trc.t[trc.limits], trc.X)
+        self._lineActive.set_color(CONFIG.colors[channel][key])
 
         self.relim()
         self.autoscale(enable=True, axis="both")
