@@ -9,6 +9,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
 from matplotlib.widgets import SpanSelector
 
+from .. import CONFIG
+
 # ==============================================================================
 # base canvas classes
 # ==============================================================================
@@ -48,12 +50,12 @@ class ScrollableCanvas(QtCanvas):
 class InteractiveCanvas():
 
     def set_zoom_axes(self, ax, button=1):
-        rectProps = {"alpha": 0.5, "facecolor": "#99ED12"}
+        rectProps = {"alpha": 0.5, "facecolor": CONFIG.colors["span"]["zoom"]}
         spanArgs = {"useblit": True, "button": button, "rectprops": rectProps}
         self.zoomSpan = SpanSelector(ax, self.on_zoom, 'horizontal', **spanArgs)
 
     def set_baseline_axes(self, ax, button=3):
-        rectProps = {"alpha": 0.5, "facecolor": "#2F4F4F"} #"#4b0082"}
+        rectProps = {"alpha": 0.5, "facecolor": CONFIG.colors["span"]["offset"]} 
         spanArgs = {"useblit": True, "button": button, "rectprops": rectProps, "minspan": 0.5}
         self.baselineSpan = SpanSelector(ax, self.controller.set_trace_offset_time_window,
                                          'horizontal', **spanArgs)

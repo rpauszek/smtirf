@@ -27,6 +27,10 @@
             "active": "#282828",
             "fit": "#1E1E1E",
             "selected": "#282828"
+        },
+        "span": {
+            "offset": "#2F4F4F",
+            "zoom": "#99ED12"
         }
     },
     "rcParams": {
