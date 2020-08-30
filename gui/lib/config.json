@@ -1,9 +1,23 @@
 {
+    "colors": {
+        "fret": {
+            "background" : "#dddddd",
+            "inactive": "#C1CDCD",
+            "active": "#104E8B",
+            "fit": "#020b14",
+            "selected": "#990825"
+        }
+    },
+    "rcParams": {
+        "lines": {
+            "linewidth": 0.75
+        }
+    },
     "qtParams": {
-      "TOOLBUTTON_SIZE" : [48,48],
-      "BUTTON_HEIGHT" : 75
+        "TOOLBUTTON_SIZE" : [48,48],
+        "BUTTON_HEIGHT" : 75
     },
     "opts": {
-      "fretLims" : [-0.1, 1.1]
+        "fretLims" : [-0.1, 1.1]
     }
 }

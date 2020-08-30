@@ -4,4 +4,5 @@
 smtirf >> gui >> widgets >> __init__
 """
 from . import composite
+from .buttons import *
 from .sliders import *

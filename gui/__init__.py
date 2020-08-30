@@ -6,6 +6,7 @@ smtirf >> gui >> __init__
 import json, contextlib
 from pathlib import Path
 from PyQt5 import QtWidgets, QtCore, QtGui
+import matplotlib as mpl
 from . import controllers
 
 # ==============================================================================
@@ -19,11 +20,13 @@ class SMTirfAppConfig():
         self.filename = Path(__file__).parent / "lib/config.json"
         with open(self.filename, "r") as F:
             J = json.loads(F.read())
-        # for key, d in J["rcParams"].items():
-        #     mpl.rc(key, **d)
-        # self.colors = J["colors"]
+        self.colors = J["colors"]
+        self.rc = J["rcParams"]
         self.qt = J["qtParams"]
         self.opts = J["opts"]
+
+        for key, d in self.rc.items():
+            mpl.rc(key, **d)
 
 CONFIG = SMTirfAppConfig()
 

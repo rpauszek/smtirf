@@ -17,7 +17,7 @@ class TraceAxes(mpl.axes.Axes):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.axhline(0, c='k', lw=0.5)
-        
+
         if self.is_first_col():
             self.show_ylabel()
         else:
@@ -49,10 +49,23 @@ class FretAxes(TraceAxes):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._lineInactive, = self.plot([], [], CONFIG.colors["fret"]["inactive"])
+        self._lineActive, = self.plot([], [], CONFIG.colors["fret"]["active"])
+        self._lineFit, = self.plot([], [], CONFIG.colors["fret"]["fit"], lw=2)
+
         self.margins(x=0)
         self.set_ylim(*CONFIG.opts["fretLims"])
 
     def set_trace(self, trc):
+        key = "selected" if trc.isSelected else "active"
+        self._lineInactive.set_data(trc.t, trc.E)
+        self._lineActive.set_data(trc.t[trc.limits], trc.X)
+        self._lineActive.set_color(CONFIG.colors["fret"][key])
+        if trc.model is not None:
+            self._lineFit.set_data(trc.t[trc.limits], trc.EP)
+        else:
+            self._lineFit.set_data([], [])
+
         self.relim()
         self.autoscale(enable=True, axis="x")
 
