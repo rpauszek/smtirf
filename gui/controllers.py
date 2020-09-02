@@ -65,7 +65,9 @@ class ExperimentController(NavigationController):
     # experiment
     # ==========================================================================
     def import_experiment_from_pma(self):
-        pass
+        dlg = smtirf.gui.dialogs.ImportExperimentDialog()
+        rsp = dlg.exec_()
+        print(rsp)
 
     def merge_experiments(self):
         pass

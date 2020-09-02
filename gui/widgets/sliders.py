@@ -4,11 +4,11 @@
 smtirf >> gui >> widgets >> sliders
 """
 from PyQt5 import QtWidgets, QtCore, QtGui
-from . import composite
+from . import base
 
 __all__ = ["NavBar"]
 
-class NavBar(composite.SpinSlider):
+class NavBar(base.SpinSlider):
 
     def __init__(self, controller, label="Trace Index:"):
         self.controller = controller

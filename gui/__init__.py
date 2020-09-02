@@ -102,3 +102,4 @@ def format_toolbar(toolbar):
 # ==============================================================================
 from . import plots
 from . import widgets
+from . import dialogs

@@ -4,7 +4,7 @@
 smtirf >> gui >> widgets >> composite
 """
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt5.QtWidgets import QSizePolicy, QFileDialog
 
 # ==============================================================================
 class SpinSlider(QtWidgets.QWidget):
@@ -85,3 +85,72 @@ class SpinSlider(QtWidgets.QWidget):
 
     def setFocus(self):
         self.slider.setFocus()
+
+# ==============================================================================
+class RadioButtonGroup(QtWidgets.QWidget):
+
+    selectionChanged = QtCore.pyqtSignal(str)
+
+    def __init__(self, labels, keys):
+        super().__init__()
+        self.keys = keys
+
+        box = QtWidgets.QHBoxLayout()
+        box.setContentsMargins(0,0,0,0)
+        box.addItem(QtWidgets.QSpacerItem(20, 10, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        self.radiogroup = QtWidgets.QButtonGroup()
+        for j, label in enumerate(labels):
+            rad = QtWidgets.QRadioButton(label)
+            if j == 0:
+                rad.setChecked(True)
+            self.radiogroup.addButton(rad)
+            self.radiogroup.setId(rad, j)
+            box.addWidget(rad)
+
+        self.radiogroup.buttonClicked.connect(self.selection_clicked)
+        self.setLayout(box)
+
+    def selection_clicked(self, btn):
+        self.selectionChanged.emit(self.value())
+
+    def value(self):
+        return self.keys[self.radiogroup.checkedId()]
+
+    def setEnabled(self, b):
+        for btn in self.radiogroup.buttons():
+            btn.setEnabled(b)
+
+# ==============================================================================
+class PathButton(QtWidgets.QWidget):
+
+    def __init__(self, fdArgs=None):
+        super().__init__()
+        self._fdArgs = fdArgs
+        self.textline = QtWidgets.QLabel("")
+        self.button = QtWidgets.QPushButton("Choose File")
+        self.button.setMaximumWidth(75)
+
+        box = QtWidgets.QHBoxLayout()
+        box.setContentsMargins(0,0,0,0)
+        box.addWidget(self.button)
+        box.addWidget(self.textline)
+        self.setLayout(box)
+        self.setTabOrder(self.button, self.textline)
+
+        self.button.clicked.connect(self.on_click)
+
+    def on_click(self):
+        try:
+            filename, filetype = QFileDialog.getOpenFileName(**self._fdArgs)
+        except TypeError:
+            filename, filetype = QFileDialog.getOpenFileName()
+        # self.textline.setText(filename)
+        fm = QtGui.QFontMetrics(self.textline.font())
+        self.textline.setText(fm.elidedText(filename, QtCore.Qt.ElideLeft, self.textline.width()))
+
+    def path(self):
+        text = self.textline.text()
+        if text:
+            return pathlib.Path(self.textline.text()).absolute()
+        else:
+            return None
