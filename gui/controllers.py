@@ -67,7 +67,14 @@ class ExperimentController(NavigationController):
     def import_experiment_from_pma(self):
         dlg = smtirf.gui.dialogs.ImportExperimentDialog()
         rsp = dlg.exec_()
-        print(rsp)
+        if rsp:
+            args = dlg.get_args()
+            if args["filename"]:
+                self.expt = smtirf.Experiment.from_pma(**args)
+                self.filename = None
+                self.filenameChanged.emit(self.filename)
+                self.experimentLoaded.emit(self.expt)
+                self.update_index(self.index)
 
     def merge_experiments(self):
         pass

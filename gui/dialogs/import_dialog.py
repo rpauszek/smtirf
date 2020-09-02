@@ -12,14 +12,13 @@ class ImportExperimentDialog(QtWidgets.QDialog):
 
     _experimentTypes = ("fret", "piecewise", "pife", "multimer")
     _experimentLabels = ("FRET", "Piecewise FRET", "PIFE", "Multimer")
+    _isChannelType = ("pife", "multimer")
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.layout()
         self.connect()
-
         self.setWindowTitle("Import experiment")
-        # self.setMinimumWidth(500)
 
     def layout(self):
         vbox = QtWidgets.QVBoxLayout()
@@ -35,20 +34,19 @@ class ImportExperimentDialog(QtWidgets.QDialog):
 
         hb1 = QtWidgets.QHBoxLayout()
         hb1.addWidget(QtWidgets.QLabel("Donor bleedthrough: "))
-        self.txtBleed = QtWidgets.QDoubleSpinBox()
+        self.txtBleed = QtWidgets.QDoubleSpinBox(minimum=0, maximum=1, value=0.05)
         hb1.addWidget(self.txtBleed)
         vbox.addLayout(hb1)
 
         hb2 = QtWidgets.QHBoxLayout()
         hb2.addWidget(QtWidgets.QLabel("Gamma factor: "))
-        self.txtGamma = QtWidgets.QDoubleSpinBox()
+        self.txtGamma = QtWidgets.QDoubleSpinBox(minimum=0, maximum=2, value=1)
         hb2.addWidget(self.txtGamma)
         vbox.addLayout(hb2)
 
         hb3 = QtWidgets.QHBoxLayout()
         hb3.addWidget(QtWidgets.QLabel("Channel: "))
-        # self.txtChannel = QtWidgets.QSpinBox()
-        self.radChannel = widgets.base.RadioButtonGroup(("1", "2"), ("1", "2"))
+        self.radChannel = widgets.base.RadioButtonGroup(("1", "2"), (1, 2))
         self.radChannel.setEnabled(False)
         hb3.addWidget(self.radChannel)
         vbox.addLayout(hb3)
@@ -62,4 +60,16 @@ class ImportExperimentDialog(QtWidgets.QDialog):
         self.setLayout(vbox)
 
     def connect(self):
-        self.experimentTypes.selectionChanged.connect(print)
+        self.experimentTypes.selectionChanged.connect(self.update_experiment_type)
+
+    def update_experiment_type(self, type_):
+        self.radChannel.setEnabled(type_ in self._isChannelType)
+
+    def get_args(self):
+        args = {"filename": self.path.path(),
+                "experimentType": self.experimentTypes.value(),
+                "bleed": self.txtBleed.value(),
+                "gamma": self.txtGamma.value()}
+        if self.radChannel.isEnabled():
+            args["channel"] = self.radChannel.value()
+        return args
