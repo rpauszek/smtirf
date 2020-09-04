@@ -5,6 +5,7 @@ smtirf >> gui >> widgets >> buttons
 """
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtWidgets, QtCore, QtGui
+import numpy as np
 
 __all__ = ["ToggleSelectionAction", "TrainModelButton"]
 
@@ -33,6 +34,7 @@ class TrainModelButton(QtWidgets.QWidget):
         super().__init__(*args, **kwargs)
         self.controller = controller
         self.K = 2
+        self.trc = None
         self.layout()
         self.connect()
 
@@ -41,7 +43,7 @@ class TrainModelButton(QtWidgets.QWidget):
 
     def layout(self):
         self.cboModelTypes = QtWidgets.QComboBox()
-        for item in ("EM", "VB"):
+        for item in ("Baum-Welch", "Variational Bayes"):
             self.cboModelTypes.addItem(item)
 
         self.cmdSubtractState = QtWidgets.QPushButton("\u2212")
@@ -55,6 +57,7 @@ class TrainModelButton(QtWidgets.QWidget):
         self.lblNStates.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
         self.cmdTrain = QtWidgets.QPushButton("Train")
+        self.chkSharedVar = QtWidgets.QCheckBox("Shared Variance")
 
         hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(self.cboModelTypes)
@@ -62,12 +65,14 @@ class TrainModelButton(QtWidgets.QWidget):
         hbox.addWidget(self.lblNStates)
         hbox.addWidget(self.cmdAddState)
         hbox.addWidget(self.cmdTrain)
+        hbox.addWidget(self.chkSharedVar)
         self.setLayout(hbox)
 
     def connect(self):
         self.cmdAddState.clicked.connect(self.add_state)
         self.cmdSubtractState.clicked.connect(self.subtract_state)
         self.cmdTrain.clicked.connect(self.train_model)
+        self.controller.currentTraceChanged.connect(self.update_trace)
 
     def set_model_style(self, val):
         SS = """border: 1px solid #444444;"""
@@ -89,5 +94,35 @@ class TrainModelButton(QtWidgets.QWidget):
             self.set_n_states()
             self.set_model_style("none")
 
+    def update_trace(self, trc):
+        self.trc = trc
+        self.update_text()
+
+    def update_text(self):
+        if self.trc.model is None:
+            val = "none"
+            # self.K = 2
+        elif np.any(np.isnan(self.trc.model.mu)):
+            val = "error"
+            self.K = self.trc.model.K
+        else:
+            val = "ok"
+            self.K = self.trc.model.K
+        self.set_n_states()
+        self.set_model_style(val)
+
     def train_model(self):
-        self.set_model_style("working")
+        self.set_model_style("working") # TODO => need to thread, or update before calling train
+        self.lblNStates.update()
+        try:
+            try:
+                self.trc.train("em", self.K) # !! TODO => multimer just takes K
+            except ZeroDivisionError:
+                pass
+        except TypeError:
+            try:
+                self.trc.train(self.K)
+            except ZeroDivisionError:
+                pass
+        self.update_text()
+        self.controller.traceEdited.emit(self.trc) # TODO => specific event for training?
