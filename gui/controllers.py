@@ -29,6 +29,9 @@ class ExperimentController(NavigationController):
     # data update
     traceEdited = QtCore.pyqtSignal(object)
     selectedEdited = QtCore.pyqtSignal(object)
+    # training
+    trainingMessageChanged = QtCore.pyqtSignal(str)
+    modelTrained = QtCore.pyqtSignal(object)
 
     def __init__(self):
         super().__init__()
@@ -36,13 +39,14 @@ class ExperimentController(NavigationController):
         self.expt = None
         self.trc = None
         self.index = 0
+        self.trainingThread = None
 
     @property
     def isReady(self):
         return self.expt is not None and self.trc is not None
 
     # ==========================================================================
-    # navigation
+    # navigation & threading
     # ==========================================================================
     def update_index(self, value):
         """ broadcast current trace """
@@ -53,6 +57,13 @@ class ExperimentController(NavigationController):
     def toggle_selected(self):
         self.trc.toggle()
         self.selectedEdited.emit(self.trc)
+
+    def setup_training_thread(self, widget):
+        self.trainingThread = smtirf.gui.threads.ModelTrainingThread(self, widget)
+        self.trainingThread.trainingStarted.connect(lambda : self.trainingMessageChanged.emit("working"))
+        self.trainingThread.trainingFinished.connect(lambda : self.modelTrained.emit(self.trc))
+        self.trainingThread.trainingStarted.connect(lambda : widget.setEnabled(False))
+        self.trainingThread.trainingFinished.connect(lambda : widget.setEnabled(True))
 
     # ==========================================================================
     # matplotlib
@@ -167,4 +178,4 @@ class ExperimentController(NavigationController):
         pass
 
     def train_trace(self):
-        pass
+        self.trainingThread.start()

@@ -17,6 +17,7 @@ class TraceViewerPlot(ScrollableCanvas, InteractiveCanvas):
         self.controller.currentTraceChanged.connect(self.update_plots)
         self.controller.traceEdited.connect(self.update_plots)
         self.controller.selectedEdited.connect(self.update_plots)
+        self.controller.modelTrained.connect(self.update_plots)
         self.mpl_connect('motion_notify_event', self.controller.motion_notify)
         self.mpl_connect('button_release_event', self.on_release)
         self.controller.experimentLoaded.connect(self.refresh)

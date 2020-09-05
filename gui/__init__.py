@@ -100,6 +100,7 @@ def format_toolbar(toolbar):
         widget.setFixedSize(widget.sizeHint().width(), CONFIG.qt["BUTTON_HEIGHT"])
 
 # ==============================================================================
+from . import threads
 from . import plots
 from . import widgets
 from . import dialogs

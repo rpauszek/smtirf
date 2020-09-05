@@ -6,6 +6,7 @@ smtirf >> gui >> widgets >> buttons
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtWidgets, QtCore, QtGui
 import numpy as np
+# from .. import threads
 
 __all__ = ["ToggleSelectionAction", "TrainModelButton"]
 
@@ -37,6 +38,7 @@ class TrainModelButton(QtWidgets.QWidget):
         self.trc = None
         self.layout()
         self.connect()
+        self.controller.setup_training_thread(self)
 
         self.set_n_states()
         self.set_model_style("none")
@@ -49,7 +51,6 @@ class TrainModelButton(QtWidgets.QWidget):
         self.cmdSubtractState = QtWidgets.QPushButton("\u2212")
         self.cmdAddState = QtWidgets.QPushButton("\u002b")
         for btn in (self.cmdSubtractState, self.cmdAddState):
-            # btn.setStyleSheet("font-size: 12pt;")
             btn.setMaximumWidth(25)
 
         self.lblNStates = QtWidgets.QLabel("")
@@ -72,7 +73,15 @@ class TrainModelButton(QtWidgets.QWidget):
         self.cmdAddState.clicked.connect(self.add_state)
         self.cmdSubtractState.clicked.connect(self.subtract_state)
         self.cmdTrain.clicked.connect(self.train_model)
+        self.controller.trainingMessageChanged.connect(self.set_model_style)
         self.controller.currentTraceChanged.connect(self.update_trace)
+        self.controller.modelTrained.connect(self.update_trace)
+        # TODO ==> connect cboModelTypes and chkSharedVar
+        # TODO ==> make dict for all training arguments
+
+    def setEnabled(self, b):
+        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar):
+            w.setEnabled(b)
 
     def set_model_style(self, val):
         SS = """border: 1px solid #444444;"""
@@ -112,17 +121,4 @@ class TrainModelButton(QtWidgets.QWidget):
         self.set_model_style(val)
 
     def train_model(self):
-        self.set_model_style("working") # TODO => need to thread, or update before calling train
-        self.lblNStates.update()
-        try:
-            try:
-                self.trc.train("em", self.K) # !! TODO => multimer just takes K
-            except ZeroDivisionError:
-                pass
-        except TypeError:
-            try:
-                self.trc.train(self.K)
-            except ZeroDivisionError:
-                pass
-        self.update_text()
-        self.controller.traceEdited.emit(self.trc) # TODO => specific event for training?
+        self.controller.train_trace()
