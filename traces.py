@@ -263,38 +263,22 @@ class SingleColorTrace(BaseTrace):
         return self.D[self.limits] if self.channel == 1 else self.A[self.limits]
 
 class PifeTrace(SingleColorTrace):
+    classLabel = "pife"
 
     pass
 
-    # @property
-    # def X(self):
-    #     return 2
-
-
-# class PifeCh2Trace(BaseTrace):
-#
-#     @property
-#     def X(self):
-#         return 3
-
 
 class MultimerTrace(SingleColorTrace):
+    classLabel = "multimer"
 
     def train(self, K, sharedVariance=True, **kwargs):
         theta = smtirf.HiddenMarkovModel.train_new("multimer", self.X, K, sharedVariance, **kwargs)
         self.model = theta
         self.label_statepath()
 
-    # def train(self, K, modelType="multimer", guess_with_kmeans=False, sharedVariance=True, printWarnings=False):
-    #     theta = smtirf.HiddenMarkovModel.new(K, self.X, modelType=modelType,
-    #                                          guess_with_kmeans=guess_with_kmeans,
-    #                                          sharedVariance=sharedVariance,
-    #                                          trainNow=True, printWarnings=printWarnings)
-    #     self.model = theta
-    #     self.label_statepath()
-
 
 class FretTrace(BaseTrace):
+    classLabel = "fret"
 
     @property
     def X(self):
@@ -307,6 +291,7 @@ class FretTrace(BaseTrace):
 
 
 class PiecewiseTrace(FretTrace):
+    classLabel = "piecewise"
 
     @property
     def X(self):
