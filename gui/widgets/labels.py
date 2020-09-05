@@ -14,12 +14,13 @@ class CoordinateLabel(QtWidgets.QLabel):
         self.setMinimumWidth(120)
         self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         controller.mplMotionNotifyEvent.connect(self.update_text)
+        self.setStyleSheet("color: #888888;")
 
     def update_text(self, evt):
         if evt.inaxes:
             self.setText(f"x: {evt.xdata:0.2f}, y: {evt.ydata:0.2f}")
         else:
-            self.setText("x: , y: ")
+            self.setText("")
 
 
 class TraceIdLabel(QtWidgets.QLabel):
