@@ -21,15 +21,9 @@ class ModelTrainingThread(QtCore.QThread):
     def run(self):
         self.trainingStarted.emit()
         trc = self.controller.trc
-        # TODO ==> use parent dict for all training arguments
+        kwargs = self._parent.modelKwargs
         try:
-            try:
-                trc.train("em", self._parent.K) # !! TODO => multimer just takes K
-            except ZeroDivisionError:
-                pass
-        except TypeError:
-            try:
-                trc.train(self._parent.K)
-            except ZeroDivisionError:
-                pass
+            trc.train(**kwargs)
+        except ZeroDivisionError:
+            pass
         self.trainingFinished.emit()

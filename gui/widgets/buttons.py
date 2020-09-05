@@ -6,7 +6,6 @@ smtirf >> gui >> widgets >> buttons
 from PyQt5.QtWidgets import QFileDialog
 from PyQt5 import QtWidgets, QtCore, QtGui
 import numpy as np
-# from .. import threads
 
 __all__ = ["ToggleSelectionAction", "TrainModelButton"]
 
@@ -30,6 +29,8 @@ class TrainModelButton(QtWidgets.QWidget):
                     "ok" : ("#009ACD", "#ffffff"),
                     "error" : ("#CD2626", "#EEEE00"),
                     "working" : ("#DAA520", "#444444")}
+    _modelLabels = ("Baum-Welch", "Variational Bayes")
+    _modelTypes = ("em", "vb")
 
     def __init__(self, controller, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -43,9 +44,18 @@ class TrainModelButton(QtWidgets.QWidget):
         self.set_n_states()
         self.set_model_style("none")
 
+    @property
+    def modelKwargs(self):
+        kwargs =  {"K" : self.K,
+                   "sharedVariance" : self.chkSharedVar.isChecked()}
+        if self.cboModelTypes.isEnabled():
+            kwargs["modelType"] = self._modelTypes[self.cboModelTypes.currentIndex()]
+        return kwargs
+        # TODO ==> repeats kwarg for vb
+
     def layout(self):
         self.cboModelTypes = QtWidgets.QComboBox()
-        for item in ("Baum-Welch", "Variational Bayes"):
+        for item in self._modelLabels:
             self.cboModelTypes.addItem(item)
 
         self.cmdSubtractState = QtWidgets.QPushButton("\u2212")
@@ -76,12 +86,12 @@ class TrainModelButton(QtWidgets.QWidget):
         self.controller.trainingMessageChanged.connect(self.set_model_style)
         self.controller.currentTraceChanged.connect(self.update_trace)
         self.controller.modelTrained.connect(self.update_trace)
-        # TODO ==> connect cboModelTypes and chkSharedVar
-        # TODO ==> make dict for all training arguments
 
     def setEnabled(self, b):
         for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar):
             w.setEnabled(b)
+        if self.trc.classLabel == "multimer":
+            self.cboModelTypes.setEnabled(False)
 
     def set_model_style(self, val):
         SS = """border: 1px solid #444444;"""
@@ -105,6 +115,7 @@ class TrainModelButton(QtWidgets.QWidget):
 
     def update_trace(self, trc):
         self.trc = trc
+        self.cboModelTypes.setEnabled(trc.classLabel != "multimer")
         self.update_text()
 
     def update_text(self):
