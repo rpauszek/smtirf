@@ -112,6 +112,10 @@ class ExperimentController(NavigationController):
     def detect_baseline(self):
         pass
 
+    def train_all_traces(self):
+        dlg = smtirf.gui.dialogs.TrainAllTracesDialog()
+        rsp = dlg.exec_()
+
     def set_experiment_bleed(self):
         pass
 

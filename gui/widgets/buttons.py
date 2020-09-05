@@ -3,11 +3,11 @@
 @author: Raymond F. Pauszek III, Ph.D. (2020)
 smtirf >> gui >> widgets >> buttons
 """
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QSizePolicy
 from PyQt5 import QtWidgets, QtCore, QtGui
 import numpy as np
 
-__all__ = ["ToggleSelectionAction", "TrainModelButton"]
+__all__ = ["ToggleSelectionAction", "TrainModelButton", "TrainAllModelButton"]
 
 class ToggleSelectionAction(QtWidgets.QAction):
 
@@ -95,6 +95,12 @@ class BaseTrainModelButton(QtWidgets.QWidget):
     def set_n_states(self):
         self.lblNStates.setText(f"{self.K}")
 
+    def set_model_style(self, val):
+        SS = """border: 1px solid #444444;"""
+        SS += f"background-color: {self._modelStatus[val][0]};"
+        SS += f"color: {self._modelStatus[val][1]};"
+        self.lblNStates.setStyleSheet(SS)
+
     def add_state(self):
         self.K += 1
         self.set_n_states()
@@ -138,12 +144,6 @@ class TrainModelButton(BaseTrainModelButton):
         if self.trc.classLabel == "multimer":
             self.cboModelTypes.setEnabled(False)
 
-    def set_model_style(self, val):
-        SS = """border: 1px solid #444444;"""
-        SS += f"background-color: {self._modelStatus[val][0]};"
-        SS += f"color: {self._modelStatus[val][1]};"
-        self.lblNStates.setStyleSheet(SS)
-
     def update_trace(self, trc):
         self.trc = trc
         self.check_current_model(trc)
@@ -172,3 +172,40 @@ class TrainModelButton(BaseTrainModelButton):
 
     def train_model(self):
         self.controller.train_trace()
+
+
+class TrainAllModelButton(BaseTrainModelButton):
+
+    def __init__(self, controller, *args, **kwargs):
+        super().__init__(controller, *args, **kwargs)
+        # self.controller.setup_training_thread(self)
+
+    def layout(self):
+        gbox = QtWidgets.QGridLayout()
+        grpModelParams = QtWidgets.QGroupBox("Model Parameters")
+        grpModelParams.setLayout(gbox)
+        row = 0
+
+        gbox.addWidget(self.cboModelTypes, row, 0)
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.setContentsMargins(0,0,0,0)
+        hbox.addWidget(self.cmdSubtractState)
+        hbox.addWidget(self.lblNStates)
+        hbox.addWidget(self.cmdAddState)
+        gbox.addLayout(hbox, row, 1)
+        row += 1
+
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addWidget(QtWidgets.QLabel("Repeats:"), stretch=1)
+        hbox.addWidget(self.spnRepeats)
+        gbox.addLayout(hbox, row, 0)
+        gbox.addWidget(self.chkSharedVar, row, 1)
+        row += 1
+
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.setContentsMargins(0,0,0,0)
+        vbox.addWidget(grpModelParams)
+        self.setLayout(vbox)
+
+    def train_model(self):
+        print("train clicked")

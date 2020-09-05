@@ -5,3 +5,4 @@ smtirf >> gui >> dialogs >> __init__
 """
 
 from .import_dialog import ImportExperimentDialog
+from .trainalltraces_dialog import TrainAllTracesDialog
