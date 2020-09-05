@@ -23,7 +23,9 @@ class ImportExperimentDialog(QtWidgets.QDialog):
     def layout(self):
         vbox = QtWidgets.QVBoxLayout()
 
-        self.path = widgets.base.PathButton()
+        fdArgs = {"caption":"Import PMA experiment",
+                  "filter":"Traces (*.traces)"}
+        self.path = widgets.base.PathButton(fdArgs=fdArgs)
         vbox.addWidget(self.path)
         vbox.addItem(QtWidgets.QSpacerItem(20, 20, QSizePolicy.Fixed, QSizePolicy.Fixed))
 
