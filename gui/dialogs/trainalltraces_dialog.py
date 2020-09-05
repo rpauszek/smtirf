@@ -9,8 +9,9 @@ from smtirf.gui import widgets
 
 class TrainAllTracesDialog(QtWidgets.QDialog):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, expt, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.expt = expt
         self.layout()
         self.connect()
         self.setWindowTitle("Train all selected traces")
@@ -18,6 +19,8 @@ class TrainAllTracesDialog(QtWidgets.QDialog):
     def layout(self):
         vbox = QtWidgets.QVBoxLayout()
         modelParamsWidget = widgets.TrainAllModelButton(self)
+        modelParamsWidget.cboModelTypes.setEnabled(self.expt.classLabel != "multimer")
+        modelParamsWidget.cmdTrain.setEnabled(self.expt.nSelected > 0)
         vbox.addWidget(modelParamsWidget)
 
         self.chkDeselectTraceOnError = QtWidgets.QCheckBox("Deselect trace if model training error occurs")
@@ -29,7 +32,7 @@ class TrainAllTracesDialog(QtWidgets.QDialog):
         vbox.addLayout(hbox)
 
         vbox.addItem(QtWidgets.QSpacerItem(10,30, QSizePolicy.Fixed, QSizePolicy.Fixed))
-        vbox.addWidget(TrainingProgressBar(self))
+        vbox.addWidget(TrainingProgressBar(self, self.expt.nSelected))
 
         self.setLayout(vbox)
 
@@ -51,8 +54,8 @@ class TrainingProgressBar(QtWidgets.QProgressBar):
                 }
          """
 
-    def __init__(self, controller, parent=None):
-        super().__init__(parent=parent, minimum=0, maximum=500, value=10)
+    def __init__(self, controller, maximum):
+        super().__init__(minimum=0, maximum=maximum, value=0)
         self.setFormat(r" %v/%m")
         self.setMinimumWidth(120)
         self.setStyleSheet(self.SS)
