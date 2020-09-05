@@ -24,7 +24,7 @@ class ToggleSelectionAction(QtWidgets.QAction):
         self.setIcon(QtGui.QIcon(f":/icons/{ico}.png"))
 
 
-class TrainModelButton(QtWidgets.QWidget):
+class BaseTrainModelButton(QtWidgets.QWidget):
     _modelStatus = {"none" : ("#eeeeee", "#000000"),
                     "ok" : ("#009ACD", "#ffffff"),
                     "error" : ("#CD2626", "#EEEE00"),
@@ -37,29 +37,15 @@ class TrainModelButton(QtWidgets.QWidget):
         self.controller = controller
         self.K = 2
         self.trc = None
+        self.init_widgets()
         self.layout()
         self.connect()
-        self.controller.setup_training_thread(self)
 
         self.set_n_states()
         self.set_model_style("none")
         self.check_model_type()
 
-    @property
-    def modelType(self):
-        return self._modelTypes[self.cboModelTypes.currentIndex()]
-
-    @property
-    def modelKwargs(self):
-        kwargs =  {"K" : self.K,
-                   "sharedVariance" : self.chkSharedVar.isChecked()}
-        if self.cboModelTypes.isEnabled():
-            kwargs["modelType"] = self.modelType
-        if self.spnRepeats.isEnabled():
-            kwargs["repeats"] = self.spnRepeats.value()
-        return kwargs
-
-    def layout(self):
+    def init_widgets(self):
         self.cboModelTypes = QtWidgets.QComboBox()
         for item in self._modelLabels:
             self.cboModelTypes.addItem(item)
@@ -77,6 +63,34 @@ class TrainModelButton(QtWidgets.QWidget):
         self.spnRepeats = QtWidgets.QSpinBox(minimum=1, maximum=500, value=5)
         self.chkSharedVar = QtWidgets.QCheckBox("Shared Variance")
 
+    def layout(self):
+        pass
+
+    def connect(self):
+        pass
+
+
+class TrainModelButton(BaseTrainModelButton):
+
+    def __init__(self, controller, *args, **kwargs):
+        super().__init__(controller, *args, **kwargs)
+        self.controller.setup_training_thread(self)
+
+    @property
+    def modelType(self):
+        return self._modelTypes[self.cboModelTypes.currentIndex()]
+
+    @property
+    def modelKwargs(self):
+        kwargs =  {"K" : self.K,
+                   "sharedVariance" : self.chkSharedVar.isChecked()}
+        if self.cboModelTypes.isEnabled():
+            kwargs["modelType"] = self.modelType
+        if self.spnRepeats.isEnabled():
+            kwargs["repeats"] = self.spnRepeats.value()
+        return kwargs
+
+    def layout(self):
         hbox = QtWidgets.QHBoxLayout()
         hbox.addWidget(self.cboModelTypes)
         hbox.addWidget(self.cmdSubtractState)
