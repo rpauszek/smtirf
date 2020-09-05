@@ -115,6 +115,7 @@ class ExperimentController(NavigationController):
     def train_all_traces(self):
         dlg = smtirf.gui.dialogs.TrainAllTracesDialog(self.expt)
         rsp = dlg.exec_()
+        self.modelTrained.emit(self.trc)
 
     def set_experiment_bleed(self):
         pass

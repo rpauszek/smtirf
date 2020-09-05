@@ -10,7 +10,7 @@ class ModelTrainingThread(QtCore.QThread):
     trainingStarted = QtCore.pyqtSignal()
     trainingFinished = QtCore.pyqtSignal()
 
-    def __init__(self, controller, parent):
+    def __init__(self, controller, parent): # TODO => should probably rename parent
         super().__init__()
         self.controller = controller
         self._parent = parent
@@ -26,4 +26,34 @@ class ModelTrainingThread(QtCore.QThread):
             trc.train(**kwargs)
         except ZeroDivisionError:
             pass
+        self.trainingFinished.emit()
+
+
+class TrainAllModelsThread(QtCore.QThread):
+
+    trainingStarted = QtCore.pyqtSignal()
+    traceTrained = QtCore.pyqtSignal()
+    trainingFinished = QtCore.pyqtSignal()
+
+    def __init__(self, controller, paramWidget=None):
+        super().__init__()
+        self.controller = controller
+        self._widget = paramWidget
+
+    def set_param_widget(self, w):
+        self._widget = w
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        self.trainingStarted.emit()
+        kwargs = self._widget.modelKwargs
+        for trc in self.controller.expt:
+            if trc.isSelected:
+                try:
+                    trc.train(**kwargs)
+                except ZeroDivisionError:
+                    pass
+                self.traceTrained.emit()
         self.trainingFinished.emit()

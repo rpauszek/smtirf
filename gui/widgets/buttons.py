@@ -139,8 +139,10 @@ class TrainModelButton(BaseTrainModelButton):
         self.controller.modelTrained.connect(self.update_trace)
 
     def setEnabled(self, b):
-        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar):
+        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar, self.spnRepeats):
             w.setEnabled(b)
+        if b:
+            self.check_model_type()
         if self.trc.classLabel == "multimer":
             self.cboModelTypes.setEnabled(False)
 
@@ -178,7 +180,6 @@ class TrainAllModelButton(BaseTrainModelButton):
 
     def __init__(self, controller, *args, **kwargs):
         super().__init__(controller, *args, **kwargs)
-        # self.controller.setup_training_thread(self)
 
     def layout(self):
         gbox = QtWidgets.QGridLayout()
@@ -207,5 +208,18 @@ class TrainAllModelButton(BaseTrainModelButton):
         vbox.addWidget(grpModelParams)
         self.setLayout(vbox)
 
+    def connect(self):
+        super().connect()
+        self.controller.trainingStarted.connect(lambda : self.setEnabled(False))
+        self.controller.trainingFinished.connect(lambda : self.setEnabled(True))
+
+    def setEnabled(self, b):
+        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar, self.spnRepeats):
+            w.setEnabled(b)
+        if b:
+            self.check_model_type()
+        if self.controller.expt.classLabel == "multimer":
+            self.cboModelTypes.setEnabled(False)
+
     def train_model(self):
-        print("train clicked")
+        self.controller.thread.start()
