@@ -68,6 +68,7 @@ class BaseTrainModelButton(QtWidgets.QWidget):
         pass
 
     def connect(self):
+        self.cboModelTypes.currentIndexChanged.connect(self.check_model_type)
         self.cmdAddState.clicked.connect(self.add_state)
         self.cmdSubtractState.clicked.connect(self.subtract_state)
         self.cmdTrain.clicked.connect(self.train_model)
@@ -133,7 +134,6 @@ class TrainModelButton(BaseTrainModelButton):
 
     def connect(self):
         super().connect()
-        self.cboModelTypes.currentIndexChanged.connect(self.check_model_type)
         self.controller.trainingMessageChanged.connect(self.set_model_style)
         self.controller.currentTraceChanged.connect(self.update_trace)
         self.controller.modelTrained.connect(self.update_trace)
