@@ -24,6 +24,7 @@ class ToggleSelectionAction(QtWidgets.QAction):
         self.setIcon(QtGui.QIcon(f":/icons/{ico}.png"))
 
 
+# ==============================================================================
 class BaseTrainModelButton(QtWidgets.QWidget):
     _modelStatus = {"none" : ("#eeeeee", "#000000"),
                     "ok" : ("#009ACD", "#ffffff"),
@@ -67,14 +68,12 @@ class BaseTrainModelButton(QtWidgets.QWidget):
         pass
 
     def connect(self):
+        self.cmdAddState.clicked.connect(self.add_state)
+        self.cmdSubtractState.clicked.connect(self.subtract_state)
+        self.cmdTrain.clicked.connect(self.train_model)
+
+    def train_model(self):
         pass
-
-
-class TrainModelButton(BaseTrainModelButton):
-
-    def __init__(self, controller, *args, **kwargs):
-        super().__init__(controller, *args, **kwargs)
-        self.controller.setup_training_thread(self)
 
     @property
     def modelType(self):
@@ -90,41 +89,8 @@ class TrainModelButton(BaseTrainModelButton):
             kwargs["repeats"] = self.spnRepeats.value()
         return kwargs
 
-    def layout(self):
-        hbox = QtWidgets.QHBoxLayout()
-        hbox.addWidget(self.cboModelTypes)
-        hbox.addWidget(self.cmdSubtractState)
-        hbox.addWidget(self.lblNStates)
-        hbox.addWidget(self.cmdAddState)
-        hbox.addWidget(self.cmdTrain)
-        hbox.addWidget(QtWidgets.QLabel("Repeats: "))
-        hbox.addWidget(self.spnRepeats)
-        hbox.addWidget(self.chkSharedVar)
-        self.setLayout(hbox)
-
-    def connect(self):
-        self.cboModelTypes.currentIndexChanged.connect(self.check_model_type)
-        self.cmdAddState.clicked.connect(self.add_state)
-        self.cmdSubtractState.clicked.connect(self.subtract_state)
-        self.cmdTrain.clicked.connect(self.train_model)
-        self.controller.trainingMessageChanged.connect(self.set_model_style)
-        self.controller.currentTraceChanged.connect(self.update_trace)
-        self.controller.modelTrained.connect(self.update_trace)
-
-    def setEnabled(self, b):
-        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar):
-            w.setEnabled(b)
-        if self.trc.classLabel == "multimer":
-            self.cboModelTypes.setEnabled(False)
-
     def check_model_type(self):
         self.spnRepeats.setEnabled(self.modelType == "vb")
-
-    def set_model_style(self, val):
-        SS = """border: 1px solid #444444;"""
-        SS += f"background-color: {self._modelStatus[val][0]};"
-        SS += f"color: {self._modelStatus[val][1]};"
-        self.lblNStates.setStyleSheet(SS)
 
     def set_n_states(self):
         self.lblNStates.setText(f"{self.K}")
@@ -139,6 +105,44 @@ class TrainModelButton(BaseTrainModelButton):
             self.K -= 1
             self.set_n_states()
             self.set_model_style("none")
+
+
+class TrainModelButton(BaseTrainModelButton):
+
+    def __init__(self, controller, *args, **kwargs):
+        super().__init__(controller, *args, **kwargs)
+        self.controller.setup_training_thread(self)
+
+    def layout(self):
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addWidget(self.cboModelTypes)
+        hbox.addWidget(self.cmdSubtractState)
+        hbox.addWidget(self.lblNStates)
+        hbox.addWidget(self.cmdAddState)
+        hbox.addWidget(self.cmdTrain)
+        hbox.addWidget(QtWidgets.QLabel("Repeats: "))
+        hbox.addWidget(self.spnRepeats)
+        hbox.addWidget(self.chkSharedVar)
+        self.setLayout(hbox)
+
+    def connect(self):
+        super().connect()
+        self.cboModelTypes.currentIndexChanged.connect(self.check_model_type)
+        self.controller.trainingMessageChanged.connect(self.set_model_style)
+        self.controller.currentTraceChanged.connect(self.update_trace)
+        self.controller.modelTrained.connect(self.update_trace)
+
+    def setEnabled(self, b):
+        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar):
+            w.setEnabled(b)
+        if self.trc.classLabel == "multimer":
+            self.cboModelTypes.setEnabled(False)
+
+    def set_model_style(self, val):
+        SS = """border: 1px solid #444444;"""
+        SS += f"background-color: {self._modelStatus[val][0]};"
+        SS += f"color: {self._modelStatus[val][1]};"
+        self.lblNStates.setStyleSheet(SS)
 
     def update_trace(self, trc):
         self.trc = trc
