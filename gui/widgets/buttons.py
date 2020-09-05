@@ -43,15 +43,21 @@ class TrainModelButton(QtWidgets.QWidget):
 
         self.set_n_states()
         self.set_model_style("none")
+        self.check_model_type()
+
+    @property
+    def modelType(self):
+        return self._modelTypes[self.cboModelTypes.currentIndex()]
 
     @property
     def modelKwargs(self):
         kwargs =  {"K" : self.K,
                    "sharedVariance" : self.chkSharedVar.isChecked()}
         if self.cboModelTypes.isEnabled():
-            kwargs["modelType"] = self._modelTypes[self.cboModelTypes.currentIndex()]
+            kwargs["modelType"] = self.modelType
+        if self.spnRepeats.isEnabled():
+            kwargs["repeats"] = self.spnRepeats.value()
         return kwargs
-        # TODO ==> repeats kwarg for vb
 
     def layout(self):
         self.cboModelTypes = QtWidgets.QComboBox()
@@ -62,12 +68,13 @@ class TrainModelButton(QtWidgets.QWidget):
         self.cmdAddState = QtWidgets.QPushButton("\u002b")
         for btn in (self.cmdSubtractState, self.cmdAddState):
             btn.setMaximumWidth(25)
-
         self.lblNStates = QtWidgets.QLabel("")
         self.lblNStates.setMinimumWidth(30)
         self.lblNStates.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
 
         self.cmdTrain = QtWidgets.QPushButton("Train")
+
+        self.spnRepeats = QtWidgets.QSpinBox(minimum=1, maximum=500, value=5)
         self.chkSharedVar = QtWidgets.QCheckBox("Shared Variance")
 
         hbox = QtWidgets.QHBoxLayout()
@@ -76,10 +83,13 @@ class TrainModelButton(QtWidgets.QWidget):
         hbox.addWidget(self.lblNStates)
         hbox.addWidget(self.cmdAddState)
         hbox.addWidget(self.cmdTrain)
+        hbox.addWidget(QtWidgets.QLabel("Repeats: "))
+        hbox.addWidget(self.spnRepeats)
         hbox.addWidget(self.chkSharedVar)
         self.setLayout(hbox)
 
     def connect(self):
+        self.cboModelTypes.currentIndexChanged.connect(self.check_model_type)
         self.cmdAddState.clicked.connect(self.add_state)
         self.cmdSubtractState.clicked.connect(self.subtract_state)
         self.cmdTrain.clicked.connect(self.train_model)
@@ -92,6 +102,9 @@ class TrainModelButton(QtWidgets.QWidget):
             w.setEnabled(b)
         if self.trc.classLabel == "multimer":
             self.cboModelTypes.setEnabled(False)
+
+    def check_model_type(self):
+        self.spnRepeats.setEnabled(self.modelType == "vb")
 
     def set_model_style(self, val):
         SS = """border: 1px solid #444444;"""
@@ -115,13 +128,21 @@ class TrainModelButton(QtWidgets.QWidget):
 
     def update_trace(self, trc):
         self.trc = trc
+        self.check_current_model(trc)
         self.cboModelTypes.setEnabled(trc.classLabel != "multimer")
         self.update_text()
+
+    def check_current_model(self, trc):
+        try:
+            i = self._modelTypes.index(trc.model.modelType)
+            self.cboModelTypes.setCurrentIndex(i)
+            self.chkSharedVar.setChecked(trc.model.sharedVariance)
+        except (AttributeError, ValueError):
+            pass
 
     def update_text(self):
         if self.trc.model is None:
             val = "none"
-            # self.K = 2
         elif np.any(np.isnan(self.trc.model.mu)):
             val = "error"
             self.K = self.trc.model.K
