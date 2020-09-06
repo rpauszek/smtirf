@@ -195,4 +195,4 @@ class ExperimentController(NavigationController):
         # check that filename isn't null, then load and signal
         if filename:
             filename = pathlib.Path(filename)
-            print(filename)
+            self.trc.export(filename)

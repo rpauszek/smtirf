@@ -238,6 +238,14 @@ class BaseTrace(ABC):
     def EP(self):
         return self.model.get_emission_path(self.SP)
 
+    @abstractmethod
+    def get_export_data(self):
+        ...
+
+    def export(self, savename):
+        data, fmt, header = self.get_export_data()
+        np.savetxt(savename, data, fmt=fmt, delimiter='\t', header=header)
+
 # ==============================================================================
 # Experiment Trace Subclasses
 # ==============================================================================
@@ -265,7 +273,8 @@ class SingleColorTrace(BaseTrace):
 class PifeTrace(SingleColorTrace):
     classLabel = "pife"
 
-    pass
+    def get_export_data(self):
+        pass
 
 
 class MultimerTrace(SingleColorTrace):
@@ -275,6 +284,9 @@ class MultimerTrace(SingleColorTrace):
         theta = smtirf.HiddenMarkovModel.train_new("multimer", self.X, K, sharedVariance, **kwargs)
         self.model = theta
         self.label_statepath()
+
+    def get_export_data(self):
+        pass
 
 
 class FretTrace(BaseTrace):
@@ -288,6 +300,21 @@ class FretTrace(BaseTrace):
         super()._correct_signals()
         with np.errstate(divide='ignore', invalid='ignore'):
             self.E = self.A / self.I
+
+    def get_export_data(self):
+        E = np.full(self.E.shape, np.nan)
+        S = np.full(self.E.shape, -1)
+        F = E.copy()
+        E[self.limits] = self.X
+        try:
+            S[self.limits] = self.SP
+            F[self.limits] = self.EP
+        except AttributeError:
+            pass
+        data = np.vstack((self.t, self.D, self.A, E, S, F)).T
+        fmt = ('%.3f', '%.3f', '%.3f', '%.5f', '%3d', '%.5f')
+        header = "Time (sec)\tDonor\tAcceptor\tFRET\tState\tFit"
+        return data, fmt, header
 
 
 class PiecewiseTrace(FretTrace):
