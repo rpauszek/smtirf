@@ -135,7 +135,9 @@ class ExperimentController(NavigationController):
             self.filenameChanged.emit(self.filename)
 
     def detect_baseline(self):
-        pass
+        dlg = smtirf.gui.dialogs.AutoBaselineDialog()
+        rsp = dlg.exec_()
+        print("*", rsp, "*")
 
     def train_all_traces(self):
         dlg = smtirf.gui.dialogs.TrainAllTracesDialog(self.expt)
