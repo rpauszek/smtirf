@@ -7,7 +7,9 @@ from PyQt5.QtWidgets import QFileDialog, QSizePolicy
 from PyQt5 import QtWidgets, QtCore, QtGui
 import numpy as np
 
-__all__ = ["ToggleSelectionAction", "TrainModelButton", "TrainAllModelButton"]
+__all__ = ["ToggleSelectionAction",
+           "ExportTraceButton",
+           "TrainModelButton", "TrainAllModelButton"]
 
 class ToggleSelectionAction(QtWidgets.QAction):
 
@@ -22,6 +24,15 @@ class ToggleSelectionAction(QtWidgets.QAction):
     def set_icon(self, trc):
         ico = "radio_checked" if trc.isSelected else "radio_unchecked"
         self.setIcon(QtGui.QIcon(f":/icons/{ico}.png"))
+
+# ==============================================================================
+class ExportTraceButton(QtWidgets.QPushButton):
+
+    def __init__(self, controller):
+        self.controller = controller
+        super().__init__("Export Trace ")
+        self.setIcon(QtGui.QIcon(f":/icons/export.png"))
+        self.clicked.connect(controller.export_trace)
 
 
 # ==============================================================================

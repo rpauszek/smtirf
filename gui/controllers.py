@@ -184,3 +184,15 @@ class ExperimentController(NavigationController):
 
     def train_trace(self):
         self.trainingThread.start()
+
+    # ==========================================================================
+    # export
+    # ==============================================================================
+    def export_trace(self):
+        fdArgs = {"caption":"Export trace as...",
+                  "filter":"Data Files (*.dat)"}
+        filename, filetype = QFileDialog.getSaveFileName(**fdArgs)
+        # check that filename isn't null, then load and signal
+        if filename:
+            filename = pathlib.Path(filename)
+            print(filename)
