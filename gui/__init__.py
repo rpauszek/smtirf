@@ -42,9 +42,10 @@ class SMTirfMainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, title="TIRF Analysis", **kwargs):
         super().__init__(windowTitle=title, **kwargs)
-        self.resize(1000, 600)
+        self.controller.filenameChanged.connect(self.set_title)
         QtWidgets.QShortcut("Ctrl+Q", self, activated=self.close)
         self.setWindowIcon(QtGui.QIcon(":/icons/dna.png"))
+        self.resize(1000, 600)
 
 
 class SMTirfPanel(QtWidgets.QWidget):
