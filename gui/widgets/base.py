@@ -6,6 +6,7 @@ smtirf >> gui >> widgets >> composite
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSizePolicy, QFileDialog
 import pathlib
+import numpy as np
 
 # ==============================================================================
 class SpinSlider(QtWidgets.QWidget):
@@ -159,3 +160,24 @@ class PathButton(QtWidgets.QWidget):
             return pathlib.Path(self._filename).absolute()
         else:
             return None
+
+
+# ==============================================================================
+class ScientificLineEdit(QtWidgets.QLineEdit):
+
+    def __init__(self, value=0, bottom=-np.inf, top=np.inf, decimals=10, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        validator = QtGui.QDoubleValidator(bottom, top, decimals)
+        validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
+        self.setValidator(validator)
+
+        self.setText(str(value))
+        self._format_text()
+        self.editingFinished.connect(self._format_text)
+
+    def _format_text(self):
+        value = float(self.text())
+        self.setText(f"{value:0.1e}")
+
+    def value(self):
+        return float(self.text())
