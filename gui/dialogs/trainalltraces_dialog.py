@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> gui >> dialogs >> import_dialog
+smtirf >> gui >> dialogs >> trainalltraces_dialog
 """
 import datetime
 from PyQt5 import QtWidgets, QtCore, QtGui

@@ -79,16 +79,25 @@ class ExperimentController(NavigationController):
         dlg = smtirf.gui.dialogs.ImportExperimentDialog()
         rsp = dlg.exec_()
         if rsp:
-            args = dlg.get_args()
-            if args["filename"]:
-                self.expt = smtirf.Experiment.from_pma(**args)
+            kwargs = dlg.get_kwargs()
+            if kwargs["filename"]:
+                self.expt = smtirf.Experiment.from_pma(**kwargs)
                 self.filename = None
                 self.filenameChanged.emit(self.filename)
                 self.experimentLoaded.emit(self.expt)
                 self.update_index(self.index)
 
     def merge_experiments(self):
-        pass
+        dlg = smtirf.gui.dialogs.MergeExperimentsDialog()
+        rsp = dlg.exec_()
+        if rsp:
+            kwargs = dlg.get_kwargs()
+            if kwargs["filenames"]:
+                kwargs = dlg.get_kwargs()
+                self.expt = smtirf.Experiment.merge(**kwargs)
+                self.filename = None
+                self.filenameChanged.emit(self.filename)
+                self.experimentLoaded.emit(self.expt)
 
     def open_experiment(self):
         fdArgs = {"caption":"Load experiment",

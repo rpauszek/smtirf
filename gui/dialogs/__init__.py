@@ -24,3 +24,4 @@ class SaveExperimentMessageBox(QMessageBox):
 
 from .import_dialog import ImportExperimentDialog
 from .trainalltraces_dialog import TrainAllTracesDialog
+from .merge_experiments_dialog import MergeExperimentsDialog

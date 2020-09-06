@@ -67,11 +67,11 @@ class ImportExperimentDialog(QtWidgets.QDialog):
     def update_experiment_type(self, type_):
         self.radChannel.setEnabled(type_ in self._isChannelType)
 
-    def get_args(self):
-        args = {"filename": self.path.path(),
-                "experimentType": self.experimentTypes.value(),
-                "bleed": self.txtBleed.value(),
-                "gamma": self.txtGamma.value()}
+    def get_kwargs(self):
+        kwargs = {"filename": self.path.path(),
+                 "experimentType": self.experimentTypes.value(),
+                 "bleed": self.txtBleed.value(),
+                 "gamma": self.txtGamma.value()}
         if self.radChannel.isEnabled():
-            args["channel"] = self.radChannel.value()
-        return args
+            kwargs["channel"] = self.radChannel.value()
+        return kwargs
