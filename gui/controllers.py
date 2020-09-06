@@ -5,7 +5,7 @@ smtirf >> gui >> controllers
 """
 import pathlib
 from PyQt5 import QtCore
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QMessageBox
 import smtirf
 
 class NavigationController(QtCore.QObject):
@@ -104,10 +104,26 @@ class ExperimentController(NavigationController):
             self.update_index(self.index)
 
     def save_experiment(self):
-        pass
+        if self.filename is not None:
+            msg = smtirf.gui.dialogs.SaveExperimentMessageBox()
+            msg.exec_()
+            val = msg.buttonRole(msg.clickedButton())
+
+            if val == QMessageBox.YesRole:
+                self.expt.save(self.filename)
+            elif val == QMessageBox.NoRole:
+                self.save_experiment_as()
+        else:
+            self.save_experiment_as()
 
     def save_experiment_as(self):
-        pass
+        fdArgs = {"caption":"Save experiment as...",
+                  "filter":"smTIRF Experiment (*.smtrc)"}
+        filename, filetype = QFileDialog.getSaveFileName(**fdArgs)
+        if filename:
+            self.filename = pathlib.Path(filename)
+            self.expt.save(self.filename)
+            self.filenameChanged.emit(self.filename)
 
     def detect_baseline(self):
         pass
