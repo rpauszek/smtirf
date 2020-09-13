@@ -7,7 +7,9 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QDialogButtonBox, QSizePolicy
 from smtirf.gui import widgets, plots, threads
 from smtirf.gui.controllers import AutoBaselineController
+import numpy as np
 
+# TODO ==> clean up threading!! maybe new thread each time button is clicked?
 
 class AutoBaselineDialog(QtWidgets.QDialog):
 
@@ -29,7 +31,7 @@ class AutoBaselineDialog(QtWidgets.QDialog):
         self.setLayout(gbox)
 
         gbox.addWidget(BaselineModelGroupBox(self.controller), 0, 0)
-        gbox.addWidget(BaselineGmmCanvas(self), 0, 1)
+        gbox.addWidget(BaselineGmmCanvas(self.controller), 0, 1)
         gbox.addWidget(BaselineHmmCanvas(self), 1, 0, 1, 2)
         gbox.addWidget(widgets.NavBar(self.controller), 2, 0, 1, 2)
 
@@ -98,7 +100,42 @@ class BaselineGmmCanvas(plots.QtCanvas):
 
     def __init__(self, controller):
         super().__init__(controller)
+        self.controller = controller
+        self.sampleSize = None
         self.ax = self.fig.add_subplot(1,1,1)
+
+        self.controller.gmmTrained.connect(self.update_plots)
+        self.controller.gmmTrainingThread.sampleSizeSet.connect(self.set_sample_size)
+
+    def set_sample_size(self, val):
+        self.nPoints = val
+
+    def update_plots(self):
+        gmmSample = self.controller.model.draw_gmm_samples(nDraws=5, nPoints=self.nPoints)
+        self.ax.cla()
+        xlim = [0, 0]
+        ymin = 0
+        for sample in gmmSample:
+            kt, edges = np.histogram(sample, bins=100, density=True)
+            binWidth = np.diff(edges[:2])
+            x = edges[:-1] + binWidth/2
+
+            xlim[0] = np.min((xlim[0], x[0]))
+            xlim[1] = np.max((xlim[1], x[-1]))
+            ymin = np.max((ymin, kt[np.where(kt!=0)].min()))
+
+            self.ax.plot(x, kt, '#cccccc')
+
+        x = np.linspace(*xlim, num=300)
+        gs = self.controller.model.gmm_p_X(x)
+        G = gs.sum(axis=0)
+        for g in gs:
+            self.ax.plot(x, g, 'r')
+        self.ax.plot(x, G, "#555555")
+
+        self.ax.set_yscale('log')
+        self.ax.set_ylim(ymin, G.max()*1.1)
+        self.draw()
 
 
 class BaselineHmmCanvas(plots.QtCanvas):

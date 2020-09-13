@@ -45,6 +45,9 @@ class AutoBaselineModel():
         self.mu = mu[ix]
         self.var = var[ix]
 
+    def draw_gmm_samples(self, nDraws=5, nPoints=1e4):
+        return [np.random.choice(self.X.ravel(), size=int(nPoints), replace=False) for n in range(nDraws)]
+
     def gmm_p_X(self, X):
         X = row(X)-col(self.mu)
         tau = 1/self.var

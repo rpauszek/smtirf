@@ -43,7 +43,7 @@ class AutoBaselineController(NavigationController):
 
     def train_gmm(self):
         self.gmmTrainingThread.start()
-        self.gmmTrained.emit()
+        # self.gmmTrained.emit()
 
     # def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,
     #                     maxIter=50, tol=1e-3, printWarnings=False,
