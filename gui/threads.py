@@ -57,3 +57,27 @@ class TrainAllModelsThread(QtCore.QThread):
                     pass
                 self.traceTrained.emit()
         self.trainingFinished.emit()
+
+
+class AutoBaselineModelGmmTrainingThread(QtCore.QThread):
+
+    trainingStarted = QtCore.pyqtSignal()
+    trainingFinished = QtCore.pyqtSignal()
+
+    def __init__(self, controller, parent): # TODO => should probably rename parent
+        super().__init__()
+        self.controller = controller
+        self._parent = parent
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        self.trainingStarted.emit()
+        kwargs = {"nComponents": self._parent.spnGmmComponents.value(),
+                  "nPoints": self._parent.txtGmmNPoints.value(),
+                  # "gmmMaxIter": self.spnGmmMaxIter.value(),
+                  # "gmmTol": self.txtGmmTol.value(),
+                 }
+        self.controller.model.train_gmm(**kwargs)
+        self.trainingFinished.emit()

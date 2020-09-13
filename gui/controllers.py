@@ -31,6 +31,7 @@ class AutoBaselineController(NavigationController):
         super().__init__()
         self.expt = expt
         self.model = smtirf.util.AutoBaselineModel(expt)
+        self.gmmTrainingThread = None
         self.trc = None
         self.experimentLoaded.emit(self.expt)
 
@@ -40,8 +41,8 @@ class AutoBaselineController(NavigationController):
         self.trc = self.expt[self.index]
         self.currentTraceChanged.emit(self.trc)
 
-    def train_gmm(self, **kwargs):
-        self.model.train_gmm(**kwargs)
+    def train_gmm(self):
+        self.gmmTrainingThread.start()
         self.gmmTrained.emit()
 
     # def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,

@@ -150,12 +150,10 @@ class PathButton(QtWidgets.QWidget):
             self._filename, filetype = QFileDialog.getOpenFileName(**self._fdArgs)
         except TypeError:
             self._filename, filetype = QFileDialog.getOpenFileName()
-        # self.textline.setText(filename)
         fm = QtGui.QFontMetrics(self.textline.font())
         self.textline.setText(fm.elidedText(self._filename, QtCore.Qt.ElideLeft, self.textline.width()))
 
     def path(self):
-        # text = self.textline.text()
         if self._filename:
             return pathlib.Path(self._filename).absolute()
         else:
@@ -188,7 +186,6 @@ class IntegerLineEdit(QtWidgets.QLineEdit):
     def __init__(self, value=0, minimum=0, maximum=1e9, *args, **kwargs):
         super().__init__(*args, **kwargs)
         validator = QtGui.QIntValidator(minimum, maximum)
-        # validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
         self.setValidator(validator)
 
         self.setText(str(int(value)))
@@ -196,7 +193,7 @@ class IntegerLineEdit(QtWidgets.QLineEdit):
         self.editingFinished.connect(self._format_text)
 
     def _format_text(self):
-        value = self.value() #int(self.text())
+        value = self.value()
         if value > 1000:
             self.setText(f"{value:0.1e}")
         else:

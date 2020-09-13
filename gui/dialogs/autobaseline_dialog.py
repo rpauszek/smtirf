@@ -5,7 +5,7 @@ smtirf >> gui >> dialogs >> autobaseline_dialog
 """
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QDialogButtonBox, QSizePolicy
-from smtirf.gui import widgets, plots
+from smtirf.gui import widgets, plots, threads
 from smtirf.gui.controllers import AutoBaselineController
 
 
@@ -39,7 +39,8 @@ class AutoBaselineDialog(QtWidgets.QDialog):
         gbox.addWidget(self.buttonBox, 3, 0, 1, 2)
 
     def connect(self):
-        pass
+        self.controller.gmmTrainingThread.trainingStarted.connect(lambda: self.buttonBox.setEnabled(False))
+        self.controller.gmmTrained.connect(lambda: self.buttonBox.setEnabled(True))
 
 
 class BaselineModelGroupBox(QtWidgets.QGroupBox):
@@ -83,17 +84,14 @@ class BaselineModelGroupBox(QtWidgets.QGroupBox):
         gbox.addLayout(hbox, row, 0, 1, 2)
 
     def connect(self):
-        self.cmdTrainGmm.clicked.connect(self.train_gmm)
+        self.setup_training_thread()
+        self.cmdTrainGmm.clicked.connect(self.controller.train_gmm)
+        self.controller.gmmTrainingThread.trainingStarted.connect(lambda: self.cmdTrainGmm.setEnabled(False))
         self.controller.gmmTrained.connect(lambda: self.cmdTrainGmm.setEnabled(True))
 
-    def train_gmm(self):
-        kwargs = {"nComponents": self.spnGmmComponents.value(),
-                  "nPoints": self.txtGmmNPoints.value(),
-                  # "gmmMaxIter": self.spnGmmMaxIter.value(),
-                  # "gmmTol": self.txtGmmTol.value(),
-                 }
-        self.cmdTrainGmm.setEnabled(False)
-        self.controller.train_gmm(**kwargs)
+    def setup_training_thread(self):
+        self.controller.gmmTrainingThread = threads.AutoBaselineModelGmmTrainingThread(self.controller, self)
+        self.controller.gmmTrainingThread.trainingFinished.connect(self.controller.gmmTrained.emit)
 
 
 class BaselineGmmCanvas(plots.QtCanvas):
