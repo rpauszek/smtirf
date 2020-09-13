@@ -165,9 +165,9 @@ class PathButton(QtWidgets.QWidget):
 # ==============================================================================
 class ScientificLineEdit(QtWidgets.QLineEdit):
 
-    def __init__(self, value=0, bottom=-np.inf, top=np.inf, decimals=10, *args, **kwargs):
+    def __init__(self, value=0, minimum=-np.inf, maximum=np.inf, decimals=10, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        validator = QtGui.QDoubleValidator(bottom, top, decimals)
+        validator = QtGui.QDoubleValidator(minimum, maximum, decimals)
         validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
         self.setValidator(validator)
 
@@ -181,3 +181,26 @@ class ScientificLineEdit(QtWidgets.QLineEdit):
 
     def value(self):
         return float(self.text())
+
+
+class IntegerLineEdit(QtWidgets.QLineEdit):
+
+    def __init__(self, value=0, minimum=0, maximum=1e9, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        validator = QtGui.QIntValidator(minimum, maximum)
+        # validator.setNotation(QtGui.QDoubleValidator.ScientificNotation)
+        self.setValidator(validator)
+
+        self.setText(str(int(value)))
+        self._format_text()
+        self.editingFinished.connect(self._format_text)
+
+    def _format_text(self):
+        value = int(self.text())
+        if value > 1000:
+            self.setText(f"{value:0.1e}")
+        else:
+            self.setText(f"{value}")
+
+    def value(self):
+        return int(self.text())

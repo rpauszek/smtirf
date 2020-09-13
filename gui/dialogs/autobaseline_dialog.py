@@ -6,14 +6,16 @@ smtirf >> gui >> dialogs >> autobaseline_dialog
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QFileDialog, QDialogButtonBox, QSizePolicy
 from smtirf.gui import widgets, plots
+from smtirf.gui.controllers import AutoBaselineController
 
 
 class AutoBaselineDialog(QtWidgets.QDialog):
 
     filesUpdated = QtCore.pyqtSignal()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, expt, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.controller = AutoBaselineController(expt)
         self.layout()
         self.connect()
 
@@ -29,11 +31,12 @@ class AutoBaselineDialog(QtWidgets.QDialog):
         gbox.addWidget(BaselineModelGroupBox(self), 0, 0)
         gbox.addWidget(BaselineGmmCanvas(self), 0, 1)
         gbox.addWidget(BaselineHmmCanvas(self), 1, 0, 1, 2)
+        gbox.addWidget(widgets.NavBar(self.controller), 2, 0, 1, 2)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
-        gbox.addWidget(self.buttonBox, 2, 0, 1, 2)
+        gbox.addWidget(self.buttonBox, 3, 0, 1, 2)
 
     def connect(self):
         pass
@@ -46,12 +49,12 @@ class BaselineModelGroupBox(QtWidgets.QGroupBox):
         self.layout()
 
     def layout(self):
-        self.spnGmmComponents = QtWidgets.QSpinBox(minimum=2, maximum=50, value=10)
-        self.txtGmmNPoints = widgets.base.ScientificLineEdit(1e4)
-        self.spnGmmMaxIter = QtWidgets.QSpinBox(minimum=10, maximum=1e4, value=250)
-        self.txtGmmTol = widgets.base.ScientificLineEdit(1e-3)
-        self.spnHmmMaxIter = QtWidgets.QSpinBox(minimum=10, maximum=1e4, value=250)
-        self.txtHmmTol = widgets.base.ScientificLineEdit(1e-3)
+        self.spnGmmComponents = widgets.base.IntegerLineEdit(10, minimum=2, maximum=50)
+        self.txtGmmNPoints = widgets.base.IntegerLineEdit(1e4, minimum=100, maximum=1e5)
+        self.spnGmmMaxIter = widgets.base.IntegerLineEdit(250, minimum=10, maximum=1e4)
+        self.txtGmmTol = widgets.base.ScientificLineEdit(1e-3, minimum=0, maximum=10)
+        self.spnHmmMaxIter = widgets.base.IntegerLineEdit(250, minimum=10, maximum=1e4)
+        self.txtHmmTol = widgets.base.ScientificLineEdit(1e-3, minimum=0, maximum=10)
 
         gbox = QtWidgets.QGridLayout()
         gbox.setColumnStretch(0, 1)

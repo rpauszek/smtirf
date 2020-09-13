@@ -18,6 +18,25 @@ class NavigationController(QtCore.QObject):
         self.index = value
 
 
+class AutoBaselineController(NavigationController):
+
+    currentTraceChanged = QtCore.pyqtSignal(object)
+    experimentLoaded = QtCore.pyqtSignal(object)
+    traceEdited = QtCore.pyqtSignal(object)
+
+    def __init__(self, expt):
+        super().__init__()
+        self.expt = expt
+        self.trc = None
+        self.experimentLoaded.emit(self.expt)
+
+    def update_index(self, value):
+        """ broadcast current trace """
+        super().update_index(value)
+        self.trc = self.expt[self.index]
+        self.currentTraceChanged.emit(self.trc)
+
+
 class ExperimentController(NavigationController):
     # navigation
     currentTraceChanged = QtCore.pyqtSignal(object)
@@ -135,7 +154,7 @@ class ExperimentController(NavigationController):
             self.filenameChanged.emit(self.filename)
 
     def detect_baseline(self):
-        dlg = smtirf.gui.dialogs.AutoBaselineDialog()
+        dlg = smtirf.gui.dialogs.AutoBaselineDialog(self.expt)
         rsp = dlg.exec_()
         print("*", rsp, "*")
 
