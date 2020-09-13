@@ -18,43 +18,6 @@ class NavigationController(QtCore.QObject):
         self.index = value
 
 
-class AutoBaselineController(NavigationController):
-
-    currentTraceChanged = QtCore.pyqtSignal(object)
-    experimentLoaded = QtCore.pyqtSignal(object)
-    traceEdited = QtCore.pyqtSignal(object)
-
-    gmmTrained = QtCore.pyqtSignal()
-    hmmTrained = QtCore.pyqtSignal()
-
-    def __init__(self, expt):
-        super().__init__()
-        self.expt = expt
-        self.model = smtirf.util.AutoBaselineModel(expt)
-        self.gmmTrainingThread = None
-        self.trc = None
-        self.experimentLoaded.emit(self.expt)
-
-    def update_index(self, value):
-        """ broadcast current trace """
-        super().update_index(value)
-        self.trc = self.expt[self.index]
-        self.currentTraceChanged.emit(self.trc)
-
-    def train_gmm(self):
-        self.gmmTrainingThread.start()
-        # self.gmmTrained.emit()
-
-    # def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,
-    #                     maxIter=50, tol=1e-3, printWarnings=False,
-    #                     where="first", correctOffsets=True):
-    #     M = smtirf.util.AutoBaselineModel(self, baselineCutoff=baselineCutoff)
-    #     M.train_gmm(nComponents=nComponents, nPoints=nPoints)
-    #     M.train_hmm(maxIter=maxIter, tol=tol, printWarnings=printWarnings)
-    #     for trc, sp in zip(self, M.SP):
-    #         trc.set_signal_labels(sp, where=where, correctOffsets=correctOffsets)
-
-
 class ExperimentController(NavigationController):
     # navigation
     currentTraceChanged = QtCore.pyqtSignal(object)
