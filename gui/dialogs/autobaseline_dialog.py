@@ -129,8 +129,9 @@ class BaselineGmmCanvas(plots.QtCanvas):
         x = np.linspace(*xlim, num=300)
         gs = self.controller.model.gmm_p_X(x)
         G = gs.sum(axis=0)
-        for g in gs:
-            self.ax.plot(x, g, 'r')
+        for j, g in enumerate(gs):
+            color = "b" if self.controller.model.mu[j] < self.controller.model.baselineCutoff else "r"
+            self.ax.plot(x, g, color)
         self.ax.plot(x, G, "#555555")
 
         self.ax.set_yscale('log')
