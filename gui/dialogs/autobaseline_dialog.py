@@ -17,6 +17,7 @@ class AutoBaselineController(NavigationController):
     currentTraceChanged = QtCore.pyqtSignal(object)
     experimentLoaded = QtCore.pyqtSignal(object)
     traceEdited = QtCore.pyqtSignal(object)
+    cutoffSet = QtCore.pyqtSignal()
 
     gmmTrained = QtCore.pyqtSignal()
     hmmTrained = QtCore.pyqtSignal()
@@ -35,9 +36,13 @@ class AutoBaselineController(NavigationController):
         self.trc = self.expt[self.index]
         self.currentTraceChanged.emit(self.trc)
 
+    def set_cutoff(self, evt):
+        if evt.xdata is not None:
+            self.model.baselineCutoff = evt.xdata
+            self.cutoffSet.emit()
+
     def train_gmm(self):
         self.gmmTrainingThread.start()
-        # self.gmmTrained.emit()
 
     # def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,
     #                     maxIter=50, tol=1e-3, printWarnings=False,
@@ -144,6 +149,8 @@ class BaselineGmmCanvas(plots.QtCanvas):
 
         self.controller.gmmTrained.connect(self.update_plots)
         self.controller.gmmTrainingThread.sampleSizeSet.connect(self.set_sample_size)
+        self.mpl_connect('button_release_event', self.controller.set_cutoff)
+        self.controller.cutoffSet.connect(self.update_plots)
 
     def set_sample_size(self, val):
         self.nPoints = val
