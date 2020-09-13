@@ -28,7 +28,7 @@ class AutoBaselineDialog(QtWidgets.QDialog):
         gbox.setColumnStretch(1, 1)
         self.setLayout(gbox)
 
-        gbox.addWidget(BaselineModelGroupBox(self), 0, 0)
+        gbox.addWidget(BaselineModelGroupBox(self.controller), 0, 0)
         gbox.addWidget(BaselineGmmCanvas(self), 0, 1)
         gbox.addWidget(BaselineHmmCanvas(self), 1, 0, 1, 2)
         gbox.addWidget(widgets.NavBar(self.controller), 2, 0, 1, 2)
@@ -46,13 +46,15 @@ class BaselineModelGroupBox(QtWidgets.QGroupBox):
 
     def __init__(self, controller):
         super().__init__("Model Parameters")
+        self.controller = controller
         self.layout()
+        self.connect()
 
     def layout(self):
         self.spnGmmComponents = widgets.base.IntegerLineEdit(10, minimum=2, maximum=50)
         self.txtGmmNPoints = widgets.base.IntegerLineEdit(1e4, minimum=100, maximum=1e5)
-        self.spnGmmMaxIter = widgets.base.IntegerLineEdit(250, minimum=10, maximum=1e4)
-        self.txtGmmTol = widgets.base.ScientificLineEdit(1e-3, minimum=0, maximum=10)
+        # self.spnGmmMaxIter = widgets.base.IntegerLineEdit(250, minimum=10, maximum=1e4)
+        # self.txtGmmTol = widgets.base.ScientificLineEdit(1e-3, minimum=0, maximum=10)
         self.spnHmmMaxIter = widgets.base.IntegerLineEdit(250, minimum=10, maximum=1e4)
         self.txtHmmTol = widgets.base.ScientificLineEdit(1e-3, minimum=0, maximum=10)
 
@@ -60,16 +62,38 @@ class BaselineModelGroupBox(QtWidgets.QGroupBox):
         gbox.setColumnStretch(0, 1)
         self.setLayout(gbox)
         controls = (self.spnGmmComponents, self.txtGmmNPoints,
-                    self.spnGmmMaxIter, self.txtGmmTol,
+                    # self.spnGmmMaxIter, self.txtGmmTol,
                     self.spnHmmMaxIter, self.txtHmmTol)
         labels = ("GMM Components", "GMM Sample Size",
-                  "GMM Max Iterations", "GMM Tolerance",
+                  # "GMM Max Iterations", "GMM Tolerance",
                   "HMM Max Iterations", "HMM Tolerance")
         for row, (control, label) in enumerate(zip(controls, labels)):
             control.setMaximumWidth(60)
             gbox.addWidget(QtWidgets.QLabel(label+": "), row, 0)
             gbox.addWidget(control, row, 1)
-        gbox.addItem(QtWidgets.QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Expanding), row+1, 0)
+        row += 1
+        gbox.addItem(QtWidgets.QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Expanding), row, 0)
+        row += 1
+
+        self.cmdTrainGmm = QtWidgets.QPushButton("Train GMM")
+        self.cmdTrainHmm = QtWidgets.QPushButton("Train HMM")
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addWidget(self.cmdTrainGmm)
+        hbox.addWidget(self.cmdTrainHmm)
+        gbox.addLayout(hbox, row, 0, 1, 2)
+
+    def connect(self):
+        self.cmdTrainGmm.clicked.connect(self.train_gmm)
+        self.controller.gmmTrained.connect(lambda: self.cmdTrainGmm.setEnabled(True))
+
+    def train_gmm(self):
+        kwargs = {"nComponents": self.spnGmmComponents.value(),
+                  "nPoints": self.txtGmmNPoints.value(),
+                  # "gmmMaxIter": self.spnGmmMaxIter.value(),
+                  # "gmmTol": self.txtGmmTol.value(),
+                 }
+        self.cmdTrainGmm.setEnabled(False)
+        self.controller.train_gmm(**kwargs)
 
 
 class BaselineGmmCanvas(plots.QtCanvas):

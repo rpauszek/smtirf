@@ -196,11 +196,11 @@ class IntegerLineEdit(QtWidgets.QLineEdit):
         self.editingFinished.connect(self._format_text)
 
     def _format_text(self):
-        value = int(self.text())
+        value = self.value() #int(self.text())
         if value > 1000:
             self.setText(f"{value:0.1e}")
         else:
             self.setText(f"{value}")
 
     def value(self):
-        return int(self.text())
+        return np.floor(float(self.text())).astype(np.int)
