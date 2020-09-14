@@ -4,7 +4,10 @@
 smtirf >> results
 """
 import numpy as np
+from sklearn.neighbors import KernelDensity
+
 import smtirf
+
 
 class DwellTable():
     """ extracts a table of dwelltimes from trace fitted statepath
@@ -48,3 +51,30 @@ class DwellTable():
             return self.table[1:-1,3].squeeze()[ix]
         except IndexError:
             return []
+
+
+# ==============================================================================
+# module functions
+# ==============================================================================
+def get_split_histogram(e, minimum=-0.2, maximum=1.2, nBins=75):
+    # TODO ==> density normalization !!
+
+    # extract full dataset
+    X = np.hstack([trc.X for trc in e if trc.isSelected])
+    S = np.hstack([trc.SP for trc in e if trc.isSelected])
+    # replace NaN's and Inf's
+    X[np.argwhere(np.logical_not(np.isfinite(X)))] = np.nan
+
+    bins, width = np.linspace(minimum, maximum, nBins, retstep=True)
+    total, _ = np.histogram(X, bins=bins)
+
+    populations = []    # state populations
+    states = []         # state histograms
+    for k in range(S.max()+1):
+        xx = X[S==k]
+        populations.append(xx.size/X.size)
+        n, edges = np.histogram(xx, bins=bins)
+        states.append(n)
+    centers = edges[:-1] + width/2
+    # centers, total, states, binWidth
+    return centers, total, np.vstack(states), width
