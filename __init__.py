@@ -40,6 +40,7 @@ class SMJsonDecoder(json.JSONDecoder):
 
 from . import hmm
 from . import util
+from . import results
 from .auxiliary import SMTraceID, SMMovieList, SMSpotCoordinate
 from .auxiliary import where
 from .hmm.models import HiddenMarkovModel

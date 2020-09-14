@@ -32,7 +32,7 @@ class BaseTrace(ABC):
         self.model = HiddenMarkovModel.from_json(model)
         self.deBlur = deBlur
         self.deSpike = deSpike
-        self.dwells = None #DwellTable(self) if self.model is not None else None
+        self.dwells = smtirf.results.DwellTable(self) if self.model is not None else None
 
     def __str__(self):
         return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
@@ -232,7 +232,7 @@ class BaseTrace(ABC):
     def label_statepath(self):
         if self.model is not None:
             self.set_statepath(self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike))
-            # self.dwells = DwellTable(self)
+            self.dwells = smtirf.results.DwellTable(self)
 
     @property
     def EP(self):
