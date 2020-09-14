@@ -78,3 +78,17 @@ def get_split_histogram(e, minimum=-0.2, maximum=1.2, nBins=75):
     centers = edges[:-1] + width/2
     # centers, total, states, binWidth
     return centers, total, np.vstack(states), width
+
+
+def get_tdp(e, minimum=-0.2, maximum=1.2, nBins=150, bandwidth=0.04, dataType="fit"):
+    X = np.vstack([trc.dwells.get_transitions(dataType=dataType) for trc in e if trc.isSelected])
+    # replace NaN's and Inf's
+    X[np.where(np.logical_not(np.isfinite(X)))] = np.nan
+
+    mesh = np.linspace(minimum, maximum, nBins)
+    XX,YY = np.meshgrid(mesh,mesh)
+    coords = np.vstack((XX.ravel(), YY.ravel())).T
+
+    kde = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X)
+    ZZ = np.exp(kde.score_samples(coords)).reshape(XX.shape)
+    return XX, YY, ZZ
