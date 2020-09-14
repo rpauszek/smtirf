@@ -83,3 +83,29 @@ class AutoBaselineModelGmmTrainingThread(QtCore.QThread):
         self.sampleSizeSet.emit(kwargs["nPoints"])
         self.controller.model.train_gmm(**kwargs)
         self.trainingFinished.emit()
+
+
+class AutoBaselineModelHmmTrainingThread(QtCore.QThread):
+
+    trainingStarted = QtCore.pyqtSignal()
+    trainingFinished = QtCore.pyqtSignal()
+
+    def __init__(self, controller, parent): # TODO => should probably rename parent
+        super().__init__()
+        self.controller = controller
+        self._parent = parent
+
+    def __del__(self):
+        self.wait()
+
+    def run(self):
+        self.trainingStarted.emit()
+        kwargs = {"maxIter": self._parent.spnHmmMaxIter.value(),
+                  "tol": self._parent.txtHmmTol.value(),
+                 }
+        self.controller.model.train_hmm(**kwargs)
+
+        for trc, sp in zip(self.controller.expt, self.controller.model.SP):
+            trc.set_signal_labels(sp)#, where=where, correctOffsets=correctOffsets)
+
+        self.trainingFinished.emit()

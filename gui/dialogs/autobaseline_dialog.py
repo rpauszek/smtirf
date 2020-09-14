@@ -27,8 +27,8 @@ class AutoBaselineController(NavigationController):
         self.expt = expt
         self.model = AutoBaselineModel(expt)
         self.gmmTrainingThread = None
-        self.trc = None
-        self.experimentLoaded.emit(self.expt)
+        self.hmmTrainingThread = None
+        self.trc = self.expt[0]
 
     def update_index(self, value):
         """ broadcast current trace """
@@ -43,6 +43,9 @@ class AutoBaselineController(NavigationController):
 
     def train_gmm(self):
         self.gmmTrainingThread.start()
+
+    def train_hmm(self):
+        self.hmmTrainingThread.start()
 
     # def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,
     #                     maxIter=50, tol=1e-3, printWarnings=False,
@@ -63,6 +66,7 @@ class AutoBaselineDialog(QtWidgets.QDialog):
         self.controller = AutoBaselineController(expt)
         self.layout()
         self.connect()
+        self.controller.experimentLoaded.emit(self.controller.expt)
 
         self.setWindowIcon(QtGui.QIcon(":/icons/dna.png"))
         self.setWindowTitle("Auto-Detect Baseline")
@@ -75,7 +79,7 @@ class AutoBaselineDialog(QtWidgets.QDialog):
 
         gbox.addWidget(BaselineModelGroupBox(self.controller), 0, 0)
         gbox.addWidget(BaselineGmmCanvas(self.controller), 0, 1)
-        gbox.addWidget(BaselineHmmCanvas(self), 1, 0, 1, 2)
+        gbox.addWidget(BaselineHmmCanvas(self.controller), 1, 0, 1, 2)
         gbox.addWidget(widgets.NavBar(self.controller), 2, 0, 1, 2)
 
         self.buttonBox = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
@@ -86,6 +90,8 @@ class AutoBaselineDialog(QtWidgets.QDialog):
     def connect(self):
         self.controller.gmmTrainingThread.trainingStarted.connect(lambda: self.buttonBox.setEnabled(False))
         self.controller.gmmTrained.connect(lambda: self.buttonBox.setEnabled(True))
+        self.controller.hmmTrainingThread.trainingStarted.connect(lambda: self.buttonBox.setEnabled(False))
+        self.controller.hmmTrained.connect(lambda: self.buttonBox.setEnabled(True))
 
 
 class BaselineModelGroupBox(QtWidgets.QGroupBox):
@@ -132,11 +138,20 @@ class BaselineModelGroupBox(QtWidgets.QGroupBox):
         self.setup_training_thread()
         self.cmdTrainGmm.clicked.connect(self.controller.train_gmm)
         self.controller.gmmTrainingThread.trainingStarted.connect(lambda: self.cmdTrainGmm.setEnabled(False))
+        self.controller.gmmTrainingThread.trainingStarted.connect(lambda: self.cmdTrainHmm.setEnabled(False))
         self.controller.gmmTrained.connect(lambda: self.cmdTrainGmm.setEnabled(True))
+        self.controller.gmmTrained.connect(lambda: self.cmdTrainHmm.setEnabled(True))
+        self.cmdTrainHmm.clicked.connect(self.controller.train_hmm)
+        self.controller.hmmTrainingThread.trainingStarted.connect(lambda: self.cmdTrainGmm.setEnabled(False))
+        self.controller.hmmTrainingThread.trainingStarted.connect(lambda: self.cmdTrainHmm.setEnabled(False))
+        self.controller.hmmTrained.connect(lambda: self.cmdTrainGmm.setEnabled(True))
+        self.controller.hmmTrained.connect(lambda: self.cmdTrainHmm.setEnabled(True))
 
     def setup_training_thread(self):
         self.controller.gmmTrainingThread = threads.AutoBaselineModelGmmTrainingThread(self.controller, self)
         self.controller.gmmTrainingThread.trainingFinished.connect(self.controller.gmmTrained.emit)
+        self.controller.hmmTrainingThread = threads.AutoBaselineModelHmmTrainingThread(self.controller, self)
+        self.controller.hmmTrainingThread.trainingFinished.connect(self.controller.hmmTrained.emit)
 
 
 class BaselineGmmCanvas(plots.QtCanvas):
@@ -184,8 +199,16 @@ class BaselineGmmCanvas(plots.QtCanvas):
         self.draw()
 
 
-class BaselineHmmCanvas(plots.QtCanvas):
+class BaselineHmmCanvas(plots.ScrollableCanvas):
 
     def __init__(self, controller):
         super().__init__(controller)
+        self.controller = controller
         self.ax = self.fig.add_subplot(1,1,1, projection="total")
+
+        self.controller.hmmTrained.connect(lambda: self.update_plots(self.controller.trc))
+        self.controller.currentTraceChanged.connect(self.update_plots)
+
+    def update_plots(self, trc):
+        self.ax.set_trace(trc)
+        self.draw()

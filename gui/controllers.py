@@ -137,7 +137,7 @@ class ExperimentController(NavigationController):
     def detect_baseline(self):
         dlg = smtirf.gui.dialogs.AutoBaselineDialog(self.expt)
         rsp = dlg.exec_()
-        print("*", rsp, "*")
+        self.traceEdited.emit(self.trc)
 
     def train_all_traces(self):
         dlg = smtirf.gui.dialogs.TrainAllTracesDialog(self.expt)
