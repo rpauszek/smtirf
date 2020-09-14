@@ -20,11 +20,18 @@ class SpinSlider(QtWidgets.QWidget):
         self.slider.setTracking(False)
         self.spinbox = QtWidgets.QSpinBox()
 
+        self.cmdStepFwd = QtWidgets.QPushButton(">>")
+        self.cmdStepFwd.setMaximumWidth(25)
+        self.cmdStepBack = QtWidgets.QPushButton("<<")
+        self.cmdStepBack.setMaximumWidth(25)
+
         box = QtWidgets.QHBoxLayout()
         box.setContentsMargins(5,5,5,5)
         box.addWidget(QtWidgets.QLabel(label))
         box.addWidget(self.spinbox)
         box.addWidget(self.slider)
+        box.addWidget(self.cmdStepBack)
+        box.addWidget(self.cmdStepFwd)
         self.setLayout(box)
         self.setTabOrder(self.slider, self.spinbox)
 
@@ -33,6 +40,8 @@ class SpinSlider(QtWidgets.QWidget):
     def connect(self):
         self.slider.valueChanged.connect(self._update_index)
         self.spinbox.editingFinished.connect(self._update_slider)
+        self.cmdStepFwd.clicked.connect(self._step_forward)
+        self.cmdStepBack.clicked.connect(self._step_backward)
 
     # ==========================================================================
     # internal event handling
@@ -47,6 +56,12 @@ class SpinSlider(QtWidgets.QWidget):
         """ triggered when spinbox editing is finished
             updates the slider value ==> cascades to _update_index() """
         self.slider.setValue(self.spinbox.value()-1)
+
+    def _step_forward(self):
+        self.slider.setValue(self.slider.value()+1)
+
+    def _step_backward(self):
+        self.slider.setValue(self.slider.value()-1)
 
     # ==========================================================================
     # public API
