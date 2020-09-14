@@ -105,7 +105,9 @@ class AutoBaselineModelHmmTrainingThread(QtCore.QThread):
                  }
         self.controller.model.train_hmm(**kwargs)
 
+        selectionType = self._parent._selectionTypes[self._parent.cboSelectionTypes.currentIndex()]
+        print(selectionType)
         for trc, sp in zip(self.controller.expt, self.controller.model.SP):
-            trc.set_signal_labels(sp)#, where=where, correctOffsets=correctOffsets)
+            trc.set_signal_labels(sp, where=selectionType, correctOffsets=self._parent.chkCorrectOffsets.isChecked())
 
         self.trainingFinished.emit()

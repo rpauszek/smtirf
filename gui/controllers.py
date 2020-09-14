@@ -150,9 +150,6 @@ class ExperimentController(NavigationController):
     def set_experiment_gamma(self):
         pass
 
-    def train_selected_traces(self):
-        pass
-
     def sort_by_index(self):
         self.expt.sort("index")
         self.update_index(self.index)

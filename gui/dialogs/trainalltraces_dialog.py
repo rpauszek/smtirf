@@ -31,6 +31,7 @@ class TrainAllTracesDialog(QtWidgets.QDialog):
         vbox.addWidget(self.modelParamsWidget)
 
         self.chkDeselectTraceOnError = QtWidgets.QCheckBox("Deselect trace if model training error occurs")
+        self.chkDeselectTraceOnError.setEnabled(False)
         # TODO => need to implement functionality, maybe need to include in global training button
         vbox.addWidget(self.chkDeselectTraceOnError)
 

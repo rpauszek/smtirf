@@ -96,6 +96,9 @@ class AutoBaselineDialog(QtWidgets.QDialog):
 
 class BaselineModelGroupBox(QtWidgets.QGroupBox):
 
+    _selectionTypes = ("first", "longest", "all")
+    _selectionLabels = ("First", "Longest", "All")
+
     def __init__(self, controller):
         super().__init__("Model Parameters")
         self.controller = controller
@@ -124,6 +127,19 @@ class BaselineModelGroupBox(QtWidgets.QGroupBox):
             gbox.addWidget(QtWidgets.QLabel(label+": "), row, 0)
             gbox.addWidget(control, row, 1)
         row += 1
+
+        self.cboSelectionTypes = QtWidgets.QComboBox()
+        for item in self._selectionLabels:
+            self.cboSelectionTypes.addItem(item)
+        gbox.addWidget(QtWidgets.QLabel("Select Data Range:"), row, 0)
+        gbox.addWidget(self.cboSelectionTypes, row, 1)
+        row += 1
+
+        self.chkCorrectOffsets = QtWidgets.QCheckBox("Correct offsets")
+        self.chkCorrectOffsets.setChecked(True)
+        gbox.addWidget(self.chkCorrectOffsets, row, 0, 1, 2)
+        row += 1
+
         gbox.addItem(QtWidgets.QSpacerItem(10, 10, QSizePolicy.Fixed, QSizePolicy.Expanding), row, 0)
         row += 1
 
