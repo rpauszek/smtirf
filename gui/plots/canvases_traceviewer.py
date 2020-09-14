@@ -50,3 +50,7 @@ class TraceViewerPlot(ScrollableCanvas, InteractiveCanvas):
                 self.controller.set_trace_start_time(evt.xdata)
             elif evt.button == 3: # stop
                 self.controller.set_trace_stop_time(evt.xdata)
+        elif evt.inaxes == self.ax1 and evt.button == 3:
+            for ax in self.fig.axes:
+                ax.unzoom()
+            self.draw()

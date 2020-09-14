@@ -42,6 +42,10 @@ class TraceAxes(mpl.axes.Axes):
         self.set_ylabel("")
         self.set_yticklabels("")
 
+    def unzoom(self):
+        self.relim()
+        self.autoscale(enable=True, axis="both")
+
 
 class DonorAcceptorAxes(TraceAxes):
     name = "donoracceptor"
@@ -114,6 +118,11 @@ class FretAxes(TraceAxes):
         else:
             self._lineFit.set_data([], [])
 
+        self.relim()
+        self.autoscale(enable=True, axis="x")
+
+    def unzoom(self):
+        # override super(), don't rescale y-axis for FRET based measurement
         self.relim()
         self.autoscale(enable=True, axis="x")
 
