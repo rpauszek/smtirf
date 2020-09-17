@@ -65,6 +65,8 @@ class SMMovie():
             raise ValueError("image must be flat (not RGB channels)")
         self.img = img
         self.info = info
+        # print(self.img.shape) !! movie isn't saving properly -> 512x1 instead of 512x512
+        # import works fine
 
     def __str__(self):
         s = f"{self.__class__.__name__}\t{self._id}\n"
@@ -83,7 +85,8 @@ class SMMovieList(OrderedDict):
     def load(cls, images, movInfo):
         movies = cls()
         for item in movInfo:
-            movies.append(item["id"], images[item["position"]], item["contents"])
+            # movies.append(item["id"], images[item["position"]], item["contents"])
+            movies.append(item["id"], np.ones((2,2)), item["contents"]) # need to fix bug
         return movies
 
     def append(self, key, img, info):
@@ -101,8 +104,10 @@ class SMMovieList(OrderedDict):
 
     def _as_image_stack(self):
         """ return stack of images (ndarray) """
-        images = [mov.img for j, (key, mov) in enumerate(self.items())]
-        return np.stack(images, axis=2)
+        # images = [mov.img for j, (key, mov) in enumerate(self.items())]
+        # return np.stack(images, axis=2)
+        # !! need to fix save bug
+        return np.stack([np.ones((2,2)) for j in enumerate(self.items())], axis=2)
 
     def _as_json(self):
         """ json-serialized list of info dicts  """
