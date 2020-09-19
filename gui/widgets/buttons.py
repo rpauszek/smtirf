@@ -74,6 +74,7 @@ class BaseTrainModelButton(QtWidgets.QWidget):
 
         self.spnRepeats = QtWidgets.QSpinBox(minimum=1, maximum=500, value=5)
         self.chkSharedVar = QtWidgets.QCheckBox("Shared Variance")
+        self.chkRefineByKMeans = QtWidgets.QCheckBox("Refine guess by k-means")
 
     def layout(self):
         pass
@@ -94,7 +95,8 @@ class BaseTrainModelButton(QtWidgets.QWidget):
     @property
     def modelKwargs(self):
         kwargs =  {"K" : self.K,
-                   "sharedVariance" : self.chkSharedVar.isChecked()}
+                   "sharedVariance" : self.chkSharedVar.isChecked(),
+                   "refineByKmeans" : self.chkRefineByKMeans.isChecked()}
         if self.cboModelTypes.isEnabled():
             kwargs["modelType"] = self.modelType
         if self.spnRepeats.isEnabled():
@@ -141,6 +143,7 @@ class TrainModelButton(BaseTrainModelButton):
         hbox.addWidget(QtWidgets.QLabel("Repeats: "))
         hbox.addWidget(self.spnRepeats)
         hbox.addWidget(self.chkSharedVar)
+        hbox.addWidget(self.chkRefineByKMeans)
         self.setLayout(hbox)
 
     def connect(self):
@@ -150,17 +153,20 @@ class TrainModelButton(BaseTrainModelButton):
         self.controller.modelTrained.connect(self.update_trace)
 
     def setEnabled(self, b):
-        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar, self.spnRepeats):
+        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes,
+                  self.chkSharedVar, self.spnRepeats, self.chkRefineByKMeans):
             w.setEnabled(b)
         if b:
             self.check_model_type()
         if self.trc.classLabel == "multimer":
             self.cboModelTypes.setEnabled(False)
+            self.chkRefineByKMeans.setEnabled(False)
 
     def update_trace(self, trc):
         self.trc = trc
         self.check_current_model(trc)
         self.cboModelTypes.setEnabled(trc.classLabel != "multimer")
+        self.chkRefineByKMeans.setEnabled(trc.classLabel != "multimer")
         self.update_text()
 
     def check_current_model(self, trc):
@@ -214,6 +220,8 @@ class TrainAllModelButton(BaseTrainModelButton):
         gbox.addWidget(self.chkSharedVar, row, 1)
         row += 1
 
+        gbox.addWidget(self.chkRefineByKMeans, row, 0, 1, 2)
+
         vbox = QtWidgets.QVBoxLayout()
         vbox.setContentsMargins(0,0,0,0)
         vbox.addWidget(grpModelParams)
@@ -225,12 +233,14 @@ class TrainAllModelButton(BaseTrainModelButton):
         self.controller.trainingFinished.connect(lambda : self.setEnabled(True))
 
     def setEnabled(self, b):
-        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes, self.chkSharedVar, self.spnRepeats):
+        for w in (self.cmdAddState, self.cmdSubtractState, self.cmdTrain, self.cboModelTypes,
+                  self.chkSharedVar, self.spnRepeats, self.chkRefineByKMeans):
             w.setEnabled(b)
         if b:
             self.check_model_type()
         if self.controller.expt.classLabel == "multimer":
             self.cboModelTypes.setEnabled(False)
+            self.chkRefineByKMeans.setEnabled(False)
 
     def train_model(self):
         self.controller.thread.start()
