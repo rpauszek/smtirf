@@ -11,13 +11,52 @@ import smtirf
 
 class Results():
 
-    def __init__(self, expt):
+    def __init__(self, expt, hist=None):
         self._expt = expt
         self.K = 0
         self.nTraces = 0
-        self.hist = None
+        self.hist = Histogram(expt) if hist is None else hist
         self.tdp = None
 
+    def calculate_histogram(self):
+        self.hist = Histogram(self.expt)
+        self.hist.calculate()
+
+# ==============================================================================
+# AGGREGATE RESULT CLASSES
+# ==============================================================================
+class Histogram():
+
+    def __init__(self, expt):
+        self._expt = expt
+        self.centers = None
+        self.total = None
+        self.states = None
+        self.width = 0
+        self.populations = None
+
+    def calculate(self, minimum=-0.2, maximum=1.2, nBins=75):
+        # TODO ==> density normalization !!
+
+        # extract full dataset
+        X = np.hstack([trc.X for trc in self._expt if trc.isSelected and trc.model is not None])
+        S = np.hstack([trc.SP for trc in self._expt if trc.isSelected and trc.model is not None])
+        # # replace NaN's and Inf's
+        # X[np.argwhere(np.logical_not(np.isfinite(X)))] = np.nan
+
+        edges, self.width = np.linspace(minimum, maximum, nBins, retstep=True)
+        self.total, _ = np.histogram(X, bins=edges)
+
+        self.populations = []    # state populations
+        self.states = []         # state histograms
+        for k in range(S.max()+1):
+            xx = X[S==k]
+            self.populations.append(xx.size/X.size)
+            n, edges = np.histogram(xx, bins=edges)
+            self.states.append(n)
+        self.centers = edges[:-1] + self.width/2
+        # # centers, total, states, binWidth
+        # return centers, total, np.vstack(states), width
 
 
 # ==============================================================================
@@ -70,28 +109,7 @@ class DwellTable():
 # ==============================================================================
 # module functions
 # ==============================================================================
-def get_split_histogram(e, minimum=-0.2, maximum=1.2, nBins=75):
-    # TODO ==> density normalization !!
 
-    # extract full dataset
-    X = np.hstack([trc.X for trc in e if trc.isSelected])
-    S = np.hstack([trc.SP for trc in e if trc.isSelected])
-    # replace NaN's and Inf's
-    X[np.argwhere(np.logical_not(np.isfinite(X)))] = np.nan
-
-    bins, width = np.linspace(minimum, maximum, nBins, retstep=True)
-    total, _ = np.histogram(X, bins=bins)
-
-    populations = []    # state populations
-    states = []         # state histograms
-    for k in range(S.max()+1):
-        xx = X[S==k]
-        populations.append(xx.size/X.size)
-        n, edges = np.histogram(xx, bins=bins)
-        states.append(n)
-    centers = edges[:-1] + width/2
-    # centers, total, states, binWidth
-    return centers, total, np.vstack(states), width
 
 
 def get_tdp(e, minimum=-0.2, maximum=1.2, nBins=150, bandwidth=0.04, dataType="fit"):

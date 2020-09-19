@@ -86,6 +86,7 @@ class BaseExperiment():
 
     def update_results(self):
         self.results = smtirf.results.Results(self)
+        self.results.hist.calculate()
 
 
 
