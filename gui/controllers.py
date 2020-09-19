@@ -98,6 +98,7 @@ class ExperimentController(NavigationController):
                 self.filename = None
                 self.filenameChanged.emit(self.filename)
                 self.experimentLoaded.emit(self.expt)
+                self.update_index(self.index)
 
     def open_experiment(self):
         fdArgs = {"caption":"Load experiment",
