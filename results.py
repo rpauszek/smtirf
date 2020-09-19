@@ -41,8 +41,8 @@ class Histogram():
         # extract full dataset
         X = np.hstack([trc.X for trc in self._expt if trc.isSelected and trc.model is not None])
         S = np.hstack([trc.SP for trc in self._expt if trc.isSelected and trc.model is not None])
-        # # replace NaN's and Inf's
-        # X[np.argwhere(np.logical_not(np.isfinite(X)))] = np.nan
+        # remove NaN's and Inf's
+        X = X[np.argwhere(np.isfinite(X))]
 
         edges, self.width = np.linspace(minimum, maximum, nBins, retstep=True)
         self.total, _ = np.histogram(X, bins=edges)
@@ -55,8 +55,6 @@ class Histogram():
             n, edges = np.histogram(xx, bins=edges)
             self.states.append(n)
         self.centers = edges[:-1] + self.width/2
-        # # centers, total, states, binWidth
-        # return centers, total, np.vstack(states), width
 
 
 # ==============================================================================
