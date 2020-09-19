@@ -22,15 +22,36 @@ class Results():
 # ==============================================================================
 class Histogram():
 
-    def __init__(self, expt):
+    def __init__(self, expt, data=None, populations=None, minimum=-0.2, maximum=1.2, nBins=75):
         self._expt = expt
-        self.centers = None
-        self.total = None
-        self.states = None
-        self.width = 0
-        self.populations = None
+        self._set_data(data)
+        self.populations = populations
+        self.minimum = minimum
+        self.maximum = maximum
+        self.nBins = nBins
 
-    def calculate(self, minimum=-0.2, maximum=1.2, nBins=75):
+    def _set_data(self, data):
+        if data is None:
+            self.total = None
+            self.states = None
+        else:
+            self.total = data[0]
+            self.states = data[1:]
+
+    @property
+    def edges(self):
+        return np.linspace(self.minimum, self.maximum, self.nBins, retstep=False)
+
+    @property
+    def width(self):
+        return self.edges[0]-self.edges[1]
+
+    @property
+    def centers(self):
+        return self.edges[:-1] + self.width/2
+
+
+    def calculate(self):#, minimum=-0.2, maximum=1.2, nBins=75):
         # TODO ==> density normalization !!
 
         # extract full dataset
@@ -39,17 +60,14 @@ class Histogram():
         # remove NaN's and Inf's
         X = X[np.argwhere(np.isfinite(X))]
 
-        edges, self.width = np.linspace(minimum, maximum, nBins, retstep=True)
-        self.total, _ = np.histogram(X, bins=edges)
-
+        self.total, _ = np.histogram(X, bins=self.edges)
         self.populations = []    # state populations
         self.states = []         # state histograms
         for k in range(S.max()+1):
             xx = X[S==k]
             self.populations.append(xx.size/X.size)
-            n, edges = np.histogram(xx, bins=edges)
+            n, _ = np.histogram(xx, bins=self.edges)
             self.states.append(n)
-        self.centers = edges[:-1] + self.width/2
 
 
 class Tdp():
@@ -88,7 +106,6 @@ class Tdp():
 
         kde = KernelDensity(kernel='gaussian', bandwidth=self.bandwidth).fit(X)
         self.Z = np.exp(kde.score_samples(coords)).reshape(self.X.shape)
-
 
 
 
