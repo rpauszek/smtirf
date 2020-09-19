@@ -11,16 +11,11 @@ import smtirf
 
 class Results():
 
-    def __init__(self, expt, hist=None):
+    def __init__(self, expt, hist=None, tdp=None):
         self._expt = expt
-        self.K = 0
-        self.nTraces = 0
         self.hist = Histogram(expt) if hist is None else hist
-        self.tdp = None
+        self.tdp = Tdp(expt) if tdp is None else tdp
 
-    def calculate_histogram(self):
-        self.hist = Histogram(self.expt)
-        self.hist.calculate()
 
 # ==============================================================================
 # AGGREGATE RESULT CLASSES
@@ -57,6 +52,46 @@ class Histogram():
         self.centers = edges[:-1] + self.width/2
 
 
+class Tdp():
+
+    def __init__(self, expt, data=None, minimum=-0.2, maximum=1.2, nBins=150, bandwidth=0.04, dataType="data"):
+        self._expt = expt
+        self._set_data(data)
+        self.minimum = minimum
+        self.maximum = maximum
+        self.nBins = nBins
+        self.bandwidth = bandwidth
+        self.dataType = dataType
+
+    def _set_data(self, data):
+        if data is None:
+            self.X = None
+            self.Y = None
+            self.Z = None
+        else:
+            self.X = data[:,:,0]
+            self.Y = data[:,:,1]
+            self.Z = data[:,:,2]
+
+    @property
+    def mesh(self):
+        return np.linspace(self.minimum, self.maximum, self.nBins)
+
+    def calculate(self):
+        X = np.vstack([trc.dwells.get_transitions(dataType=self.dataType)
+                       for trc in self._expt if trc.isSelected and trc.model is not None])
+        # # replace NaN's and Inf's
+        # X[np.where(np.logical_not(np.isfinite(X)))] = np.nan
+
+        self.X, self.Y = np.meshgrid(self.mesh,self.mesh)
+        coords = np.vstack((self.X.ravel(), self.Y.ravel())).T
+
+        kde = KernelDensity(kernel='gaussian', bandwidth=self.bandwidth).fit(X)
+        self.Z = np.exp(kde.score_samples(coords)).reshape(self.X.shape)
+
+
+
+
 # ==============================================================================
 # DWELLTIMES
 # ==============================================================================
@@ -89,7 +124,7 @@ class DwellTable():
         elif dataType.lower() == "data":
             col = 5
         elif dataType.lower() == "state":
-            col = 3
+            col = 2
         else:
             raise ValueError("dataType not recognized")
         return np.vstack((self.table[:-1,col], self.table[1:,col])).T
@@ -102,23 +137,3 @@ class DwellTable():
             return self.table[1:-1,3].squeeze()[ix]
         except IndexError:
             return []
-
-
-# ==============================================================================
-# module functions
-# ==============================================================================
-
-
-
-def get_tdp(e, minimum=-0.2, maximum=1.2, nBins=150, bandwidth=0.04, dataType="fit"):
-    X = np.vstack([trc.dwells.get_transitions(dataType=dataType) for trc in e if trc.isSelected])
-    # replace NaN's and Inf's
-    X[np.where(np.logical_not(np.isfinite(X)))] = np.nan
-
-    mesh = np.linspace(minimum, maximum, nBins)
-    XX,YY = np.meshgrid(mesh,mesh)
-    coords = np.vstack((XX.ravel(), YY.ravel())).T
-
-    kde = KernelDensity(kernel='gaussian', bandwidth=bandwidth).fit(X)
-    ZZ = np.exp(kde.score_samples(coords)).reshape(XX.shape)
-    return XX, YY, ZZ
