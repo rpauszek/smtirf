@@ -3,12 +3,26 @@
 @author: Raymond F. Pauszek III, Ph.D. (2020)
 smtirf >> results
 """
+from datetime import datetime
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
 import smtirf
 
+class Results():
 
+    def __init__(self, expt):
+        self._expt = expt
+        self.K = 0
+        self.nTraces = 0
+        self.hist = None
+        self.tdp = None
+
+
+
+# ==============================================================================
+# DWELLTIMES
+# ==============================================================================
 class DwellTable():
     """ extracts a table of dwelltimes from trace fitted statepath
         dwells as rows, features as columns:

@@ -18,11 +18,12 @@ from . import io
 # ==============================================================================
 class BaseExperiment():
 
-    def __init__(self, movies, traces, frameLength, comments=""):
+    def __init__(self, movies, traces, frameLength, comments="", results=None):
         self._movies = movies
         self._traces = traces
         self.frameLength = frameLength
         self.comments = comments
+        self.results = results
 
     def save(self, savename):
         Experiment.write_to_hdf(savename, self)
@@ -82,6 +83,9 @@ class BaseExperiment():
     def select_none(self):
         for trc in self:
             trc.isSelected = False
+
+    def update_results(self):
+        self.results = smtirf.results.Results(self)
 
 
 
