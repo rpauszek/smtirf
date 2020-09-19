@@ -252,8 +252,8 @@ class BaseTrace(ABC):
 class SingleColorTrace(BaseTrace):
 
     def __init__(self, trcID, data, frameLength, pk, bleed, gamma, channel=1, **kwargs):
-        super().__init__(trcID, data, frameLength, pk, bleed, gamma, **kwargs)
         self.channel = channel
+        super().__init__(trcID, data, frameLength, pk, bleed, gamma, **kwargs)
 
     @property
     def _attr_dict(self):
