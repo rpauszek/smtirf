@@ -170,6 +170,24 @@ class Experiment():
                 except AttributeError: # model is None
                     pass
 
+            # store results ----------------------------------------------------
+            resultsGroup = HF.create_group("results")
+            try:
+                h = experiment.results.hist
+                dataset = resultsGroup.create_dataset("histogram", data=h._raw_data, compression="gzip")
+                dataset.attrs["properties"] = h._as_json()
+            except AttributeError: # no result calculated
+                pass
+
+            try:
+                t = experiment.results.tdp
+                dataset = resultsGroup.create_dataset("tdp", data=t._raw_data, compression="gzip")
+                dataset.attrs["properties"] = t._as_json()
+            except AttributeError: # no result calculated
+                pass
+
+
+
             # store auxiliary attributes ---------------------------------------
             HF.attrs["nTraces"] = len(experiment)
             HF.attrs["nSelected"] = experiment.nSelected
