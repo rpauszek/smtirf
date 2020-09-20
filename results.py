@@ -4,9 +4,11 @@
 smtirf >> results
 """
 from datetime import datetime
+import json
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
+from . import SMJsonEncoder
 import smtirf
 
 class Results():
@@ -39,6 +41,20 @@ class Histogram():
             self.states = data[1:]
 
     @property
+    def _raw_data(self):
+        return np.vstack((self.total, self.states))
+
+    @property
+    def _attr_dict(self):
+        return {"populations" : self.populations,
+                "minimum" : self.minimum,
+                "maximum" : self.maximum,
+                "nBins" : self.nBins}
+
+    def _as_json(self):
+        return json.dumps(self._attr_dict, cls=SMJsonEncoder)
+
+    @property
     def edges(self):
         return np.linspace(self.minimum, self.maximum, self.nBins, retstep=False)
 
@@ -61,13 +77,15 @@ class Histogram():
         X = X[np.argwhere(np.isfinite(X))]
 
         self.total, _ = np.histogram(X, bins=self.edges)
-        self.populations = []    # state populations
-        self.states = []         # state histograms
+        populations = []    # state populations
+        states = []         # state histograms
         for k in range(S.max()+1):
             xx = X[S==k]
-            self.populations.append(xx.size/X.size)
+            populations.append(xx.size/X.size)
             n, _ = np.histogram(xx, bins=self.edges)
-            self.states.append(n)
+            states.append(n)
+        self.populations = np.hstack(populations)
+        self.states = np.vstack(states)
 
 
 class Tdp():
@@ -90,6 +108,21 @@ class Tdp():
             self.X = data[:,:,0]
             self.Y = data[:,:,1]
             self.Z = data[:,:,2]
+
+    @property
+    def _raw_data(self):
+        return np.stack((self.X, self.Y, self.Z), axis=2)
+
+    @property
+    def _attr_dict(self):
+        return {"minimum" : self.minimum,
+                "maximum" : self.maximum,
+                "nBins" : self.nBins,
+                "bandwidth" : self.bandwidth,
+                "dataType" : self.dataType}
+
+    def _as_json(self):
+        return json.dumps(self._attr_dict, cls=SMJsonEncoder)
 
     @property
     def mesh(self):
