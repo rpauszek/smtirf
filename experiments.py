@@ -12,6 +12,7 @@ from . import SMTraceID, SMMovieList
 from . import SMJsonDecoder, SMJsonEncoder
 from . import traces
 from . import io
+from .results import Results
 
 # ==============================================================================
 # BASE EXPERIMENT CLASS
@@ -23,7 +24,7 @@ class BaseExperiment():
         self._traces = traces
         self.frameLength = frameLength
         self.comments = comments
-        self.results = results
+        self.results = Results(self) if results is None else Results(self, **results)
 
     def save(self, savename):
         Experiment.write_to_hdf(savename, self)
@@ -85,7 +86,7 @@ class BaseExperiment():
             trc.isSelected = False
 
     def update_results(self):
-        self.results = smtirf.results.Results(self)
+        # self.results = smtirf.results.Results(self)
         self.results.hist.calculate()
         self.results.tdp.calculate()
 
@@ -226,7 +227,20 @@ class Experiment():
                 props = json.loads(item.attrs["properties"], cls=SMJsonDecoder)
                 traces.append(cls.traceClass(_id, item[:], model=model, **props))
 
-            return cls(movies, traces, frameLength, comments)
+            # load Results -----------------------------------------------------
+            try:
+                hist = json.loads(HF["results"]["histogram"].attrs["properties"], cls=SMJsonDecoder)
+                hist["data"] = HF["results"]["histogram"][:]
+            except KeyError:
+                hist = None
+            try:
+                tdp = json.loads(HF["results"]["tdp"].attrs["properties"], cls=SMJsonDecoder)
+                tdp["data"] = HF["results"]["tdp"][:]
+            except KeyError:
+                tdp = None
+            results = {"hist": hist, "tdp": tdp}
+
+            return cls(movies, traces, frameLength, comments=comments, results=results)
 
     @staticmethod
     def merge(filenames, selectedOnly=True):

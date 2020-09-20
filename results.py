@@ -15,8 +15,8 @@ class Results():
 
     def __init__(self, expt, hist=None, tdp=None):
         self._expt = expt
-        self.hist = Histogram(expt) if hist is None else hist
-        self.tdp = Tdp(expt) if tdp is None else tdp
+        self.hist = Histogram(expt) if hist is None else Histogram(expt, **hist)
+        self.tdp = Tdp(expt) if tdp is None else Tdp(expt, **tdp)
 
 
 # ==============================================================================
@@ -56,7 +56,7 @@ class Histogram():
 
     @property
     def edges(self):
-        return np.linspace(self.minimum, self.maximum, self.nBins, retstep=False)
+        return np.linspace(self.minimum, self.maximum, self.nBins+1, retstep=False)
 
     @property
     def width(self):
