@@ -91,7 +91,9 @@ class TdpAxes(ResultAxes):
         super().__init__(*args, **kwargs) 
 
     def update_view(self, expt):
-        print("*", expt.tdp)
+        t = expt.results.tdp
+        self.cla()
+        self.contourf(t.X, t.Y, t.Z, 150, cmap='jet')
 
 
 class KineticsAxes(ResultAxes):
