@@ -20,6 +20,18 @@ class SaveExperimentMessageBox(QMessageBox):
         self.addButton(QtWidgets.QPushButton("Yes"), QMessageBox.YesRole )
         self.addButton(QtWidgets.QPushButton("No"), QMessageBox.NoRole)
         self.addButton(QtWidgets.QPushButton("Cancel"), QMessageBox.RejectRole)
+
+
+class NoResultsMessageBox(QMessageBox):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.setWindowTitle("No results")
+        self.setIconPixmap(QtGui.QPixmap(f":/lib/icons/help.png"))
+        self.setText("No results currently calculated")
+
+        self.addButton(QtWidgets.QPushButton("OK"), QMessageBox.OkRole)
+	    
 # ==============================================================================
 
 from .import_dialog import ImportExperimentDialog

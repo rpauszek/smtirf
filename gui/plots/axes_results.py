@@ -9,6 +9,7 @@ from matplotlib.widgets import Cursor
 import matplotlib.ticker as ticker
 import matplotlib as mpl
 
+from ..dialogs import NoResultsMessageBox
 from .. import CONFIG
 
 class ResultAxes(mpl.axes.Axes):
@@ -56,13 +57,17 @@ class SplitHistAxes(ResultAxes):
         # self.margins(x=0, y=0.05)
 
     def update_view(self, expt):
-        print("*", expt)
         h = expt.results.hist
-        print("centers", h.centers)
-        print("total", h.total)
-        print("width", h.width)
-
-        # self.bar(h.centers, h.total, width=h.width, align="center")
+        # try:
+        self.cla()
+        self.step(h.centers, h.total, where="mid", c="k")
+        for state, population in zip(h.states, h.populations):
+            lbl = f"{population*100:0.2f}%"
+            self.bar(h.centers, state, width=h.width, alpha=0.75, label=lbl)
+        self.legend()
+        # except TypeError:
+        #     msg = NoResultsMessageBox()
+        #     msg.exec_()
 
         # matplotlib.pyplot.bar(x, height, width=0.8, bottom=None, *, align='center'
 
