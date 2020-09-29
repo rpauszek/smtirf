@@ -9,7 +9,8 @@ import numpy as np
 
 __all__ = ["ToggleSelectionAction",
            "ExportTraceButton",
-           "TrainModelButton", "TrainAllModelButton"]
+           "TrainModelButton", "TrainAllModelButton",
+           "UpdateResultsButton"]
 
 class ToggleSelectionAction(QtWidgets.QAction):
 
@@ -244,3 +245,11 @@ class TrainAllModelButton(BaseTrainModelButton):
 
     def train_model(self):
         self.controller.thread.start()
+
+# ==============================================================================
+class UpdateResultsButton(QtWidgets.QPushButton):
+
+    def __init__(self, controller):
+        self.controller = controller
+        super().__init__("Update Results")
+        self.clicked.connect(controller.update_results)

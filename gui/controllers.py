@@ -30,6 +30,7 @@ class ExperimentController(NavigationController):
     # data update
     traceEdited = QtCore.pyqtSignal(object)
     selectedEdited = QtCore.pyqtSignal(object)
+    resultsUpdated = QtCore.pyqtSignal()
     # training
     trainingMessageChanged = QtCore.pyqtSignal(str)
     modelTrained = QtCore.pyqtSignal(object)
@@ -175,6 +176,10 @@ class ExperimentController(NavigationController):
     def select_none(self):
         self.expt.select_none()
         self.selectedEdited.emit(self.trc)
+
+    def update_results(self):
+        self.expt.update_results()
+        self.resultsUpdated.emit()
 
     # ==========================================================================
     # trace
