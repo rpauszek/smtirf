@@ -57,6 +57,14 @@ class SplitHistAxes(ResultAxes):
 
     def update_view(self, expt):
         print("*", expt)
+        h = expt.results.hist
+        print("centers", h.centers)
+        print("total", h.total)
+        print("width", h.width)
+
+        # self.bar(h.centers, h.total, width=h.width, align="center")
+
+        # matplotlib.pyplot.bar(x, height, width=0.8, bottom=None, *, align='center'
 
     # def set_trace(self, trc):
     #     key = "selected" if trc.isSelected else "active"
