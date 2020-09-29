@@ -41,6 +41,10 @@ class Histogram():
             self.states = data[1:]
 
     @property
+    def isEmpty(self):
+        return self.total is None
+
+    @property
     def _raw_data(self):
         return np.vstack((self.total, self.states))
 
@@ -108,6 +112,10 @@ class Tdp():
             self.X = data[:,:,0]
             self.Y = data[:,:,1]
             self.Z = data[:,:,2]
+
+    @property
+    def isEmpty(self):
+        return self.Z is None
 
     @property
     def _raw_data(self):
