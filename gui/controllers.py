@@ -21,6 +21,7 @@ class NavigationController(QtCore.QObject):
 class ExperimentController(NavigationController):
     # navigation
     currentTraceChanged = QtCore.pyqtSignal(object)
+    currentResultViewChanged = QtCore.pyqtSignal(str)
     # file I/O
     experimentLoaded = QtCore.pyqtSignal(object)
     filenameChanged = QtCore.pyqtSignal(object)

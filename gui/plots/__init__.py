@@ -76,4 +76,6 @@ class InteractiveCanvas():
 
 
 from . import axes_trace
+from . import axes_results
 from .canvases_traceviewer import *
+from .canvases_results import *
