@@ -28,4 +28,10 @@ class ResultViewerPlot(QtCanvas):
         for ax in self.fig.axes:
             self.ax.remove()
         self.ax = self.fig.add_subplot(gs[0], projection=view)
+        try:
+            self.ax.update_view(self.controller.expt)
+        except AttributeError:
+            # thrown when Experiment type changes, because ref still active
+            # til garbage collected
+            pass
         self.draw()

@@ -55,6 +55,9 @@ class SplitHistAxes(ResultAxes):
         super().__init__(*args, **kwargs)
         # self.margins(x=0, y=0.05)
 
+    def update_view(self, expt):
+        print("*", expt)
+
     # def set_trace(self, trc):
     #     key = "selected" if trc.isSelected else "active"
     #     self._lineD.set_data(trc.t, trc.D)
@@ -74,6 +77,9 @@ class TdpAxes(ResultAxes):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) 
 
+    def update_view(self, expt):
+        print("*", expt.tdp)
+
 
 class KineticsAxes(ResultAxes):
     name = "kinetics"
@@ -82,6 +88,9 @@ class KineticsAxes(ResultAxes):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)           
+
+    def update_view(self, expt):
+        print("*", expt)
 
 
 mpl.projections.register_projection(SplitHistAxes)
