@@ -88,7 +88,7 @@ class TdpAxes(ResultAxes):
     XLABEL = "Initial"
 
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs) 
+        super().__init__(aspect="equal", *args, **kwargs) 
 
     def update_view(self, expt):
         t = expt.results.tdp
