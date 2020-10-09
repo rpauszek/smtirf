@@ -8,7 +8,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 import numpy as np
 
 __all__ = ["ToggleSelectionAction",
-           "ExportTraceButton",
+           "ExportTraceButton", "ExportHistogramButton", "ExportTdpButton",
+           "SaveHistogramImageButton", "SaveTdpImageButton",
            "TrainModelButton", "TrainAllModelButton",
            "UpdateResultsButton"]
 
@@ -35,6 +36,37 @@ class ExportTraceButton(QtWidgets.QPushButton):
         self.setIcon(QtGui.QIcon(f":/icons/export.png"))
         self.clicked.connect(controller.export_trace)
 
+class ExportHistogramButton(QtWidgets.QPushButton):
+
+    def __init__(self, controller):
+        self.controller = controller
+        super().__init__("Export Histogram Data ")
+        self.setIcon(QtGui.QIcon(f":/icons/export_csv.png"))
+        self.clicked.connect(controller.export_histogram)
+
+class ExportTdpButton(QtWidgets.QPushButton):
+
+    def __init__(self, controller):
+        self.controller = controller
+        super().__init__("Export TDP Data")
+        self.setIcon(QtGui.QIcon(f":/icons/export_csv.png"))
+        self.clicked.connect(controller.export_tdp)
+
+class SaveHistogramImageButton(QtWidgets.QPushButton):
+
+    def __init__(self, controller):
+        self.controller = controller
+        super().__init__("Save Histogram Image ")
+        self.setIcon(QtGui.QIcon(f":/icons/picture.png"))
+        self.clicked.connect(controller.save_histogram_image)
+
+class SaveTdpImageButton(QtWidgets.QPushButton):
+
+    def __init__(self, controller):
+        self.controller = controller
+        super().__init__("Save TDP Image ")
+        self.setIcon(QtGui.QIcon(f":/icons/picture.png"))
+        self.clicked.connect(controller.save_tdp_image)
 
 # ==============================================================================
 class BaseTrainModelButton(QtWidgets.QWidget):

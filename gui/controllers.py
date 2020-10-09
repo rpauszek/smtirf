@@ -227,3 +227,22 @@ class ExperimentController(NavigationController):
         if filename:
             filename = pathlib.Path(filename)
             self.trc.export(filename)
+
+    def export_histogram(self):
+        fdArgs = {"caption":"Export histogram as...",
+                  "filter":"Data Files (*.dat)"}
+        filename, filetype = QFileDialog.getSaveFileName(**fdArgs)
+        # check that filename isn't null, then load and signal
+        if filename:
+            filename = pathlib.Path(filename)
+            self.expt.results.hist.export(filename)
+
+    def export_tdp(self):
+        fdArgs = {"caption":"Export TDP as...",
+                  "filter":"Data Files (*.dat)"}
+        filename, filetype = QFileDialog.getSaveFileName(**fdArgs)
+        # check that filename isn't null, then load and signal
+        if filename:
+            filename = pathlib.Path(filename)
+            self.expt.results.tdp.export(filename)
+            
