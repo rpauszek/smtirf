@@ -58,6 +58,19 @@ class Histogram():
     def _as_json(self):
         return json.dumps(self._attr_dict, cls=SMJsonEncoder)
 
+    def get_export_data(self):
+        data = np.vstack((self.centers, self.total, self.states)).T
+        nStates = self.states.shape[0]
+        fmt = ['%.3f', '%.3f'] + ['%.3f' for j in range(nStates)]
+        header = "Signal\tTotal"
+        for j in range(nStates):
+            header += f"\tState{j:02d}"
+        return data, fmt, header
+
+    def export(self, savename):
+        data, fmt, header = self.get_export_data()
+        np.savetxt(savename, data, fmt=fmt, delimiter='\t', header=header)
+
     @property
     def edges(self):
         return np.linspace(self.minimum, self.maximum, self.nBins+1, retstep=False)
@@ -131,6 +144,16 @@ class Tdp():
 
     def _as_json(self):
         return json.dumps(self._attr_dict, cls=SMJsonEncoder)
+
+    def get_export_data(self):
+        data = np.vstack((self.X.ravel(), self.Y.ravel(), self.Z.ravel())).T
+        fmt = ('%.3f', '%.3f', '%.5e')
+        header = "Initial signal\tFinal signal\tDensity"
+        return data, fmt, header
+
+    def export(self, savename):
+        data, fmt, header = self.get_export_data()
+        np.savetxt(savename, data, fmt=fmt, delimiter='\t', header=header)
 
     @property
     def mesh(self):
