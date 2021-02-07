@@ -7,17 +7,13 @@ to compile in shell, from ./smtirf/gui/ run command
     pyrcc5 resources.qrc -o ../resources.py
 """
 from pathlib import Path
-import subprocess
 
-iconsDir = Path(r'./icons').absolute()
-qrcFile = Path("./resources.qrc").absolute()
-pyResourceFile = qrcFile.parent.parent / "resources.py"
+iconsDir = Path('../icons').resolve()
+qrcFile = Path("../resources.qrc").resolve()
+print(qrcFile)
 
-# write .qrc file
 with open(qrcFile, 'w') as F:
     F.write('<!DOCTYPE RCC><RCC version="1.0">\n<qresource>\n')
     for icon in iconsDir.glob("*.png"):
         F.write(f'\t<file>icons/{icon.stem}.png</file>\n')
     F.write("</qresource>\n</RCC>")
-
-# TODO ==> compile .qrc -> .py resources, subprocess.run()?
