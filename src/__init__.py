@@ -6,8 +6,6 @@ smtirf >> __init__
 import numpy as np
 import json
 
-__version__ = "0.1.4"
-print(f"smtirf v{__version__}")
 
 class SMJsonEncoder(json.JSONEncoder):
     """ https://bit.ly/2sb9YCT """
