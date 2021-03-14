@@ -30,14 +30,18 @@ class SMTirfMainWindow(QMainWindow):
         btn = add_popup_toolbutton(self.toolbar, "select", "Select")
 
         # format
-        self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-        self.toolbar.setMovable(False)
         self.toolbar.setIconSize(QtCore.QSize(32, 32))
+        width = max([self.toolbar.widgetForAction(action).sizeHint().width()
+                     for action in self.toolbar.actions()])
+        height = max([self.toolbar.widgetForAction(action).sizeHint().height()
+                      for action in self.toolbar.actions()]) + 10
         for action in self.toolbar.actions():
             w = self.toolbar.widgetForAction(action)
-            w.setFixedSize(w.sizeHint().width(), 70)
-            w.setMinimumWidth(55)
-        self.addToolBar(self.toolbar)
+            w.setFixedSize(width, height)
+
+        self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.toolbar.setMovable(False)
+        self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
 
 
 def add_popup_toolbutton(toolbar, icon, label):
