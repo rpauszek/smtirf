@@ -22,6 +22,8 @@ class SMTirfMainWindow(QMainWindow):
         self.toolbar = QtWidgets.QToolBar("main", parent=self)
         btn = add_popup_toolbutton(self.toolbar, "microscope", "Experiment")
         add_popup_action(btn, "Import PMA", None, "Ctrl+N")
+        add_popup_action(btn, "Open Project", None, "Ctrl+O")
+        add_popup_action(btn, "Save Project", None, "Ctrl+S")
 
         btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results")
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
@@ -31,16 +33,15 @@ class SMTirfMainWindow(QMainWindow):
 
         # format
         self.toolbar.setIconSize(QtCore.QSize(32, 32))
-        width = max([self.toolbar.widgetForAction(action).sizeHint().width()
-                     for action in self.toolbar.actions()])
-        height = max([self.toolbar.widgetForAction(action).sizeHint().height()
-                      for action in self.toolbar.actions()]) + 10
-        for action in self.toolbar.actions():
-            w = self.toolbar.widgetForAction(action)
-            w.setFixedSize(width, height)
-
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.toolbar.setMovable(False)
+
+        get_action = lambda a: self.toolbar.widgetForAction(a).sizeHint()
+        width = max([get_action(action).width() for action in self.toolbar.actions()])
+        height = max([get_action(action).height() for action in self.toolbar.actions()]) + 10
+        for action in self.toolbar.actions():
+            self.toolbar.widgetForAction(action).setFixedSize(width, height)
+
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
 
 
