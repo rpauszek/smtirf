@@ -3,6 +3,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 import contextlib
 
 from . import resources
+from .controllers import ExperimentController
+from .dialogs import ImportPmaDialog
 
 WINDOW_TITLE = "smTIRF Analysis"
 
@@ -12,6 +14,7 @@ class SMTirfMainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__(windowTitle=WINDOW_TITLE)
+        self.controller = ExperimentController()
         self.resize(1000, 600)
 
         QtWidgets.QShortcut("Ctrl+Q", self, activated=self.close)
@@ -21,7 +24,7 @@ class SMTirfMainWindow(QMainWindow):
     def setup_toolbar(self):
         self.toolbar = QtWidgets.QToolBar("main", parent=self)
         btn = add_popup_toolbutton(self.toolbar, "microscope", "Experiment")
-        add_popup_action(btn, "Import PMA", None, "Ctrl+N")
+        add_popup_action(btn, "Import PMA", self.import_pma_experiment, "Ctrl+N")
         add_popup_action(btn, "Open Project", None, "Ctrl+O")
         add_popup_action(btn, "Save Project", None, "Ctrl+S")
 
@@ -43,6 +46,12 @@ class SMTirfMainWindow(QMainWindow):
             self.toolbar.widgetForAction(action).setFixedSize(width, height)
 
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
+
+    def import_pma_experiment(self):
+        dlg = ImportPmaDialog()
+        response = dlg.exec()
+        if response:
+            self.controller.import_pma_file(**dlg.importArgs)
 
 
 def add_popup_toolbutton(toolbar, icon, label):
