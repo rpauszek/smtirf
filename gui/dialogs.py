@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtWidgets
 
 from .widgets.labels import FileSelectionLabel
-from .widgets.buttons import ExperimentTypeButtonGroup
+from .widgets.button_groups import ExperimentTypeButtonGroup
 
 
 class ImportPmaDialog(QDialog):

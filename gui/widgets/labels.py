@@ -23,13 +23,13 @@ class FileSelectionLabel(QtWidgets.QWidget):
         self.filenameLabel = LeftElidedLabel()
         self.filenameLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
 
-        self.chooseFileButton = QtWidgets.QPushButton("...")
+        self.chooseFileButton = QtWidgets.QPushButton("Browse files")
         self.chooseFileButton.clicked.connect(self.choose_file)
 
         hbox = QtWidgets.QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(self.filenameLabel)
         hbox.addWidget(self.chooseFileButton)
+        hbox.addWidget(self.filenameLabel)
         self.setLayout(hbox)
 
     @property
