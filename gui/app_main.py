@@ -27,7 +27,7 @@ class SMTirfMainWindow(QMainWindow):
         btn = add_popup_toolbutton(self.toolbar, "microscope", "Experiment")
         add_popup_action(btn, "Import PMA", self.import_pma_experiment, "Ctrl+N")
         add_popup_action(btn, "Open Project", self.open_experiment, "Ctrl+O")
-        add_popup_action(btn, "Save Project", self.save_experiment, "Ctrl+S")
+        add_popup_action(btn, "Save Project", self.save_experiment, "Ctrl+S", enabler=self.controller.experimentChanged)
 
         btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results")
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
@@ -96,10 +96,13 @@ def add_popup_toolbutton(toolbar, icon, label):
     return btn
 
 
-def add_popup_action(btn, label, callback, shortcut=None):
+def add_popup_action(btn, label, callback, shortcut=None, enabler=None):
     action = QtWidgets.QAction(label, btn.parent())
     if shortcut is not None:
         action.setShortcut(shortcut)
     with contextlib.suppress(TypeError):
         action.triggered.connect(callback)
+    if enabler is not None:
+        action.setEnabled(False)
+        enabler.connect(lambda: action.setEnabled(True))
     btn.addAction(action)
