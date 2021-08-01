@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QFileDialog, QSizePolicy
 from PyQt5 import QtWidgets, QtCore, QtGui
 import contextlib
 
 from . import resources
 from .controllers import ExperimentController
 from .dialogs import ImportPmaDialog
+from . import widgets
 
 
 WINDOW_TITLE = "smTIRF Analysis"
@@ -21,6 +22,7 @@ class SMTirfMainWindow(QMainWindow):
         QtWidgets.QShortcut("Ctrl+Q", self, activated=self.close)
 
         self.setup_toolbar()
+        self.layout()
 
     def setup_toolbar(self):
         self.toolbar = QtWidgets.QToolBar("main", parent=self)
@@ -46,6 +48,17 @@ class SMTirfMainWindow(QMainWindow):
             self.toolbar.widgetForAction(action).setFixedSize(width, height)
 
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
+
+    def layout(self):
+        panel = QtWidgets.QWidget()
+        vbox = QtWidgets.QVBoxLayout()
+        panel.setLayout(vbox)
+        self.setCentralWidget(panel)
+
+        vbox.addSpacerItem(QtWidgets.QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+        navbar = widgets.TraceIndexSlider(self.controller)
+        vbox.addWidget(navbar)
 
     def import_pma_experiment(self):
         dlg = ImportPmaDialog()
