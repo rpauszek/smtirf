@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import QMainWindow
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QFileDialog
 from PyQt5 import QtWidgets, QtCore, QtGui
 import contextlib
 
 from . import resources
 from .controllers import ExperimentController
 from .dialogs import ImportPmaDialog
+
 
 WINDOW_TITLE = "smTIRF Analysis"
 
@@ -26,7 +27,7 @@ class SMTirfMainWindow(QMainWindow):
         btn = add_popup_toolbutton(self.toolbar, "microscope", "Experiment")
         add_popup_action(btn, "Import PMA", self.import_pma_experiment, "Ctrl+N")
         add_popup_action(btn, "Open Project", None, "Ctrl+O")
-        add_popup_action(btn, "Save Project", None, "Ctrl+S")
+        add_popup_action(btn, "Save Project", self.save_experiment, "Ctrl+S")
 
         btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results")
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
@@ -34,7 +35,6 @@ class SMTirfMainWindow(QMainWindow):
         btn = add_popup_toolbutton(self.toolbar, "sort", "Sort")
         btn = add_popup_toolbutton(self.toolbar, "select", "Select")
 
-        # format
         self.toolbar.setIconSize(QtCore.QSize(32, 32))
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
         self.toolbar.setMovable(False)
@@ -52,6 +52,32 @@ class SMTirfMainWindow(QMainWindow):
         response = dlg.exec()
         if response:
             self.controller.import_pma_file(**dlg.importArgs)
+
+    def save_experiment(self):
+        msg = make_messagebox("Save experiment?", "question",
+                              f"Save changes with current filename?\n{self.controller.filename}",
+                              QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
+        msg.exec()
+        response = msg.buttonRole(msg.clickedButton())
+
+        if response == QMessageBox.RejectRole:
+            return None
+        elif response == QMessageBox.YesRole:
+            filename = self.controller.save_experiment(self.controller.filename)
+        elif response == QMessageBox.NoRole:
+            filename, _ = QFileDialog.getSaveFileName(caption="Save experiment as...",
+                                                      filter="smtirf Experiment (*.smtrc)")
+            if filename:
+                self.controller.save_experiment(filename)
+
+
+def make_messagebox(title, icon, message, buttons):
+    msg = QMessageBox()
+    msg.setWindowTitle(title)
+    msg.setIconPixmap(QtGui.QPixmap(f":{icon}.svg").scaled(32, 32))
+    msg.setText(message)
+    msg.setStandardButtons(buttons)
+    return msg
 
 
 def add_popup_toolbutton(toolbar, icon, label):
