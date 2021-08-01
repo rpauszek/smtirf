@@ -16,6 +16,11 @@ class ExperimentController(QObject):
         self.filename = Path(filename).with_suffix(".smtrc")
         print(self.experiment)
 
+    def open_experiment(self, filename):
+        self.experiment = Experiment.load(filename)
+        self.filename = Path(filename)
+        print(self.experiment)
+
     def save_experiment(self, filename):
         self.experiment.save(filename)
         self.filename = Path(filename)

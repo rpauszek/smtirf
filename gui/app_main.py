@@ -26,7 +26,7 @@ class SMTirfMainWindow(QMainWindow):
         self.toolbar = QtWidgets.QToolBar("main", parent=self)
         btn = add_popup_toolbutton(self.toolbar, "microscope", "Experiment")
         add_popup_action(btn, "Import PMA", self.import_pma_experiment, "Ctrl+N")
-        add_popup_action(btn, "Open Project", None, "Ctrl+O")
+        add_popup_action(btn, "Open Project", self.open_experiment, "Ctrl+O")
         add_popup_action(btn, "Save Project", self.save_experiment, "Ctrl+S")
 
         btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results")
@@ -52,6 +52,12 @@ class SMTirfMainWindow(QMainWindow):
         response = dlg.exec()
         if response:
             self.controller.import_pma_file(**dlg.importArgs)
+
+    def open_experiment(self):
+        filename, _ = QFileDialog.getOpenFileName(caption="Open experiment...",
+                                                  filter="smtirf Experiment (*.smtrc)")
+        if filename:
+            self.controller.open_experiment(filename)
 
     def save_experiment(self):
         msg = make_messagebox("Save experiment?", "question",
