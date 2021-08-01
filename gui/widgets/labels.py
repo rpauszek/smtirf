@@ -2,6 +2,9 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSizePolicy, QFileDialog
 
 
+__all__ = ["FileSelectionLabel"]
+
+
 class LeftElidedLabel(QtWidgets.QLabel):
 
     def setText(self, s):

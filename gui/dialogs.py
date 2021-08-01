@@ -2,8 +2,7 @@ from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtWidgets
 
-from .widgets.labels import FileSelectionLabel
-from .widgets.button_groups import ExperimentTypeButtonGroup
+from . import widgets
 
 
 class ImportPmaDialog(QDialog):
@@ -21,13 +20,13 @@ class ImportPmaDialog(QDialog):
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.filenameLabel = FileSelectionLabel(caption="Select file to import",
-                                                filterString="PMA traces (*.traces)")
+        self.filenameLabel = widgets.FileSelectionLabel(caption="Select file to import",
+                                                        filterString="PMA traces (*.traces)")
         buttonOpen = self.buttonBox.button(QDialogButtonBox.Open)
         buttonOpen.setEnabled(False)
         self.filenameLabel.filenameIsSet.connect(buttonOpen.setEnabled)
 
-        self.experimentTypeGroup = ExperimentTypeButtonGroup()
+        self.experimentTypeGroup = widgets.ExperimentTypeButtonGroup()
         # TODO: bleedthrough, gammma, comments
 
         mainLayout = QtWidgets.QVBoxLayout()

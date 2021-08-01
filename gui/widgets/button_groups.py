@@ -2,6 +2,9 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QSizePolicy
 
 
+__all__ = ["ExperimentTypeButtonGroup"]
+
+
 class BaseButtonGroup(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
