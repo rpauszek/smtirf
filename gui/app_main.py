@@ -5,6 +5,7 @@ import contextlib
 from . import resources
 from .controllers import ExperimentController
 from .dialogs import ImportPmaDialog
+from .canvases import InteractiveTraceViewer
 from . import widgets
 
 
@@ -55,7 +56,8 @@ class SMTirfMainWindow(QMainWindow):
         panel.setLayout(vbox)
         self.setCentralWidget(panel)
 
-        vbox.addSpacerItem(QtWidgets.QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
+        canvas = InteractiveTraceViewer(self.controller)
+        vbox.addWidget(canvas, stretch=1)
 
         navbar = widgets.TraceIndexSlider(self.controller)
         vbox.addWidget(navbar)
