@@ -5,6 +5,9 @@ from PyQt5.QtGui import QPalette
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
+from matplotlib.widgets import SpanSelector
+
+from . import config
 from .axes import TraceAxes
 
 
@@ -42,7 +45,19 @@ class InteractiveTraceViewer(QtCanvas):
             if ax is not None:
                 ax.remove()
             projection = TraceAxes(parent=self, dataType=dataType)
-            ax = self.figure.add_subplot(self.gs[j], projection=projection)
+            self.axes[dataType] = self.figure.add_subplot(self.gs[j], projection=projection)
+        self.make_span_selectors()
+
+    def make_span_selectors(self):
+        def on_zoom(xmin, xmax):
+            if xmax-xmin < 1:
+                return
+            for _, ax in self.axes.items():
+                ax.set_xlim(xmin, xmax)
+            self.draw()
+
+        self.zoomSpan = SpanSelector(self.axes["selection"], on_zoom, "horizontal",
+                                     useblit=True, button=1, rectprops=config.plot.zoom_span)
 
     def update_plots(self, trace):
         self.traceChanged.emit(trace)

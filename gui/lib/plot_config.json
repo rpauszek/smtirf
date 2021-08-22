@@ -3,5 +3,9 @@
     "d_color": "#9ACD32",
     "a_color": "#CD1076",
     "i_color": "#8B8B83",
-    "line_width": 1
+    "line_width": 1,
+    "zoom_span": {
+        "alpha": 0.2,
+        "facecolor": "#C0FF3E"
+    }
 }
