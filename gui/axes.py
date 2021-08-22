@@ -1,10 +1,11 @@
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, InitVar
+from typing import ClassVar
 from matplotlib.axes import Axes
 
 __all__ = ["TraceAxes"]
 
 
-class TraceDataBaseAxes(Axes):
+class BaseTraceDataAxes(Axes):
 
     def __init__(self, *args, parent=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -14,7 +15,7 @@ class TraceDataBaseAxes(Axes):
         raise NotImplemented("base axes class cannot be instantiated")
 
 
-class SelectedDataAxes(TraceDataBaseAxes):
+class SelectedDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
@@ -29,7 +30,7 @@ class SelectedDataAxes(TraceDataBaseAxes):
         self.autoscale(enable=True, axis="x")
 
 
-class ChannelDataAxes(TraceDataBaseAxes):
+class ChannelDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
@@ -38,7 +39,7 @@ class ChannelDataAxes(TraceDataBaseAxes):
         pass
 
 
-class TotalDataAxes(TraceDataBaseAxes):
+class TotalDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
@@ -50,15 +51,13 @@ class TotalDataAxes(TraceDataBaseAxes):
 @dataclass
 class TraceAxes:
     parent: object
-    dataType: str
+    dataType: InitVar[str]
+    axesTypes: ClassVar[dict] = {"selection": SelectedDataAxes,
+                                 "channels": ChannelDataAxes,
+                                 "total": TotalDataAxes}
 
-    def get_axes_class(self):
-        if self.dataType == "selection":
-            return SelectedDataAxes
-        elif self.dataType == "channels":
-            return ChannelDataAxes
-        elif self.dataType == "total":
-            return TotalDataAxes
+    def __post_init__(self, dataType):
+        self.cls = TraceAxes.axesTypes[dataType]
 
     def _as_mpl_axes(self):
-        return self.get_axes_class(), {"parent": self.parent}
+        return self.cls, {"parent": self.parent}
