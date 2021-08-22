@@ -35,6 +35,7 @@ class InteractiveTraceViewer(QtCanvas):
 
         controller.experimentChanged.connect(self.make_axes)
         controller.traceChanged.connect(self.update_plots)
+        self.mpl_connect("scroll_event", lambda evt: controller.stepIndexTriggered.emit(evt.step))
 
     def make_axes(self):
         for j, (dataType, ax) in enumerate(self.axes.items()):
