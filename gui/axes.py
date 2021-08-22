@@ -18,9 +18,15 @@ class SelectedDataAxes(TraceDataBaseAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
+        self.lineFull, = self.plot([], [], color="k", lw=0.5)
+        self.set_xmargin(0)
+        self.set_ylim(-0.2, 1.2)
 
     def update_data(self, trace):
-        pass
+        self.lineFull.set_data(trace.t, trace.X)
+
+        self.relim()
+        self.autoscale(enable=True, axis="x")
 
 
 class ChannelDataAxes(TraceDataBaseAxes):

@@ -38,3 +38,4 @@ class InteractiveTraceViewer(QtCanvas):
 
     def update_plots(self, trace):
         self.traceChanged.emit(trace)
+        self.draw()
