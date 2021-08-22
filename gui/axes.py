@@ -19,7 +19,7 @@ class SelectedDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
-        self.lineFull, = self.plot([], [], color="k", lw=0.5)
+        self.lineFull, = self.plot([], [], color="#7A67EE", lw=0.5)
         self.set_xmargin(0)
         self.set_ylim(-0.2, 1.2)
 
@@ -34,18 +34,32 @@ class ChannelDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
+        self.lineDonor, = self.plot([], [], color="#9ACD32", lw=0.5)
+        self.lineAcceptor, = self.plot([], [], color="#CD1076", lw=0.5)
+        self.set_xmargin(0)
+        self.set_ymargin(0.1)
 
     def update_data(self, trace):
-        pass
+        self.lineDonor.set_data(trace.t, trace.D)
+        self.lineAcceptor.set_data(trace.t, trace.A)
+
+        self.relim()
+        self.autoscale(enable=True, axis="both")
 
 
 class TotalDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
+        self.lineFull, = self.plot([], [], color="#8B8B83", lw=0.5)
+        self.set_xmargin(0)
+        self.set_ymargin(0.1)
 
     def update_data(self, trace):
-        pass
+        self.lineFull.set_data(trace.t, trace.I)
+
+        self.relim()
+        self.autoscale(enable=True, axis="both")
 
 
 @dataclass
