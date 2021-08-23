@@ -39,6 +39,7 @@ class InteractiveTraceViewer(QtCanvas):
         controller.experimentChanged.connect(self.make_axes)
         controller.traceChanged.connect(self.update_plots)
         self.mpl_connect("scroll_event", lambda evt: controller.stepIndexTriggered.emit(evt.step))
+        self.mpl_connect('button_release_event', self.on_release)
 
     def make_axes(self):
         for j, (dataType, ax) in enumerate(self.axes.items()):
@@ -62,3 +63,10 @@ class InteractiveTraceViewer(QtCanvas):
     def update_plots(self, trace):
         self.traceChanged.emit(trace)
         self.draw()
+
+    def on_release(self, evt):
+        if evt.inaxes == self.axes["channels"] and evt.xdata is not None:
+            if evt.button == 1: # start
+                self.controller.set_trace_start_time(evt.xdata)
+            elif evt.button == 3: # stop
+                self.controller.set_trace_stop_time(evt.xdata)

@@ -54,3 +54,11 @@ class ExperimentController(QObject):
     def save_experiment(self, filename):
         self.experiment.save(filename)
         self.filename = Path(filename)
+
+    def set_trace_start_time(self, time):
+        self.trace.set_start_time(time)
+        self.traceChanged.emit(self.trace)
+
+    def set_trace_stop_time(self, time):
+        self.trace.set_stop_time(time)
+        self.traceChanged.emit(self.trace)
