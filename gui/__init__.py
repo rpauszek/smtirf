@@ -12,6 +12,8 @@ class PlotConfig:
     i_color: str = "#8B8B83"
     line_width: float = 1
     zoom_span: dict = field(default_factory={})
+    selection_span: dict = field(default_factory={})
+    axes_dim_background: str = "#DEDEDE"
 
     @classmethod
     def from_json(cls, filename):

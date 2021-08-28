@@ -8,5 +8,10 @@
     "zoom_span": {
         "alpha": 0.2,
         "facecolor": "#C0FF3E"
-    }
+    },
+    "selection_span": {
+        "alpha": 1.0,
+        "facecolor": "#FFFFFF"
+    },
+    "axes_dim_background": "#e3e2d8"
 }

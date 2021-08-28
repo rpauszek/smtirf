@@ -1,3 +1,4 @@
+import numpy as np
 from dataclasses import dataclass, InitVar
 from typing import ClassVar
 from matplotlib.axes import Axes
@@ -11,6 +12,14 @@ class BaseTraceDataAxes(Axes):
 
     def __init__(self, *args, parent=None, **kwargs):
         super().__init__(*args, **kwargs)
+        self.selectedSpan = self.axvspan(0, 1, **config.plot.selection_span)
+        self.set_facecolor(config.plot.axes_dim_background)
+
+        selected_span_updater = lambda trace: set_span_xlimits(self.selectedSpan,
+                                                               trace.t[trace.limits][0],
+                                                               trace.t[trace.limits][-1])
+
+        parent.traceChanged.connect(selected_span_updater)
         parent.traceChanged.connect(self.update_data)
 
     def update_data(self, trace, relim):
@@ -46,6 +55,7 @@ class ChannelDataAxes(BaseTraceDataAxes):
         super().__init__(*args, parent=parent)
         self.lineDonor = self.make_line(color=config.plot.d_color)
         self.lineAcceptor = self.make_line(color=config.plot.a_color)
+
         self.set_xmargin(0)
         self.set_ymargin(0.1)
 
@@ -63,6 +73,7 @@ class TotalDataAxes(BaseTraceDataAxes):
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
         self.lineFull = self.make_line(color=config.plot.i_color)
+
         self.set_xmargin(0)
         self.set_ymargin(0.1)
 
@@ -87,3 +98,10 @@ class TraceAxes:
 
     def _as_mpl_axes(self):
         return self.cls, {"parent": self.parent}
+
+
+def set_span_xlimits(span, xmin, xmax):
+    xy = span.get_xy()
+    xy[[0, 1, 4], 0] = xmin
+    xy[[2, 3], 0] = xmax
+    span.set_xy(xy)
