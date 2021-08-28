@@ -66,6 +66,18 @@ class InteractiveTraceViewer(QtCanvas):
         self.draw()
 
     def on_release(self, evt):
+        """Handle mouse button release events."""
+
+        def reset_xlim():
+            for _, ax in self.axes.items():
+                ax.autoscale(enable=True, axis="x")
+            self.draw()
+
+        # In selected data axes
+        if evt.inaxes == self.axes["selection"] and evt.button == 3:
+            reset_xlim()
+
+        # In channel data axes
         if evt.inaxes == self.axes["channels"] and evt.xdata is not None:
             if evt.button == 1: # start
                 self.controller.set_trace_start_time(evt.xdata)
