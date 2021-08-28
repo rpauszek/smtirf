@@ -13,7 +13,7 @@ class BaseTraceDataAxes(Axes):
         super().__init__(*args, **kwargs)
         parent.traceChanged.connect(self.update_data)
 
-    def update_data(self, trace):
+    def update_data(self, trace, relim):
         raise NotImplemented("base axes class cannot be instantiated")
 
     def make_line(self, color, **kwargs):
@@ -31,12 +31,13 @@ class SelectedDataAxes(BaseTraceDataAxes):
         self.set_xmargin(0)
         self.set_ylim(-0.2, 1.2)
 
-    def update_data(self, trace):
+    def update_data(self, trace, relim):
         self.lineFull.set_data(trace.t, trace.E)
         self.lineSelected.set_data(trace.t[trace.limits], trace.X)
 
-        self.relim()
-        self.autoscale(enable=True, axis="x")
+        if relim:
+            self.relim()
+            self.autoscale(enable=True, axis="x")
 
 
 class ChannelDataAxes(BaseTraceDataAxes):
@@ -48,12 +49,13 @@ class ChannelDataAxes(BaseTraceDataAxes):
         self.set_xmargin(0)
         self.set_ymargin(0.1)
 
-    def update_data(self, trace):
+    def update_data(self, trace, relim):
         self.lineDonor.set_data(trace.t, trace.D)
         self.lineAcceptor.set_data(trace.t, trace.A)
 
-        self.relim()
-        self.autoscale(enable=True, axis="both")
+        if relim:
+            self.relim()
+            self.autoscale(enable=True, axis="both")
 
 
 class TotalDataAxes(BaseTraceDataAxes):
@@ -64,11 +66,12 @@ class TotalDataAxes(BaseTraceDataAxes):
         self.set_xmargin(0)
         self.set_ymargin(0.1)
 
-    def update_data(self, trace):
+    def update_data(self, trace, relim):
         self.lineFull.set_data(trace.t, trace.I)
 
-        self.relim()
-        self.autoscale(enable=True, axis="both")
+        if relim:
+            self.relim()
+            self.autoscale(enable=True, axis="both")
 
 
 @dataclass

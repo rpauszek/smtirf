@@ -26,7 +26,7 @@ class QtCanvas(FigureCanvas):
 
 class InteractiveTraceViewer(QtCanvas):
 
-    traceChanged = pyqtSignal(object)
+    traceChanged = pyqtSignal(object, bool)
     axes = {"selection": None,
             "channels": None,
             "total": None}
@@ -37,7 +37,8 @@ class InteractiveTraceViewer(QtCanvas):
         self.gs = self.figure.add_gridspec(3, 1)
 
         controller.experimentChanged.connect(self.make_axes)
-        controller.traceChanged.connect(self.update_plots)
+        controller.traceIndexChanged.connect(lambda trace: self.update_plots(trace, True))
+        controller.traceStateChanged.connect(lambda trace: self.update_plots(trace, False))
         self.mpl_connect("scroll_event", lambda evt: controller.stepIndexTriggered.emit(evt.step))
         self.mpl_connect('button_release_event', self.on_release)
 
@@ -60,8 +61,8 @@ class InteractiveTraceViewer(QtCanvas):
         self.zoomSpan = SpanSelector(self.axes["selection"], on_zoom, "horizontal",
                                      useblit=True, button=1, rectprops=config.plot.zoom_span)
 
-    def update_plots(self, trace):
-        self.traceChanged.emit(trace)
+    def update_plots(self, trace, relim):
+        self.traceChanged.emit(trace, relim)
         self.draw()
 
     def on_release(self, evt):

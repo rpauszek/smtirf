@@ -12,7 +12,8 @@ class ExperimentController(QObject):
     _trace: object = None
     _index: int = 0
     experimentChanged: ClassVar[pyqtSignal] = pyqtSignal(object)
-    traceChanged: ClassVar[pyqtSignal] = pyqtSignal(object)
+    traceIndexChanged: ClassVar[pyqtSignal] = pyqtSignal(object)
+    traceStateChanged: ClassVar[pyqtSignal] = pyqtSignal(object)
     stepIndexTriggered: ClassVar[pyqtSignal] = pyqtSignal(int)
 
     def __post_init__(self):
@@ -41,7 +42,7 @@ class ExperimentController(QObject):
 
     def set_trace(self, index):
         self._trace = self.experiment[index]
-        self.traceChanged.emit(self.trace)
+        self.traceIndexChanged.emit(self.trace)
 
     def import_pma_file(self, filename, experimentType="fret", bleed=0.05, gamma=1, comments=""):
         self.experiment = Experiment.from_pma(filename, experimentType, bleed, gamma, comments)
@@ -57,8 +58,8 @@ class ExperimentController(QObject):
 
     def set_trace_start_time(self, time):
         self.trace.set_start_time(time)
-        self.traceChanged.emit(self.trace)
+        self.traceStateChanged.emit(self.trace)
 
     def set_trace_stop_time(self, time):
         self.trace.set_stop_time(time)
-        self.traceChanged.emit(self.trace)
+        self.traceStateChanged.emit(self.trace)
