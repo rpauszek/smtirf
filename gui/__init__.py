@@ -6,6 +6,7 @@ import json
 @dataclass
 class PlotConfig:
     x_color: str = "#7A67EE"
+    x_color_dim: str = "#BCD2EE"
     d_color: str = "#9ACD32"
     a_color: str = "#CD1076"
     i_color: str = "#8B8B83"

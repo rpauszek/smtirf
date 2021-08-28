@@ -16,8 +16,9 @@ class BaseTraceDataAxes(Axes):
     def update_data(self, trace):
         raise NotImplemented("base axes class cannot be instantiated")
 
-    def make_line(self, color):
-        line, = self.plot([], [], color=color, lw=config.plot.line_width)
+    def make_line(self, color, **kwargs):
+        formatting = {"lw": config.plot.line_width, **kwargs}
+        line, = self.plot([], [], color=color, **formatting)
         return line
 
 
@@ -25,12 +26,14 @@ class SelectedDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
-        self.lineFull = self.make_line(color=config.plot.x_color)
+        self.lineFull = self.make_line(color=config.plot.x_color_dim)
+        self.lineSelected = self.make_line(color=config.plot.x_color)
         self.set_xmargin(0)
         self.set_ylim(-0.2, 1.2)
 
     def update_data(self, trace):
-        self.lineFull.set_data(trace.t, trace.X)
+        self.lineFull.set_data(trace.t, trace.E)
+        self.lineSelected.set_data(trace.t[trace.limits], trace.X)
 
         self.relim()
         self.autoscale(enable=True, axis="x")
