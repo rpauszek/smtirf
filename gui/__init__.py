@@ -3,6 +3,9 @@ from dataclasses import dataclass, field
 import json
 
 
+lib_path = Path(__file__).parent / "lib"
+
+
 @dataclass
 class PlotConfig:
     x_color: str = "#7A67EE"
@@ -21,9 +24,10 @@ class PlotConfig:
             return cls(**json.load(J))
 
 
-@dataclass
 class Config:
-    plot: PlotConfig
+
+    def __init__(self):
+        self.plot = PlotConfig.from_json(lib_path / "plot_config.json")
 
 
-config = Config(PlotConfig.from_json(Path(__file__).parent / "lib/plot_config.json"))
+config = Config()
