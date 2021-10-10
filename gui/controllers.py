@@ -63,3 +63,7 @@ class ExperimentController(QObject):
     def set_trace_stop_time(self, time):
         self.trace.set_stop_time(time)
         self.traceStateChanged.emit(self.trace)
+
+    def toggle_selected(self):
+        self.trace.toggle()
+        self.traceStateChanged.emit(self.trace)

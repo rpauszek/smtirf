@@ -21,6 +21,7 @@ class SMTirfMainWindow(QMainWindow):
         self.resize(1000, 600)
 
         QtWidgets.QShortcut("Ctrl+Q", self, activated=self.close)
+        QtWidgets.QShortcut(QtCore.Qt.Key_Space, self, activated=self.controller.toggle_selected)
 
         self.setup_toolbar()
         self.layout()
@@ -69,6 +70,7 @@ class SMTirfMainWindow(QMainWindow):
         # *** trace info panel
         traceGroup = QtWidgets.QGroupBox("Current Trace")
         vbox = QtWidgets.QVBoxLayout()
+        vbox.addWidget(widgets.TraceSelectionButton(self.controller))
         vbox.addWidget(widgets.TraceIdLabel(self.controller))
         vbox.addWidget(widgets.CorrelationLabel(self.controller))
         vbox.addSpacerItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
