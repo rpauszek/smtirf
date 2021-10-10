@@ -32,11 +32,11 @@ class SMTirfMainWindow(QMainWindow):
         add_popup_action(btn, "Open Project", self.open_experiment, "Ctrl+O")
         add_popup_action(btn, "Save Project", self.save_experiment, "Ctrl+S", enabler=self.controller.experimentChanged)
 
-        btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results")
+        btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results", enabler=self.controller.experimentChanged)
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
-        btn = add_popup_toolbutton(self.toolbar, "baseline", "Baseline")
-        btn = add_popup_toolbutton(self.toolbar, "sort", "Sort")
-        btn = add_popup_toolbutton(self.toolbar, "select", "Select")
+        btn = add_popup_toolbutton(self.toolbar, "baseline", "Baseline", enabler=self.controller.experimentChanged)
+        btn = add_popup_toolbutton(self.toolbar, "sort", "Sort", enabler=self.controller.experimentChanged)
+        btn = add_popup_toolbutton(self.toolbar, "select", "Select", enabler=self.controller.experimentChanged)
 
         self.toolbar.setIconSize(QtCore.QSize(32, 32))
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
@@ -84,7 +84,7 @@ class SMTirfMainWindow(QMainWindow):
         if response == QMessageBox.RejectRole:
             return None
         elif response == QMessageBox.YesRole:
-            filename = self.controller.save_experiment(self.controller.filename)
+            self.controller.save_experiment(self.controller.filename)
         elif response == QMessageBox.NoRole:
             filename, _ = QFileDialog.getSaveFileName(caption="Save experiment as...",
                                                       filter="smtirf Experiment (*.smtrc)")
@@ -101,12 +101,19 @@ def make_messagebox(title, icon, message, buttons):
     return msg
 
 
-def add_popup_toolbutton(toolbar, icon, label):
+def set_enabler(widget, enabler):
+    if enabler is not None:
+        widget.setEnabled(False)
+        enabler.connect(lambda: widget.setEnabled(True))
+
+
+def add_popup_toolbutton(toolbar, icon, label, enabler=None):
     btn = QtWidgets.QToolButton()
     btn.setPopupMode(QtWidgets.QToolButton.InstantPopup)
     btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
     btn.setIcon(QtGui.QIcon(f":{icon}.svg"))
     btn.setText(label)
+    set_enabler(btn, enabler)
     toolbar.addWidget(btn)
     return btn
 
@@ -117,7 +124,5 @@ def add_popup_action(btn, label, callback, shortcut=None, enabler=None):
         action.setShortcut(shortcut)
     with contextlib.suppress(TypeError):
         action.triggered.connect(callback)
-    if enabler is not None:
-        action.setEnabled(False)
-        enabler.connect(lambda: action.setEnabled(True))
+    set_enabler(action, enabler)
     btn.addAction(action)
