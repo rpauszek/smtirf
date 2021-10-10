@@ -1,8 +1,8 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSizePolicy, QFileDialog
+from PyQt5.QtWidgets import QSpacerItem, QSizePolicy, QFileDialog
 
 
-__all__ = ["FileSelectionLabel"]
+__all__ = ["FileSelectionLabel", "TraceIdLabel", "CorrelationLabel"]
 
 
 class LeftElidedLabel(QtWidgets.QLabel):
@@ -50,3 +50,50 @@ class FileSelectionLabel(QtWidgets.QWidget):
         if filename:
             self.filename = filename
             self.filenameLabel.setText(filename)
+
+
+class TraceLabel(QtWidgets.QWidget):
+    """Base widget for labels to display trace attribute information.
+
+    Static label describing attribute is left-aligned,
+    retrieved information is right aligned.
+    """
+
+    _label = ""  # static label describing information
+    _get_text = lambda *_: " "  # function to retrieve text from trace instance
+
+    def __init__(self, controller, **kwargs):
+        # * instantiate widgets
+        super().__init__(**kwargs)
+        self._labelWidget = QtWidgets.QLabel(self._label)
+        self._textWidget = QtWidgets.QLabel("")
+
+        # * layout
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.setContentsMargins(0, 0, 0, 0)
+        hbox.addWidget(self._labelWidget)
+        hbox.addSpacerItem(QSpacerItem(5, 5, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        hbox.addWidget(self._textWidget)
+        self.setLayout(hbox)
+
+        # * align
+        self.setMinimumWidth(150)
+        self._labelWidget.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self._textWidget.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+
+        # * connect
+        controller.traceIndexChanged.connect(self.update_text)
+        controller.traceStateChanged.connect(self.update_text)
+
+    def update_text(self, trace):
+        self._textWidget.setText(self._get_text(trace))
+
+
+class TraceIdLabel(TraceLabel):
+    _label = "ID: "
+    _get_text = lambda _, trace: str(trace._id)
+
+
+class CorrelationLabel(TraceLabel):
+    _label = "Correlation: "
+    _get_text = lambda _, trace: f"{trace.corrcoef:0.3f}"

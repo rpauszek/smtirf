@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QMessageBox, QFileDialog, QSizePolicy
+from PyQt5.QtWidgets import QMainWindow, QMessageBox, QFileDialog, QSpacerItem, QSizePolicy
 from PyQt5 import QtWidgets, QtCore, QtGui
 import contextlib
 
@@ -52,15 +52,29 @@ class SMTirfMainWindow(QMainWindow):
 
     def layout(self):
         panel = QtWidgets.QWidget()
-        vbox = QtWidgets.QVBoxLayout()
-        panel.setLayout(vbox)
+        hbox = QtWidgets.QHBoxLayout()
+        panel.setLayout(hbox)
         self.setCentralWidget(panel)
 
+        # *** plot/navigation panel
+        vbox = QtWidgets.QVBoxLayout()
         canvas = InteractiveTraceViewer(self.controller)
         vbox.addWidget(canvas, stretch=1)
 
         navbar = widgets.TraceIndexSlider(self.controller)
         vbox.addWidget(navbar)
+
+        hbox.addLayout(vbox, stretch=1)
+
+        # *** trace info panel
+        traceGroup = QtWidgets.QGroupBox("Current Trace")
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.addWidget(widgets.TraceIdLabel(self.controller))
+        vbox.addWidget(widgets.CorrelationLabel(self.controller))
+        vbox.addSpacerItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
+
+        traceGroup.setLayout(vbox)
+        hbox.addWidget(traceGroup)
 
     def import_pma_experiment(self):
         dlg = ImportPmaDialog()
