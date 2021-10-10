@@ -31,6 +31,17 @@ class BaseTraceDataAxes(Axes):
         return line
 
 
+def relim(axis):
+    def update(func):
+        def wrapped_update(self, trace, relim):
+            func(self, trace, relim)
+            if relim:
+                self.relim()
+                self.autoscale(enable=True, axis=axis)
+        return wrapped_update
+    return update
+
+
 class SelectedDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
@@ -40,13 +51,10 @@ class SelectedDataAxes(BaseTraceDataAxes):
         self.set_xmargin(0)
         self.set_ylim(-0.2, 1.2)
 
+    @relim("x")
     def update_data(self, trace, relim):
         self.lineFull.set_data(trace.t, trace.E)
         self.lineSelected.set_data(trace.t[trace.limits], trace.X)
-
-        if relim:
-            self.relim()
-            self.autoscale(enable=True, axis="x")
 
 
 class ChannelDataAxes(BaseTraceDataAxes):
@@ -59,13 +67,10 @@ class ChannelDataAxes(BaseTraceDataAxes):
         self.set_xmargin(0)
         self.set_ymargin(0.1)
 
+    @relim("both")
     def update_data(self, trace, relim):
         self.lineDonor.set_data(trace.t, trace.D)
         self.lineAcceptor.set_data(trace.t, trace.A)
-
-        if relim:
-            self.relim()
-            self.autoscale(enable=True, axis="both")
 
 
 class TotalDataAxes(BaseTraceDataAxes):
@@ -77,12 +82,9 @@ class TotalDataAxes(BaseTraceDataAxes):
         self.set_xmargin(0)
         self.set_ymargin(0.1)
 
+    @relim("both")
     def update_data(self, trace, relim):
         self.lineFull.set_data(trace.t, trace.I)
-
-        if relim:
-            self.relim()
-            self.autoscale(enable=True, axis="both")
 
 
 @dataclass
