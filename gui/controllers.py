@@ -56,6 +56,10 @@ class ExperimentController(QObject):
         self.experiment.save(filename)
         self.filename = Path(filename)
 
+    def sort_traces(self, method):
+        self.experiment.sort(method)
+        self.set_index(self.index)
+
     def select_all(self):
         self.experiment.select_all()
         self.traceStateChanged.emit(self.trace)

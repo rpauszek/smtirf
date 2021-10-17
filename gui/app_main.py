@@ -36,7 +36,11 @@ class SMTirfMainWindow(QMainWindow):
         btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results", enabler=self.controller.experimentChanged)
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
         btn = add_popup_toolbutton(self.toolbar, "baseline", "Baseline", enabler=self.controller.experimentChanged)
+
         btn = add_popup_toolbutton(self.toolbar, "sort", "Sort", enabler=self.controller.experimentChanged)
+        add_popup_action(btn, "By Index", lambda: self.controller.sort_traces("index"))
+        add_popup_action(btn, "By Selected", lambda: self.controller.sort_traces("selected"))
+        add_popup_action(btn, "By Correlation", lambda: self.controller.sort_traces("corrcoef"))
 
         btn = add_popup_toolbutton(self.toolbar, "select", "Select", enabler=self.controller.experimentChanged)
         add_popup_action(btn, "Select All", self.controller.select_all)
