@@ -87,10 +87,9 @@ class SMTirfMainWindow(QMainWindow):
         vbox.addWidget(widgets.TraceSelectionButton(self.controller))
         vbox.addWidget(widgets.TraceIdLabel(self.controller))
         vbox.addWidget(widgets.CorrelationLabel(self.controller))
-        vbox.addSpacerItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
 
         traceGroup.setLayout(vbox)
-        right_vbox.addWidget(traceGroup, stretch=1)
+        right_vbox.addWidget(traceGroup)
 
         # *** experiment info panel
         experimentGroup = QtWidgets.QGroupBox("Experiment")
@@ -107,6 +106,10 @@ class SMTirfMainWindow(QMainWindow):
 
         experimentGroup.setLayout(gbox)
         right_vbox.addWidget(experimentGroup)
+
+        # *** coordinate label
+        right_vbox.addSpacerItem(QSpacerItem(0, 0, QSizePolicy.Fixed, QSizePolicy.Expanding))
+        right_vbox.addWidget(widgets.CoordinateLabel(self.controller))
 
     def import_pma_experiment(self):
         dlg = ImportPmaDialog()

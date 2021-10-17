@@ -2,7 +2,8 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSpacerItem, QSizePolicy, QFileDialog
 
 
-__all__ = ["FileSelectionLabel", "TraceIdLabel", "CorrelationLabel", "SelectedTraceCounter"]
+__all__ = ["FileSelectionLabel", "TraceIdLabel", "CorrelationLabel", "SelectedTraceCounter",
+           "CoordinateLabel"]
 
 
 class LeftElidedLabel(QtWidgets.QLabel):
@@ -104,7 +105,6 @@ class SelectedItemsCounter(QtWidgets.QProgressBar):
     def __init__(self, loadSignal, editSignal, **kwargs):
         super().__init__(**kwargs)
         self.setFormat(r" %v/%m")
-        self.setMinimumWidth(120)
 
         self.items = None
 
@@ -124,3 +124,17 @@ class SelectedTraceCounter(SelectedItemsCounter):
 
     def __init__(self, controller, **kwargs):
         super().__init__(controller.experimentChanged, controller.traceStateChanged, **kwargs)
+
+
+class CoordinateLabel(QtWidgets.QLabel):
+
+    def __init__(self, controller, **kwargs):
+        super().__init__("x: , y: ", **kwargs)
+        self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        controller.mplMotionNotifyEvent.connect(self.update_text)
+        self.setStyleSheet("color: #888888;")
+
+    def update_text(self, evt):
+        self.setText(
+            f"x: {evt.xdata:0.2f}, y: {evt.ydata:0.2f}" if evt.inaxes else ""
+        )

@@ -16,6 +16,7 @@ class ExperimentController(QObject):
     traceIndexChanged: ClassVar[pyqtSignal] = pyqtSignal(object)
     traceStateChanged: ClassVar[pyqtSignal] = pyqtSignal(object)
     stepIndexTriggered: ClassVar[pyqtSignal] = pyqtSignal(int)
+    mplMotionNotifyEvent: ClassVar[pyqtSignal] = pyqtSignal(object)
 
     def __post_init__(self):
         super().__init__()
