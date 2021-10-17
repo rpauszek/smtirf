@@ -69,6 +69,7 @@ class SMTirfMainWindow(QMainWindow):
 
         # *** trace info panel
         traceGroup = QtWidgets.QGroupBox("Current Trace")
+        set_enabler(traceGroup, self.controller.experimentChanged)
         vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(widgets.TraceSelectionButton(self.controller))
         vbox.addWidget(widgets.TraceIdLabel(self.controller))
