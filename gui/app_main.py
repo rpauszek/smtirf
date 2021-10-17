@@ -74,6 +74,11 @@ class SMTirfMainWindow(QMainWindow):
 
         hbox.addLayout(vbox, stretch=1)
 
+        # *** right side panel
+        right_vbox = QtWidgets.QVBoxLayout()
+        right_vbox.addSpacerItem(QSpacerItem(300, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        hbox.addLayout(right_vbox)
+
         # *** trace info panel
         traceGroup = QtWidgets.QGroupBox("Current Trace")
         set_enabler(traceGroup, self.controller.experimentChanged)
@@ -84,7 +89,13 @@ class SMTirfMainWindow(QMainWindow):
         vbox.addSpacerItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
 
         traceGroup.setLayout(vbox)
-        hbox.addWidget(traceGroup)
+        right_vbox.addWidget(traceGroup, stretch=1)
+
+        # *** experiment info panel
+        experimentGroup = QtWidgets.QGroupBox("Experiment")
+        set_enabler(experimentGroup, self.controller.experimentChanged)
+
+        right_vbox.addWidget(experimentGroup)
 
     def import_pma_experiment(self):
         dlg = ImportPmaDialog()
