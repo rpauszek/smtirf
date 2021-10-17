@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSpacerItem, QSizePolicy, QFileDialog
 
 
-__all__ = ["FileSelectionLabel", "TraceIdLabel", "CorrelationLabel"]
+__all__ = ["FileSelectionLabel", "TraceIdLabel", "CorrelationLabel", "SelectedTraceCounter"]
 
 
 class LeftElidedLabel(QtWidgets.QLabel):
@@ -97,3 +97,30 @@ class TraceIdLabel(TraceLabel):
 class CorrelationLabel(TraceLabel):
     _label = "Correlation: "
     _get_text = lambda _, trace: f"{trace.corrcoef:0.3f}"
+
+
+class SelectedItemsCounter(QtWidgets.QProgressBar):
+
+    def __init__(self, loadSignal, editSignal, **kwargs):
+        super().__init__(**kwargs)
+        self.setFormat(r" %v/%m")
+        self.setMinimumWidth(120)
+
+        self.items = None
+
+        loadSignal.connect(self.refresh)
+        editSignal.connect(self.recount)
+
+    def refresh(self, items):
+        self.items = items
+        self.setMaximum(len(self.items))
+        self.recount()
+
+    def recount(self):
+        self.setValue(self.items.nSelected)
+
+
+class SelectedTraceCounter(SelectedItemsCounter):
+
+    def __init__(self, controller, **kwargs):
+        super().__init__(controller.experimentChanged, controller.traceStateChanged, **kwargs)
