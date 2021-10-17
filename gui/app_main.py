@@ -37,7 +37,10 @@ class SMTirfMainWindow(QMainWindow):
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
         btn = add_popup_toolbutton(self.toolbar, "baseline", "Baseline", enabler=self.controller.experimentChanged)
         btn = add_popup_toolbutton(self.toolbar, "sort", "Sort", enabler=self.controller.experimentChanged)
+
         btn = add_popup_toolbutton(self.toolbar, "select", "Select", enabler=self.controller.experimentChanged)
+        add_popup_action(btn, "Select All", self.controller.select_all)
+        add_popup_action(btn, "Select None", self.controller.select_none)
 
         self.toolbar.setIconSize(QtCore.QSize(32, 32))
         self.toolbar.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)

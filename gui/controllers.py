@@ -56,6 +56,14 @@ class ExperimentController(QObject):
         self.experiment.save(filename)
         self.filename = Path(filename)
 
+    def select_all(self):
+        self.experiment.select_all()
+        self.traceStateChanged.emit(self.trace)
+
+    def select_none(self):
+        self.experiment.select_none()
+        self.traceStateChanged.emit(self.trace)
+
     def set_trace_start_time(self, time):
         self.trace.set_start_time(time)
         self.traceStateChanged.emit(self.trace)
