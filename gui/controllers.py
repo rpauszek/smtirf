@@ -5,6 +5,7 @@ from pathlib import Path
 
 from .. import Experiment
 
+
 @dataclass
 class ExperimentController(QObject):
     filename: str = ""
@@ -66,6 +67,16 @@ class ExperimentController(QObject):
 
     def select_none(self):
         self.experiment.select_none()
+        self.traceStateChanged.emit(self.trace)
+
+    def reset_limits(self):
+        for trace in self.experiment:
+            trace.set_limits(None)
+        self.traceStateChanged.emit(self.trace)
+
+    def reset_offsets(self):
+        for trace in self.experiment:
+            trace.set_offsets(None)
         self.traceStateChanged.emit(self.trace)
 
     def set_trace_start_time(self, time):

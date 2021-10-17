@@ -7,6 +7,7 @@ from .controllers import ExperimentController
 from .dialogs import ImportPmaDialog
 from .canvases import InteractiveTraceViewer
 from . import widgets
+from .util import make_messagebox
 
 
 WINDOW_TITLE = "smTIRF Analysis"
@@ -94,10 +95,17 @@ class SMTirfMainWindow(QMainWindow):
         # *** experiment info panel
         experimentGroup = QtWidgets.QGroupBox("Experiment")
         set_enabler(experimentGroup, self.controller.experimentChanged)
-        vbox = QtWidgets.QVBoxLayout()
-        vbox.addWidget(widgets.SelectedTraceCounter(self.controller))
+        gbox = QtWidgets.QGridLayout()
+        row = 0
+        gbox.addWidget(widgets.SelectedTraceCounter(self.controller), row, 0, 1, 2)
+        row += 1
+        gbox.addItem(QSpacerItem(5, 15, QSizePolicy.Fixed, QSizePolicy.Fixed), row, 0)
 
-        experimentGroup.setLayout(vbox)
+        row += 1
+        gbox.addWidget(widgets.ResetOffsetsButton(self.controller), row, 0)
+        gbox.addWidget(widgets.ResetLimitsButton(self.controller), row, 1)
+
+        experimentGroup.setLayout(gbox)
         right_vbox.addWidget(experimentGroup)
 
     def import_pma_experiment(self):
@@ -128,15 +136,6 @@ class SMTirfMainWindow(QMainWindow):
                                                       filter="smtirf Experiment (*.smtrc)")
             if filename:
                 self.controller.save_experiment(filename)
-
-
-def make_messagebox(title, icon, message, buttons):
-    msg = QMessageBox()
-    msg.setWindowTitle(title)
-    msg.setIconPixmap(QtGui.QPixmap(f":{icon}.svg").scaled(32, 32))
-    msg.setText(message)
-    msg.setStandardButtons(buttons)
-    return msg
 
 
 def set_enabler(widget, enabler):
