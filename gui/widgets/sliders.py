@@ -104,7 +104,9 @@ class TraceIndexSlider(SpinSlider):
 
 class LabeledSlider(QtWidgets.QWidget):
 
-    def __init__(self, label, minimum=0, maximum=100, value=0):
+    valueChanged = QtCore.pyqtSignal(float)
+
+    def __init__(self, label, minimum=0, maximum=100, value=0, callback=None):
         super().__init__()
 
         self.slider = QtWidgets.QSlider(
@@ -113,11 +115,10 @@ class LabeledSlider(QtWidgets.QWidget):
             value=value,
             orientation=QtCore.Qt.Horizontal
         )
-        # self.slider.setTracking(False)
         self.label = QtWidgets.QLabel("1")
 
         box = QtWidgets.QGridLayout()
-        # box.setContentsMargins(0, 0, 0, 0)
+        box.setContentsMargins(0, 0, 0, 0)
         box.addWidget(QtWidgets.QLabel(f"{label}: "), 0, 0, 1, 2)
         box.addWidget(self.slider, 1, 0)
         box.addWidget(self.label, 1, 1, QtCore.Qt.AlignRight)
@@ -127,6 +128,7 @@ class LabeledSlider(QtWidgets.QWidget):
         self.setLayout(box)
 
         self.slider.valueChanged.connect(self._update_label)
+        self.slider.valueChanged.connect(lambda val: self.valueChanged.emit(val))
         self._update_label(value)
 
     def value(self):
@@ -150,10 +152,10 @@ class LabeledIntervalSlider(LabeledSlider):
         )
 
     def value(self):
-        return self.slider.value() * self._interval
+        return int(self.slider.value() * self._interval)
 
     def _update_label(self, index):
-        self.label.setText(f"{self.value()}")
+        self.label.setText(f"{self.value():,}")
 
 
 class LabeledScientificSlider(LabeledSlider):
