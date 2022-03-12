@@ -1,8 +1,10 @@
+import numpy as np
+
 from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSizePolicy
 
 
-__all__ = ["TraceIndexSlider"]
+__all__ = ["TraceIndexSlider", "LabeledSlider", "LabeledIntervalSlider", "LabeledScientificSlider"]
 
 
 class SpinSlider(QtWidgets.QWidget):
@@ -98,3 +100,90 @@ class TraceIndexSlider(SpinSlider):
         controller.experimentChanged.connect(lambda: self.setEnabled(True))
         controller.experimentChanged.connect(self.refresh_limits)
         controller.stepIndexTriggered.connect(self.step)
+
+
+class LabeledSlider(QtWidgets.QWidget):
+
+    def __init__(self, label, minimum=0, maximum=100, value=0):
+        super().__init__()
+
+        self.slider = QtWidgets.QSlider(
+            minimum=minimum,
+            maximum=maximum,
+            value=value,
+            orientation=QtCore.Qt.Horizontal
+        )
+        # self.slider.setTracking(False)
+        self.label = QtWidgets.QLabel("1")
+
+        box = QtWidgets.QGridLayout()
+        # box.setContentsMargins(0, 0, 0, 0)
+        box.addWidget(QtWidgets.QLabel(f"{label}: "), 0, 0, 1, 2)
+        box.addWidget(self.slider, 1, 0)
+        box.addWidget(self.label, 1, 1, QtCore.Qt.AlignRight)
+
+        box.setColumnStretch(0, 4)
+        box.setColumnStretch(1, 1)
+        self.setLayout(box)
+
+        self.slider.valueChanged.connect(self._update_label)
+        self._update_label(value)
+
+    def value(self):
+        return self.slider.value()
+
+    def _update_label(self, index):
+        self.label.setText(f"{index}")
+
+
+class LabeledIntervalSlider(LabeledSlider):
+
+    def __init__(self, label, minimum=0, maximum=1000, value=0, interval=10):
+        assert (maximum - minimum) % interval == 0
+        self._interval = interval
+        self._minimum = minimum
+        super().__init__(
+            label=label,
+            minimum=minimum/interval,
+            maximum=maximum/interval,
+            value=value/interval
+        )
+
+    def value(self):
+        return self.slider.value() * self._interval
+
+    def _update_label(self, index):
+        self.label.setText(f"{self.value()}")
+
+
+class LabeledScientificSlider(LabeledSlider):
+
+    def __init__(self, label, minimum=1e-12, maximum=1, value=1):
+        self.min_decade = np.log10(minimum)
+        max_decade = np.log10(maximum)
+        n_decades = max_decade - self.min_decade
+
+        # convert requested value to index
+        exponent = np.floor(np.log10(value))
+        significand = value / 10**exponent
+        decade = exponent - self.min_decade
+        value = significand - 1 + (9 * decade)
+
+        super().__init__(
+            label=label,
+            minimum=0,
+            maximum=n_decades * 9,
+            value=value,
+        )
+
+    def value(self):
+        index = self.slider.value()
+        significand = index - (9 * (index // 9)) + 1
+        return significand * 10**(self.min_decade + index // 9)
+
+    def _update_label(self, index):
+        value = self.value()
+        exponent = np.floor(np.log10(value))
+        significand = value / 10**exponent
+
+        self.label.setText(f"{significand:0.0f} e{exponent:0.0f}")
