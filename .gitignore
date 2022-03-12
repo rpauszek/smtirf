@@ -4,6 +4,7 @@ gui/lib/icons
 *.log
 *.tif
 *.traces
+*.pks
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

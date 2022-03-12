@@ -32,7 +32,7 @@ def simulate_statepath(K, pi, A, T):
 
 
 def simulate_fret_experiment(
-    statepath, mu, total_intensity, sigma_channel, lifetime_frames=None
+    statepath, mu, total_intensity, channel_sigma, lifetime_frames=None
 ):
     """Simulate FRET, donor, and acceptor traces from statepath.
 
@@ -44,7 +44,7 @@ def simulate_fret_experiment(
         array of FRET states
     total_intensity : float
         total signal intensity; sum of donor and acceptor
-    sigma_channel : float
+    channel_sigma : float
         noise in donor/acceptor signal
     lifetime_frames : float
         mean lifetime (in frames) of the fluorophore;
@@ -68,8 +68,8 @@ def simulate_fret_experiment(
     else:
         bleach_statepath = np.zeros(statepath.shape)
 
-    acceptor = np.random.normal(loc=acceptor_statepath, scale=sigma_channel)
-    donor = np.random.normal(loc=donor_statepath, scale=sigma_channel)
+    acceptor = np.random.normal(loc=acceptor_statepath, scale=channel_sigma)
+    donor = np.random.normal(loc=donor_statepath, scale=channel_sigma)
     fret = acceptor / (acceptor + donor)
 
     return fret, donor, acceptor, bleach_statepath
