@@ -246,6 +246,5 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.show()
 
-
     plt.imshow(img)
     plt.show()

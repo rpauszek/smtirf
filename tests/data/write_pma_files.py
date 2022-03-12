@@ -53,11 +53,11 @@ def _write_log_file(savebase, gain, data_scaler, frame_length, record_date):
 
 
 if __name__ == "__main__":
-    import simulate
+    from simulate import simulate_fret_experiment
     from datetime import datetime
 
     params = {
-        "n_frames": 1000,
+        "n_frames": 500,
         "n_spots": 5,
         "log_params": {
             "gain": 300,
@@ -67,25 +67,5 @@ if __name__ == "__main__":
         },
     }
 
-    K = 3
-    pi = np.ones(K) / K
-    A = (np.eye(K) * 10) + np.ones((K, K))
-    A = A / A.sum(axis=1)[:, np.newaxis]
-
-    frame_time_sec = 0.100
-    bleach_lifetime = 80
-    bleach_lifetime_frames = bleach_lifetime / frame_time_sec
-
-    traces = []
-    for i in range(params["n_spots"]):
-        print(i)
-        sp = simulate.simulate_statepath(K, pi, A, params["n_frames"])
-        fret, donor, acceptor, _ = simulate.simulate_fret_emission_path(
-            sp, np.linspace(0, 1, K), 300, 30, bleach_lifetime_frames
-        )
-        traces.append((donor, acceptor))
-
-    pks = simulate.sample_spot_locations(512, 20, params["n_spots"])
-    image = simulate.make_image(traces, pks, 512)
-
+    sp, traces, pks, image = simulate_fret_experiment(3, 500, 5)
     write_pma_data(Path("./test_K3"), traces, pks, image, **params)
