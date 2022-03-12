@@ -14,6 +14,7 @@ class BaseTraceDataAxes(Axes):
         super().__init__(*args, **kwargs)
         self.selectedSpan = self.axvspan(0, 1, **config.plot.selection_span)
         self.set_facecolor(config.plot.axes_dim_background)
+        self.axhline(0, color="k", lw="0.5")
 
         selected_span_updater = lambda trace: set_span_xlimits(self.selectedSpan,
                                                                trace.t[trace.limits][0],

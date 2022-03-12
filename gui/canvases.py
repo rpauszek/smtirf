@@ -27,6 +27,7 @@ class QtCanvas(FigureCanvas):
 class InteractiveTraceViewer(QtCanvas):
 
     traceChanged = pyqtSignal(object, bool)
+    baselineSelected = pyqtSignal(float, float)
     axes = {"selection": None,
             "channels": None,
             "total": None}
@@ -42,6 +43,7 @@ class InteractiveTraceViewer(QtCanvas):
         self.mpl_connect("scroll_event", lambda evt: controller.stepIndexTriggered.emit(int(evt.step)))
         self.mpl_connect('button_release_event', self.on_release)
         self.mpl_connect('motion_notify_event', lambda evt: self.controller.mplMotionNotifyEvent.emit(evt))
+        self.baselineSelected.connect(controller.set_trace_offset_time_window)
 
     def make_axes(self):
         for j, (dataType, ax) in enumerate(self.axes.items()):
@@ -61,6 +63,11 @@ class InteractiveTraceViewer(QtCanvas):
 
         self.zoomSpan = SpanSelector(self.axes["selection"], on_zoom, "horizontal",
                                      useblit=True, button=1, rectprops=config.plot.zoom_span)
+
+        self.baselineSpan = SpanSelector(
+            self.axes["total"], self.baselineSelected.emit, "horizontal", minspan=0.5,
+            useblit=True, button=1, rectprops=config.plot.baseline_span
+        )
 
     def update_plots(self, trace, relim):
         self.traceChanged.emit(trace, relim)

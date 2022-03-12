@@ -13,5 +13,9 @@
         "alpha": 1.0,
         "facecolor": "#FFFFFF"
     },
+    "baseline_span": {
+        "alpha": 0.4,
+        "facecolor": "#DC143C"
+    },
     "axes_dim_background": "#DEDEDE"
 }

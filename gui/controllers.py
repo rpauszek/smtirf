@@ -80,6 +80,10 @@ class ExperimentController(QObject):
             trace.set_offsets(None)
         self.traceStateChanged.emit(self.trace)
 
+    def set_trace_offset_time_window(self, tmin, tmax):
+        self.trace.set_offset_time_window(tmin, tmax)
+        self.traceStateChanged.emit(self.trace)
+
     def set_trace_start_time(self, time):
         self.trace.set_start_time(time)
         self.traceStateChanged.emit(self.trace)

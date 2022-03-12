@@ -16,6 +16,7 @@ class PlotConfig:
     line_width: float = 1
     zoom_span: dict = field(default_factory={})
     selection_span: dict = field(default_factory={})
+    baseline_span: dict = field(default_factory={})
     axes_dim_background: str = "#DEDEDE"
 
     @classmethod
