@@ -8,6 +8,7 @@ from .dialogs import ImportPmaDialog
 from .canvases import InteractiveTraceViewer
 from . import widgets
 from .util import make_messagebox
+from .sub_apps.autobaseline_app import AutobaselineApp
 
 
 WINDOW_TITLE = "smTIRF Analysis"
@@ -36,7 +37,9 @@ class SMTirfMainWindow(QMainWindow):
 
         btn = add_popup_toolbutton(self.toolbar, "gaussian", "Results", enabler=self.controller.experimentChanged)
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
+
         btn = add_popup_toolbutton(self.toolbar, "baseline", "Baseline", enabler=self.controller.experimentChanged)
+        btn.clicked.connect(lambda: self.show_sub_app(AutobaselineApp))
 
         btn = add_popup_toolbutton(self.toolbar, "sort", "Sort", enabler=self.controller.experimentChanged)
         add_popup_action(btn, "By Index", lambda: self.controller.sort_traces("index"))
@@ -139,6 +142,10 @@ class SMTirfMainWindow(QMainWindow):
                                                       filter="smtirf Experiment (*.smtrc)")
             if filename:
                 self.controller.save_experiment(filename)
+
+    def show_sub_app(self, app):
+        # TODO: remove reference to widget when subapp window is closed
+        self._tmp_window = app()
 
 
 def set_enabler(widget, enabler):
