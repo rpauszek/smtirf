@@ -7,7 +7,6 @@ from ..canvases import QtCanvas
 
 
 class AutobaselineApp(QtWidgets.QWidget):
-
     def __init__(self):
         super().__init__(windowTitle="Automated Baseline Estimation")
         self.setWindowModality(QtCore.Qt.ApplicationModal)
@@ -30,7 +29,6 @@ class AutobaselineApp(QtWidgets.QWidget):
 
 
 class AutobaselineParametersGroup(QtWidgets.QGroupBox):
-
     def __init__(self, controller):
         super().__init__("Detection Parameters")
         self.controller = controller
@@ -40,32 +38,73 @@ class AutobaselineParametersGroup(QtWidgets.QGroupBox):
         box = QtWidgets.QVBoxLayout()
 
         # Paramter widgets
-        w = widgets.LabeledSlider("GMM components", minimum=2, maximum=10, value=self.controller.gmm_components)
-        w.valueChanged.connect(lambda val: setattr(self.controller, "gmm_components", val))
+        w = widgets.LabeledSlider(
+            "GMM components",
+            minimum=2,
+            maximum=10,
+            value=self.controller.gmm_components,
+        )
+        w.valueChanged.connect(
+            lambda val: setattr(self.controller, "gmm_components", val)
+        )
         box.addWidget(w)
         box.addItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Fixed))
 
-        w = widgets.LabeledIntervalSlider("GMM sample size", minimum=1e3, maximum=1e5, value=self.controller.gmm_sample_size, interval=1e3)
-        w.valueChanged.connect(lambda val: setattr(self.controller, "gmm_sample_size", val))
+        w = widgets.LabeledIntervalSlider(
+            "GMM sample size",
+            minimum=1e3,
+            maximum=1e5,
+            value=self.controller.gmm_sample_size,
+            interval=1e3,
+        )
+        w.valueChanged.connect(
+            lambda val: setattr(self.controller, "gmm_sample_size", val)
+        )
         box.addWidget(w)
         box.addItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Fixed))
 
-        w = widgets.LabeledIntervalSlider("GMM maximum iterations", minimum=25, maximum=1500, value=self.controller.gmm_iterations, interval=25)
-        w.valueChanged.connect(lambda val: setattr(self.controller, "gmm_iterations", val))
+        w = widgets.LabeledIntervalSlider(
+            "GMM maximum iterations",
+            minimum=25,
+            maximum=1500,
+            value=self.controller.gmm_iterations,
+            interval=25,
+        )
+        w.valueChanged.connect(
+            lambda val: setattr(self.controller, "gmm_iterations", val)
+        )
         box.addWidget(w)
         box.addItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Fixed))
 
-        w = widgets.LabeledScientificSlider("GMM convergence tolerance", minimum=1e-12, maximum=1, value=self.controller.gmm_tol)
+        w = widgets.LabeledScientificSlider(
+            "GMM convergence tolerance",
+            minimum=1e-12,
+            maximum=1,
+            value=self.controller.gmm_tol,
+        )
         w.valueChanged.connect(lambda val: setattr(self.controller, "gmm_tol", val))
         box.addWidget(w)
         box.addItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Fixed))
 
-        w = widgets.LabeledIntervalSlider("HMM maximum iterations", minimum=25, maximum=1500, value=self.controller.hmm_iterations, interval=25)
-        w.valueChanged.connect(lambda val: setattr(self.controller, "hmm_iterations", val))
+        w = widgets.LabeledIntervalSlider(
+            "HMM maximum iterations",
+            minimum=25,
+            maximum=1500,
+            value=self.controller.hmm_iterations,
+            interval=25,
+        )
+        w.valueChanged.connect(
+            lambda val: setattr(self.controller, "hmm_iterations", val)
+        )
         box.addWidget(w)
         box.addItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Fixed))
 
-        w = widgets.LabeledScientificSlider("HMM convergence tolerance", minimum=1e-12, maximum=1, value=self.controller.hmm_tol)
+        w = widgets.LabeledScientificSlider(
+            "HMM convergence tolerance",
+            minimum=1e-12,
+            maximum=1,
+            value=self.controller.hmm_tol,
+        )
         w.valueChanged.connect(lambda val: setattr(self.controller, "hmm_tol", val))
         box.addWidget(w)
         box.addItem(QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
@@ -80,7 +119,6 @@ class AutobaselineParametersGroup(QtWidgets.QGroupBox):
 
 
 class BaselineGmmCanvas(QtCanvas):
-
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
@@ -88,7 +126,6 @@ class BaselineGmmCanvas(QtCanvas):
 
 
 class BaselineTraceCanvas(QtCanvas):
-
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
@@ -106,5 +143,6 @@ class AutobaselineController(QtCore.QObject):
 
     def __init__(self):
         pass
+
     def __post_init__(self):
         super().__init__()
