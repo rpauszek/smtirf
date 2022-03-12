@@ -31,7 +31,7 @@ def simulate_statepath(K, pi, A, T):
     return statepath
 
 
-def simulate_fret_experiment(
+def simulate_fret_emission_path(
     statepath, mu, total_intensity, channel_sigma, lifetime_frames=None
 ):
     """Simulate FRET, donor, and acceptor traces from statepath.
@@ -142,47 +142,110 @@ def make_image(traces, pks, frame_size):
     return image.astype(np.uint8)
 
 
+def simulate_fret_experiment(
+    K,
+    n_frames,
+    n_spots,
+    *,
+    pi=None,
+    A=None,
+    mu=None,
+    transition_diag=10,
+    frame_length=0.100,
+    signal_lifetime=80,
+    total_intensity=500,
+    channel_sigma=30,
+    frame_size=512,
+    channel_border=20,
+):
+    """Generate traces for a FRET experiment.
+
+    Parameters
+    ----------
+    K : int
+        number of states
+    n_frames : int
+        number of frames in the movie
+    n_spots : int
+        number of spots in the field of view
+    pi : np.array
+        initial state probability vector; defaults to uniform probability
+    A : np.array
+        K x K array of state transitions probabilities;
+        defaults to symmetric matrix controlled by `transition_diag`
+    mu : np.array
+        state emission vector; defaults to equally spaced between [0, 1]
+    transition_diag : float
+        elements along the diagonal of the transition probablity matrix
+        if none is supplied. Off-diagonal elements are set to 1 and matrix
+        is then normalized.
+    frame_length : float
+        frame integration time in seconds
+    signal_lifetime : float
+        exponential mean of fluorophore lifetime; controls bleaching time
+    total_intensity : float
+        intensity of donor + acceptor signals
+    channel_sigma : float
+        standard deviation of the signal in donor/acceptor channels
+    frame_size : int
+        number of pixels along an edge of the full two-channel image
+    channel_border : int
+        number of border pixels around each channel to exclude from sampling range
+    """
+
+    if pi is None:
+        pi = np.ones(K) / K
+
+    if A is None:
+        A = (np.eye(K) * transition_diag) + np.ones((K, K))
+        A = A / A.sum(axis=1)[:, np.newaxis]
+
+    if mu is None:
+        mu = np.linspace(0, 1, K)
+
+    assert pi.shape == (K,)
+    assert A.shape == (K, K)
+    assert mu.shape == (K,)
+
+    signal_lifetime_frames = signal_lifetime / frame_length
+
+    statepaths, traces = [], []
+    for _ in range(n_spots):
+        statepaths.append(simulate_statepath(K, pi, A, n_frames))
+        _, *trace, _ = simulate_fret_emission_path(
+            statepaths[-1], mu, total_intensity, channel_sigma, signal_lifetime_frames
+        )
+        traces.append(trace)
+
+    peaks = sample_spot_locations(frame_size, channel_border, n_spots)
+    image = make_image(traces, peaks, frame_size)
+
+    return statepaths, traces, peaks, image
+
+
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
-    np.random.seed(1234)
+    sp, traces, pks, img = simulate_fret_experiment(3, 500, 5)
 
-    T = 1000
-    N = 5
+    donor, acceptor = traces[0]
+    total = donor + acceptor
+    fret = acceptor / total
+    t = np.arange(fret.size) * 0.1
 
-    K = 3
-    pi = np.array([1, 0, 0])
-    A = (np.eye(K) * 10) + np.ones((K, K))
-    A = A / A.sum(axis=1)[:, np.newaxis]
+    plt.subplot(3, 1, 1)
+    plt.plot(t, acceptor, c="tab:orange")
+    plt.plot(t, donor, c="tab:green")
+    plt.subplot(3, 1, 2)
+    plt.plot(t, fret, c="tab:blue")
+    plt.ylim(-0.1, 1.1)
+    plt.subplot(3, 1, 3)
+    plt.plot(t, total, c="k")
 
-    frame_time_sec = 0.100
-    bleach_lifetime = 80
-    bleach_lifetime_frames = bleach_lifetime / frame_time_sec
+    plt.gcf().set_size_inches(10, 6)
+    plt.tight_layout()
+    plt.show()
 
-    traces = []
-    for i in range(N):
-        sp = simulate_statepath(K, pi, A, T)
-        fret, donor, acceptor, _ = simulate_fret_experiment(
-            sp, np.linspace(0, 1, K), 800, 30, bleach_lifetime_frames
-        )
-        traces.append((donor, acceptor))
-    t = np.arange(fret.size) * frame_time_sec
 
-    # plt.subplot(3, 1, 1)
-    # plt.plot(t, traces[-1][1], c="tab:orange")
-    # plt.plot(t, traces[-1][0], c="tab:green")
-    # plt.subplot(3, 1, 2)
-    # plt.plot(t, fret, c="tab:blue")
-    # plt.ylim(-0.1, 1.1)
-    # plt.subplot(3, 1, 3)
-    # plt.plot(t, np.vstack(traces[-1]).sum(axis=0), c="k")
-
-    # plt.gcf().set_size_inches(10, 6)
-    # plt.tight_layout()
-    # plt.show()
-
-    pks = sample_spot_locations(512, 20, N)
-    image = make_image(traces, pks, 512)
-
-    # plt.imshow(image, vmax=255)
-    # plt.show()
+    plt.imshow(img)
+    plt.show()

@@ -80,7 +80,7 @@ if __name__ == "__main__":
     for i in range(params["n_spots"]):
         print(i)
         sp = simulate.simulate_statepath(K, pi, A, params["n_frames"])
-        fret, donor, acceptor, _ = simulate.simulate_fret_experiment(
+        fret, donor, acceptor, _ = simulate.simulate_fret_emission_path(
             sp, np.linspace(0, 1, K), 300, 30, bleach_lifetime_frames
         )
         traces.append((donor, acceptor))
