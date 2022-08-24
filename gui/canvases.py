@@ -39,7 +39,7 @@ class InteractiveTraceViewer(QtCanvas):
         controller.experimentChanged.connect(self.make_axes)
         controller.traceIndexChanged.connect(lambda trace: self.update_plots(trace, True))
         controller.traceStateChanged.connect(lambda trace: self.update_plots(trace, False))
-        self.mpl_connect("scroll_event", lambda evt: controller.stepIndexTriggered.emit(evt.step))
+        self.mpl_connect("scroll_event", lambda evt: controller.stepIndexTriggered.emit(int(evt.step)))
         self.mpl_connect('button_release_event', self.on_release)
         self.mpl_connect('motion_notify_event', lambda evt: self.controller.mplMotionNotifyEvent.emit(evt))
 
