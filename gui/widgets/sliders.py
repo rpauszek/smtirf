@@ -110,9 +110,9 @@ class LabeledSlider(QtWidgets.QWidget):
         super().__init__()
 
         self.slider = QtWidgets.QSlider(
-            minimum=minimum,
-            maximum=maximum,
-            value=value,
+            minimum=int(minimum),
+            maximum=int(maximum),
+            value=int(value),
             orientation=QtCore.Qt.Horizontal
         )
         self.label = QtWidgets.QLabel("1")

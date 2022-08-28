@@ -39,7 +39,7 @@ class SMTirfMainWindow(QMainWindow):
         btn = add_popup_toolbutton(self.toolbar, "settings", "Settings")
 
         btn = add_popup_toolbutton(self.toolbar, "baseline", "Baseline", enabler=self.controller.experimentChanged)
-        btn.clicked.connect(lambda: self.show_sub_app(AutobaselineApp))
+        btn.clicked.connect(lambda: self.show_sub_app(AutobaselineApp(self.controller.experiment)))
 
         btn = add_popup_toolbutton(self.toolbar, "sort", "Sort", enabler=self.controller.experimentChanged)
         add_popup_action(btn, "By Index", lambda: self.controller.sort_traces("index"))
@@ -145,7 +145,7 @@ class SMTirfMainWindow(QMainWindow):
 
     def show_sub_app(self, app):
         # TODO: remove reference to widget when subapp window is closed
-        self._tmp_window = app()
+        self._tmp_window = app
 
 
 def set_enabler(widget, enabler):
