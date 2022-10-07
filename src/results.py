@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 
 from . import SMJsonEncoder
-import smtirf
+import smtirf.src as smtirf
 
 class Results():
 

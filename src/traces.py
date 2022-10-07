@@ -7,7 +7,7 @@ import numpy as np
 import scipy.stats
 import json, warnings
 from abc import ABC, abstractmethod
-import smtirf
+import smtirf.src as smtirf
 from . import SMSpotCoordinate, SMJsonEncoder
 from . import HiddenMarkovModel
 
