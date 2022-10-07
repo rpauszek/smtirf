@@ -7,6 +7,9 @@ import numpy as np
 import json
 
 
+__version__ = "0.2.0"
+
+
 class SMJsonEncoder(json.JSONEncoder):
     """ https://bit.ly/2sb9YCT """
     def default(self, obj):
@@ -38,8 +41,8 @@ class SMJsonDecoder(json.JSONDecoder):
 
 from . import hmm
 from . import util
-from . import results
 from .auxiliary import SMTraceID, SMMovieList, SMSpotCoordinate
 from .auxiliary import where
 from .hmm.models import HiddenMarkovModel
+from . import results
 from .experiments import Experiment
