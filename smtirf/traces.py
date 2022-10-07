@@ -7,9 +7,10 @@ import numpy as np
 import scipy.stats
 import json, warnings
 from abc import ABC, abstractmethod
-import . as smtirf
 from . import SMSpotCoordinate, SMJsonEncoder
+from . import where as smtirf_where
 from . import HiddenMarkovModel
+from .results import DwellTable
 
 # ==============================================================================
 # BASE TRACE CLASSES
@@ -32,7 +33,7 @@ class BaseTrace(ABC):
         self.model = HiddenMarkovModel.from_json(model)
         self.deBlur = deBlur
         self.deSpike = deSpike
-        self.dwells = smtirf.results.DwellTable(self) if self.model is not None else None
+        self.dwells = DwellTable(self) if self.model is not None else None
 
     def __str__(self):
         return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
@@ -197,7 +198,7 @@ class BaseTrace(ABC):
                 pass
         # find indices of signal dwells
         if where.lower() in ("first", "longest"):
-            ix = smtirf.where(sp == 0)
+            ix = smtirf_where(sp == 0)
         # set limits
         if where.lower() == "first":
             self.set_limits(ix[0])
@@ -225,14 +226,14 @@ class BaseTrace(ABC):
         ...
 
     def train(self, modelType, K, sharedVariance=True, **kwargs):
-        theta = smtirf.HiddenMarkovModel.train_new(modelType, self.X, K, sharedVariance, **kwargs)
+        theta = HiddenMarkovModel.train_new(modelType, self.X, K, sharedVariance, **kwargs)
         self.model = theta
         self.label_statepath()
 
     def label_statepath(self):
         if self.model is not None:
             self.set_statepath(self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike))
-            self.dwells = smtirf.results.DwellTable(self)
+            self.dwells = DwellTable(self)
 
     @property
     def EP(self):
@@ -281,7 +282,7 @@ class MultimerTrace(SingleColorTrace):
     classLabel = "multimer"
 
     def train(self, K, sharedVariance=True, **kwargs):
-        theta = smtirf.HiddenMarkovModel.train_new("multimer", self.X, K, sharedVariance, **kwargs)
+        theta = HiddenMarkovModel.train_new("multimer", self.X, K, sharedVariance, **kwargs)
         self.model = theta
         self.label_statepath()
 
