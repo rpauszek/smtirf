@@ -7,6 +7,9 @@ import numpy as np
 import json
 
 
+__version__ = "0.2.0"
+
+
 class SMJsonEncoder(json.JSONEncoder):
     """ https://bit.ly/2sb9YCT """
     def default(self, obj):

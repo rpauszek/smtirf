@@ -7,7 +7,7 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 import h5py, json
-import smtirf.src as smtirf
+import . as smtirf
 from . import SMTraceID, SMMovieList
 from . import SMJsonDecoder, SMJsonEncoder
 from . import traces
