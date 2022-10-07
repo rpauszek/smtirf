@@ -1,3 +1,4 @@
+import numpy as np
 from dataclasses import dataclass
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtWidgets import QSpacerItem, QSizePolicy
@@ -5,6 +6,7 @@ from PyQt5.QtWidgets import QSpacerItem, QSizePolicy
 from .. import widgets
 from ..canvases import QtCanvas
 from ...src.util.autobaseline import AutoBaselineModel
+from ..axes import TraceAxes
 
 
 class AutobaselineApp(QtWidgets.QWidget):
@@ -136,14 +138,50 @@ class BaselineGmmCanvas(QtCanvas):
         super().__init__()
         self.controller = controller
         self.ax = self.figure.add_subplot(1, 1, 1)
-        # self.controller.gmmTrainingThread.trainingStarted.connect()
+        self.controller.gmmTrainingThread.trainingFinished.connect(self.update_plots)
+
+    def update_plots(self):
+        gmmSample = self.controller.model.draw_gmm_samples(nDraws=5, nPoints=self.controller.gmm_sample_size)
+        self.ax.cla()
+        xlim = [0, 0]
+        ymin = 0
+        for sample in gmmSample:
+            kt, edges = np.histogram(sample, bins=100, density=True)
+            binWidth = np.diff(edges[:2])
+            x = edges[:-1] + binWidth/2
+
+            xlim[0] = np.min((xlim[0], x[0]))
+            xlim[1] = np.max((xlim[1], x[-1]))
+            ymin = np.max((ymin, kt[np.where(kt!=0)].min()))
+
+            self.ax.plot(x, kt, '#cccccc')
+
+        x = np.linspace(*xlim, num=300)
+        gs = self.controller.model.gmm_p_X(x)
+        G = gs.sum(axis=0)
+        self.ax.plot(x, G, "#555555")
+        for j, g in enumerate(gs):
+            color = "b" if self.controller.model.mu[j] < self.controller.model.baselineCutoff else "r"
+            self.ax.plot(x, g, color)
+
+        self.ax.set_yscale('log')
+        self.ax.set_ylim(ymin, G.max()*1.1)
+
+        self.draw()
 
 
 class BaselineTraceCanvas(QtCanvas):
+
+    traceChanged = QtCore.pyqtSignal(object, bool)
+
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
-        self.ax = self.figure.add_subplot(1, 1, 1)
+        # self.ax = self.figure.add_subplot(1, 1, 1)
+
+        projection = TraceAxes(parent=self, dataType="total")
+        self.ax = self.figure.add_subplot(1, 1, 1, projection=projection)
+
 
 
 class BaselineTrainingThread(QtCore.QThread):
