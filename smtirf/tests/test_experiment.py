@@ -17,6 +17,25 @@ def test_load(fret_pma_file):
     assert str(experiment) == "FretExperiment\t0/5 selected"
 
 
+def test_selection(fret_pma_file):
+    filename_base, params, statepaths = fret_pma_file
+    experiment = Experiment.load(filename_base.with_suffix(".smtrc"))
+
+    assert experiment.nSelected == 0
+
+    experiment[2].toggle()
+    assert experiment.nSelected == 1
+
+    experiment[2].toggle()
+    assert experiment.nSelected == 0
+
+    experiment.select_all()
+    assert experiment.nSelected == 5
+
+    experiment.select_none()
+    assert experiment.nSelected == 0
+
+
 def test_sorting(fret_pma_file):
     def strip_trace_ids(experiment):
         return [int(str(trace._id)[-4:]) for trace in experiment]
