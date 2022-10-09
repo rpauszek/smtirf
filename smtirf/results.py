@@ -9,7 +9,7 @@ import numpy as np
 from sklearn.neighbors import KernelDensity
 
 from .util.json import SMJsonEncoder
-from . import where as smtirf_where
+from .auxiliary import where as smtirf_where
 
 
 class Results():
