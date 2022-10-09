@@ -157,6 +157,7 @@ def simulate_fret_experiment(
     channel_sigma=30,
     frame_size=512,
     channel_border=20,
+    seed=None,
 ):
     """Generate traces for a FRET experiment.
 
@@ -191,7 +192,12 @@ def simulate_fret_experiment(
         number of pixels along an edge of the full two-channel image
     channel_border : int
         number of border pixels around each channel to exclude from sampling range
+    seed : int
+        seed for random number generator
     """
+
+    if seed:
+        np.random.seed(seed)
 
     if pi is None:
         pi = np.ones(K) / K
@@ -226,7 +232,7 @@ def simulate_fret_experiment(
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
-    sp, traces, pks, img = simulate_fret_experiment(3, 500, 5)
+    sp, traces, pks, img = simulate_fret_experiment(3, 500, 5, seed=1234)
 
     donor, acceptor = traces[0]
     total = donor + acceptor
