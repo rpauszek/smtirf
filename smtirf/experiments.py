@@ -8,7 +8,7 @@ from pathlib import Path
 from datetime import datetime
 import h5py, json
 from . import __version__
-from .auxiliary import SMMovieList
+from .util.movies import SMMovieList
 from .util.identifiers import SMTraceID
 from .util.json import SMJsonDecoder, SMJsonEncoder
 from . import traces
