@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from .auxiliary import SMSpotCoordinate
 from .util.json import SMJsonEncoder
 from .auxiliary import where as smtirf_where
-from . import HiddenMarkovModel
+from .hmm.models import HiddenMarkovModel
 from .results import DwellTable
 
 # ==============================================================================
