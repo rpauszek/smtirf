@@ -9,7 +9,7 @@ import json, warnings
 from abc import ABC, abstractmethod
 from .util.identifiers import SMSpotCoordinate
 from .util.json import SMJsonEncoder
-from .auxiliary import where as smtirf_where
+from .util import find_contiguous
 from .hmm.models import HiddenMarkovModel
 from .results import DwellTable
 
@@ -199,7 +199,7 @@ class BaseTrace(ABC):
                 pass
         # find indices of signal dwells
         if where.lower() in ("first", "longest"):
-            ix = smtirf_where(sp == 0)
+            ix = find_contiguous(sp == 0)
         # set limits
         if where.lower() == "first":
             self.set_limits(ix[0])
