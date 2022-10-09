@@ -36,7 +36,7 @@ def _write_pks_file(savebase, peaks):
 def _write_tif_file(savebase, image):
     savename = Path(savebase.parent) / (savebase.stem + "_ave.tif")
     with tifffile.TiffWriter(savename) as tif:
-        tif.save(image)
+        tif.write(image)
 
 
 def _write_log_file(savebase, gain, data_scaler, frame_length, record_date):

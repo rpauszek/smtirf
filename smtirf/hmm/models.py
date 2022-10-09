@@ -23,7 +23,7 @@ class BaseHiddenMarkovModel():
         return [(s, y) for s, y in zip(S,Y)]
 
     def label(self, x, deBlur=False, deSpike=False):
-        SP = hmmalg._viterbi(x, self.pi, self.A, self.p_X(x).T).astype(np.int)
+        SP = hmmalg._viterbi(x, self.pi, self.A, self.p_X(x).T).astype(int)
         return SP
 
     def get_emission_path(self, SP):
