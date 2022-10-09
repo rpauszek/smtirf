@@ -14,3 +14,14 @@ TraceSelectionButton:checked {
     color: #ececec;
 }
 
+QProgressBar {
+    border: 1px solid #c4c4c4;
+    border-radius: 3px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #1e8fff;
+    /* width: 20px; */
+}
+
