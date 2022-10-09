@@ -59,4 +59,3 @@ def test_sorting(fret_pma_file):
     experiment[2].toggle()
     experiment.sort("selected")
     assert strip_trace_ids(experiment) == [2, 0, 1, 3, 4]
-

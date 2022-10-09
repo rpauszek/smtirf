@@ -12,7 +12,7 @@ from .auxiliary import SMTraceID, SMMovieList
 from .util.json import SMJsonDecoder, SMJsonEncoder
 from . import traces
 from . import io
-from .util import AutoBaselineModel
+from .hmm.autobaseline import AutoBaselineModel
 from .results import Results
 
 # ==============================================================================
