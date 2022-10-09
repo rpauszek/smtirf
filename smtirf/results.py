@@ -8,7 +8,8 @@ import json
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
-from . import SMJsonEncoder, where
+from .util.json import SMJsonEncoder
+from . import where as smtirf_where
 
 
 class Results():
@@ -186,7 +187,7 @@ class DwellTable():
     def __init__(self, trc):
         table = []
         for j in range(trc.model.K):
-            bounds = where(trc.SP == j)
+            bounds = smtirf_where(trc.SP == j)
             lengths = np.diff(bounds, axis=1)
             state = np.ones((bounds.shape[0], 1))*j
             mu = np.ones((bounds.shape[0],1))*trc.model.mu[j]

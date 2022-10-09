@@ -5,7 +5,7 @@ smtirf >> hmm >> models
 """
 import numpy as np
 import json
-from .. import SMJsonEncoder, SMJsonDecoder
+from ..util.json import SMJsonEncoder, SMJsonDecoder
 from . import row, col, normalize_rows, ExitFlag
 from . import algorithms as hmmalg
 from .distributions import *

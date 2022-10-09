@@ -9,7 +9,7 @@ from datetime import datetime
 import h5py, json
 from . import __version__
 from . import SMTraceID, SMMovieList
-from . import SMJsonDecoder, SMJsonEncoder
+from .util.json import SMJsonDecoder, SMJsonEncoder
 from . import traces
 from . import io
 from .util import AutoBaselineModel

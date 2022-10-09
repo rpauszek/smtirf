@@ -7,7 +7,8 @@ import numpy as np
 import scipy.stats
 import json, warnings
 from abc import ABC, abstractmethod
-from . import SMSpotCoordinate, SMJsonEncoder
+from . import SMSpotCoordinate
+from .util.json import SMJsonEncoder
 from . import where as smtirf_where
 from . import HiddenMarkovModel
 from .results import DwellTable

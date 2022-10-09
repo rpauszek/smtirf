@@ -7,7 +7,7 @@ import numpy as np
 import json
 from datetime import datetime
 from collections import OrderedDict
-from . import SMJsonEncoder
+from .util.json import SMJsonEncoder
 
 class SMTraceID():
     """
