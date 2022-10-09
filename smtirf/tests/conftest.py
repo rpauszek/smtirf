@@ -46,6 +46,9 @@ def write_simulated_files(tmpdir_factory, filename, n_frames, n_spots):
         savebase, *data, params["n_frames"], params["n_spots"], params["log_params"]
     )
 
+    experiment = Experiment.from_pma(savebase.with_suffix(".traces"), "fret")
+    experiment.save(savebase.with_suffix(".smtrc"))
+
     return savebase, params, statepaths
 
 

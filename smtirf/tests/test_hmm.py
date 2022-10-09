@@ -18,7 +18,7 @@ ref_emission_path = np.array(
 
 def test_deterministic_hmm(fret_short_file):
     filename_base, params, statepaths = fret_short_file
-    experiment = Experiment.from_pma(filename_base.with_suffix(".traces"), "fret")
+    experiment = Experiment.load(filename_base.with_suffix(".smtrc"))
 
     trc = experiment[0]
     trc.train(

@@ -9,12 +9,20 @@ def test_from_pma(fret_pma_file):
     assert str(experiment) == "FretExperiment\t0/5 selected"
 
 
+def test_load(fret_pma_file):
+    filename_base, params, statepaths = fret_pma_file
+    experiment = Experiment.load(filename_base.with_suffix(".smtrc"))
+
+    assert len(experiment) == params["n_spots"]
+    assert str(experiment) == "FretExperiment\t0/5 selected"
+
+
 def test_sorting(fret_pma_file):
     def strip_trace_ids(experiment):
         return [int(str(trace._id)[-4:]) for trace in experiment]
 
     filename_base, params, statepaths = fret_pma_file
-    experiment = Experiment.from_pma(filename_base.with_suffix(".traces"), "fret")
+    experiment = Experiment.load(filename_base.with_suffix(".smtrc"))
     assert strip_trace_ids(experiment) == [0, 1, 2, 3, 4]
 
     experiment.sort("corrcoef")
