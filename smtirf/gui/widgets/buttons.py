@@ -7,25 +7,20 @@ __all__ = ["TraceSelectionButton", "ResetOffsetsButton", "ResetLimitsButton"]
 
 
 class TraceSelectionButton(QtWidgets.QPushButton):
-
     def __init__(self, controller, **kwargs):
-        super().__init__("Discarded")
+        super().__init__("discarded")
         self.setMinimumHeight(35)
         self.setCheckable(True)
         self.setChecked(False)
 
+        updater = lambda trace: self.setChecked(trace.isSelected)
+
         self.clicked.connect(controller.toggle_selected)
-        self.toggled.connect(self.update_style)
-        controller.traceIndexChanged.connect(lambda trace: self.setChecked(trace.isSelected))
-        controller.traceStateChanged.connect(lambda trace: self.setChecked(trace.isSelected))
-        self.update_style()
-
-    def update_style(self):
-        color = "#1874CD" if self.isChecked() else "#444444"
-        weight = "bold" if self.isChecked() else "normal"
-
-        self.setText("SELECTED" if self.isChecked() else "discarded")
-        self.setStyleSheet(f"color: {color}; font-weight: {weight}")
+        self.toggled.connect(
+            lambda: self.setText("SELECTED" if self.isChecked() else "discarded")
+        )
+        controller.traceIndexChanged.connect(updater)
+        controller.traceStateChanged.connect(updater)
 
 
 class ResetOffsetsButton(QtWidgets.QPushButton):
@@ -43,7 +38,6 @@ class ResetOffsetsButton(QtWidgets.QPushButton):
             controller.reset_offsets()
 
         self.clicked.connect(click_callback)
-
 
 
 class ResetLimitsButton(QtWidgets.QPushButton):

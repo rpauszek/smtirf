@@ -8,6 +8,7 @@ from .dialogs import ImportPmaDialog
 from .canvases import InteractiveTraceViewer
 from . import widgets
 from .util import make_messagebox
+from . import lib_path
 
 
 WINDOW_TITLE = "smTIRF Analysis"
@@ -26,6 +27,9 @@ class SMTirfMainWindow(QMainWindow):
 
         self.setup_toolbar()
         self.layout()
+
+        with open(lib_path / "default.css","r") as f:
+            self.setStyleSheet(f.read())
 
     def setup_toolbar(self):
         self.toolbar = QtWidgets.QToolBar("main", parent=self)
