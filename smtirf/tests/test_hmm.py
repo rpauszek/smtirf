@@ -17,13 +17,13 @@ ref_emission_path = np.array(
 
 
 def test_deterministic_hmm(fret_short_file):
-    filename_base, statepaths = fret_short_file
+    filename_base, params, statepaths = fret_short_file
     experiment = Experiment.from_pma(filename_base.with_suffix(".traces"), "fret")
 
     trc = experiment[0]
     trc.train(
         "em",
-        3,
+        params["K"],
         sharedVariance=False,
         refineByKmeans=False,
         maxIter=1000,
@@ -39,7 +39,7 @@ def test_deterministic_hmm(fret_short_file):
     for _ in range(5):
         trc.train(
             "em",
-            3,
+            params["K"],
             sharedVariance=False,
             refineByKmeans=False,
             maxIter=1000,
