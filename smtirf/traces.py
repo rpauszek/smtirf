@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from .util.identifiers import SMSpotCoordinate
 from .util.json import SMJsonEncoder
 from .util import find_contiguous
-from .hmm.models import HiddenMarkovModel
+from .hmm_original.models import HiddenMarkovModel
 from .results import DwellTable
 
 # ==============================================================================

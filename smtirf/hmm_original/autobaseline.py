@@ -8,7 +8,7 @@ import numpy as np
 from sklearn import mixture
 import warnings
 
-from ..hmm import row, col, normalize_rows
+from . import row, col, normalize_rows
 
 
 class AutoBaselineModel():

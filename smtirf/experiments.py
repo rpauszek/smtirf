@@ -13,7 +13,7 @@ from .util.identifiers import SMTraceID
 from .util.json import SMJsonDecoder, SMJsonEncoder
 from . import traces
 from . import io
-from .hmm.autobaseline import AutoBaselineModel
+from .hmm_original.autobaseline import AutoBaselineModel
 from .results import Results
 
 # ==============================================================================
