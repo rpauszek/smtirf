@@ -14,36 +14,24 @@ def col(x):
     return x[:, np.newaxis]
 
 
-@dataclass
+@dataclass(frozen=True)
 class ExitFlag:
-    log_likelihoods: np.ndarray
-    is_converged: bool
-
-    @classmethod
-    def empty(cls):
-        return cls(np.array([]), False)
-
-    @property
-    def max_log_likelihood(self):
-        return self.log_likelihoods[-1] if self.iterations else np.nan
-
-    @property
-    def delta_log_likelihood(self):
-        return (
-            self.log_likelihoods[-1] - self.log_likelihoods[-2]
-            if self.iterations
-            else np.nan
-        )
-
-    @property
-    def iterations(self):
-        return self.log_likelihoods.size
+    log_likelihood: float = -np.inf
+    delta_log_likelihood: float = np.nan
+    iterations: int = 0
+    is_converged: bool = False
 
     def __str__(self):
         return (
             f"\nTraining Summary:\n"
-            f"  {'log(L)': <13}" + f"{self.max_log_likelihood:0.4g}\n"
+            f"  {'log(L)': <13}" + f"{self.log_likelihood:0.6f}\n"
             f"  {'Δ log(L)': <13}" + f"{self.delta_log_likelihood:0.2e}\n"
             f"  {'Iterations': <13}" + f"{self.iterations}\n"
             f"  {'Converged': <13}" + f"{self.is_converged}\n"
         )
+
+    def step(self, new_log_likelihood, tol):
+        delta_ln_Z = new_log_likelihood - self.log_likelihood
+        is_converged = delta_ln_Z < tol
+        iterations = self.iterations + 1
+        return ExitFlag(new_log_likelihood, delta_ln_Z, iterations, is_converged)
