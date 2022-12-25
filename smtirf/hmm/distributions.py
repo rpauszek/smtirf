@@ -25,6 +25,9 @@ class Categorical:
         norm_factor = col(self.mu.sum(axis=1))
         return Categorical(self.K, self.mu / norm_factor)
 
+    def update(self, p):
+        return Categorical(self.K, p)
+
 
 @dataclass(frozen=True)
 class Normal:
@@ -62,3 +65,14 @@ class Normal:
         tau = col(self.tau)
         log_p = -0.5 * (np.log(2 * np.pi) - np.log(tau) + x2 * tau)
         return np.exp(log_p)
+
+    @staticmethod
+    def calc_sufficient_statistics(x, gamma):
+        Nk = gamma.sum(axis=0)
+        xbar = np.sum(gamma * col(x), axis=0) / Nk
+        S = np.sum(gamma * (col(x) - row(xbar)) ** 2, axis=0) / Nk  # variance
+        return Nk, xbar, S
+
+    def update(self, x, gamma):
+        Nk, xbar, S = self.calc_sufficient_statistics(x, gamma)
+        return Normal(self.K, xbar, 1 / S)
