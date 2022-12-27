@@ -1,5 +1,6 @@
 import numpy as np
 from dataclasses import dataclass
+import warnings
 
 
 def row(x):
@@ -32,6 +33,8 @@ class ExitFlag:
 
     def step(self, new_log_likelihood, tol):
         delta_ln_Z = new_log_likelihood - self.log_likelihood
+        if delta_ln_Z < 0:
+            warnings.warn(f"log likelihood decreased by {np.abs(delta_ln_Z):0.4e}")
         is_converged = delta_ln_Z < tol
         iterations = self.iterations + 1
         return ExitFlag(new_log_likelihood, delta_ln_Z, iterations, is_converged)

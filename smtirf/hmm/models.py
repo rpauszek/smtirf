@@ -1,6 +1,4 @@
-import numpy as np
 from dataclasses import dataclass, field
-import warnings
 from . import col, ExitFlag
 from .distributions import Categorical, Normal
 from .algorithms import fwdback
@@ -27,17 +25,19 @@ class HiddenMarkovModel:
         theta = HiddenMarkovModel(self.K, self.pi, self.A, self.phi, ExitFlag(ln_Z))
 
         for _ in range(max_iter):
-            theta, gamma, xi, ln_Z = theta.update(x, gamma, xi, tol=tol)
+            theta, gamma, xi, ln_Z = theta._update(x, gamma, xi, tol=tol)
             if theta.exit_flag.is_converged:
                 break
 
         return theta
 
-    def update(self, x, gamma, xi, tol=1e-5):
+    def _update(self, x, gamma, xi, tol=1e-5):
+        # M-Step
         pi = self.pi.update(gamma[0])
         A = self.A.update(xi / col(gamma[:-1].sum(axis=0)))
         phi = self.phi.update(x, gamma)
 
+        # E-Step
         gamma, xi, ln_Z = fwdback(pi.mu, A.mu, phi.pdf(x).T)
         return (
             HiddenMarkovModel(self.K, pi, A, phi, self.exit_flag.step(ln_Z, tol=tol)),

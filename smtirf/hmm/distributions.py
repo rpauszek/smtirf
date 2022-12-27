@@ -19,9 +19,9 @@ class Categorical:
     def initalize_array(cls, K, *, self_transition=0):
         diagonal = np.eye(K) * (self_transition - 1)
 
-        return cls(K, diagonal + np.ones((K, K))).normalize()
+        return cls(K, diagonal + np.ones((K, K)))._normalize()
 
-    def normalize(self):
+    def _normalize(self):
         norm_factor = col(self.mu.sum(axis=1))
         return Categorical(self.K, self.mu / norm_factor)
 
@@ -67,12 +67,12 @@ class Normal:
         return np.exp(log_p)
 
     @staticmethod
-    def calc_sufficient_statistics(x, gamma):
-        Nk = gamma.sum(axis=0)
-        xbar = np.sum(gamma * col(x), axis=0) / Nk
-        S = np.sum(gamma * (col(x) - row(xbar)) ** 2, axis=0) / Nk  # variance
-        return Nk, xbar, S
+    def _calc_sufficient_statistics(x, gamma):
+        N_k = gamma.sum(axis=0)
+        x_bar = np.sum(gamma * col(x), axis=0) / N_k
+        variance = np.sum(gamma * (col(x) - row(x_bar)) ** 2, axis=0) / N_k
+        return N_k, x_bar, variance
 
     def update(self, x, gamma):
-        Nk, xbar, S = self.calc_sufficient_statistics(x, gamma)
-        return Normal(self.K, xbar, 1 / S)
+        _, x_bar, variance = self._calc_sufficient_statistics(x, gamma)
+        return Normal(self.K, x_bar, 1 / variance)
