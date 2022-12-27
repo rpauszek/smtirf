@@ -42,3 +42,31 @@ def fwdback(pi, A, B):
     log_likelihood = np.sum(np.log(c))
 
     return gamma, xi, log_likelihood
+
+
+@jit(nopython=True)
+def viterbi(pi, A, B):
+    # setup
+    T, K = B.shape
+    pi = np.log(pi)
+    A = np.log(A)
+    B = np.log(B)
+    psi = np.zeros(B.shape, dtype=np.int32)
+    Q = np.zeros(T, dtype=np.int32)
+
+    # initialization
+    delta = np.expand_dims(pi + B[0], 1)
+    # recursion
+    for t in range(1, T):
+        R = delta + A
+        for k in range(K):
+            psi[t, k] = np.argmax(R[:, k])
+            delta[k] = np.max(R[:, k]) + B[t, k]
+
+    # termination
+    Q[-1] = np.argmax(delta)
+    # path backtracking
+    for t in range(1, T):
+        Q[-(t + 1)] = psi[-t, Q[-t]]
+
+    return Q

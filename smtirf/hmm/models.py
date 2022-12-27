@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from . import col, ExitFlag
 from .distributions import Categorical, Normal
-from .algorithms import fwdback
+from .algorithms import fwdback, viterbi
 
 
 @dataclass(frozen=True)
@@ -45,3 +45,6 @@ class HiddenMarkovModel:
             xi,
             ln_Z,
         )
+
+    def label(self, x):
+        return viterbi(self.pi.mu, self.A.mu, self.phi.pdf(x).T).astype(int)
