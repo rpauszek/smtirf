@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from .util.identifiers import SMSpotCoordinate
 from .util.json import SMJsonEncoder
 from .util import find_contiguous
-from .hmm_original.models import HiddenMarkovModel
+from .hmm.models import HiddenMarkovModel
 from .results import DwellTable
 
 # ==============================================================================
@@ -31,7 +31,7 @@ class BaseTrace(ABC):
         self.pk = SMSpotCoordinate(pk)
         self.isSelected = isSelected
         self.set_cluster_index(clusterIndex)
-        self.model = HiddenMarkovModel.from_json(model)
+        self.model = None if model is None else HiddenMarkovModel.from_json(model)
         self.deBlur = deBlur
         self.deSpike = deSpike
         self.dwells = DwellTable(self) if self.model is not None else None
@@ -226,19 +226,19 @@ class BaseTrace(ABC):
     def X(self):
         ...
 
-    def train(self, modelType, K, sharedVariance=True, **kwargs):
-        theta = HiddenMarkovModel.train_new(modelType, self.X, K, sharedVariance, **kwargs)
-        self.model = theta
+    def train(self, K, sharedVariance=True, **kwargs):
+        theta = HiddenMarkovModel.guess(self.X, K)
+        self.model = theta.train(self.X)
         self.label_statepath()
 
     def label_statepath(self):
         if self.model is not None:
-            self.set_statepath(self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike))
+            self.set_statepath(self.model.label(self.X))
             self.dwells = DwellTable(self)
 
     @property
     def EP(self):
-        return self.model.get_emission_path(self.SP)
+        return self.model.phi.mu[self.SP]
 
     @abstractmethod
     def get_export_data(self):
