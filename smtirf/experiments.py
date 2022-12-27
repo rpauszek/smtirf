@@ -168,10 +168,7 @@ class Experiment():
             for trc in experiment:
                 dataset = traceGroup.create_dataset(str(trc._id), data=trc._raw_data, compression="gzip")
                 dataset.attrs["properties"] = trc._as_json()
-                try:
-                    dataset.attrs["model"] = json.dumps(trc.model._as_json(), cls=SMJsonEncoder)
-                except AttributeError: # model is None
-                    pass
+                dataset.attrs["model"] = json.dumps(trc.model, cls=SMJsonEncoder)
 
             # store results ----------------------------------------------------
             resultsGroup = HF.create_group("results")

@@ -2,10 +2,11 @@ import numpy as np
 from dataclasses import dataclass
 from sklearn.cluster import KMeans
 from . import row, col
+from ..util import AsDictMixin
 
 
 @dataclass(frozen=True)
-class Categorical:
+class Categorical(AsDictMixin):
     """Categorical distribution: Cat(x|μ)."""
 
     K: int
@@ -30,7 +31,7 @@ class Categorical:
 
 
 @dataclass(frozen=True)
-class Normal:
+class Normal(AsDictMixin):
     """Normal distribution: N(x|μ,τ)."""
 
     K: int

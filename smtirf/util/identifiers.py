@@ -1,4 +1,6 @@
 from datetime import datetime
+from dataclasses import dataclass
+from . import AsDictMixin
 
 
 class SMTraceID:
@@ -49,10 +51,7 @@ class SMTraceID:
         return dt.strftime(fmt)
 
 
-class SMSpotCoordinate():
+@dataclass(frozen=True)
+class SMSpotCoordinate(AsDictMixin):
 
-    def __init__(self, coords):
-        self._coords = coords
-
-    def _as_dict(self):
-        return self._coords
+    coords: "np.ndarray"

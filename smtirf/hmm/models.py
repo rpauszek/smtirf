@@ -2,10 +2,11 @@ from dataclasses import dataclass, field
 from . import col, ExitFlag
 from .distributions import Categorical, Normal
 from .algorithms import fwdback, viterbi
+from ..util import AsDictMixin
 
 
 @dataclass(frozen=True)
-class HiddenMarkovModel:
+class HiddenMarkovModel(AsDictMixin):
 
     K: int
     pi: Categorical

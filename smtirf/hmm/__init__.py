@@ -1,6 +1,7 @@
 import numpy as np
 from dataclasses import dataclass
 import warnings
+from ..util import AsDictMixin
 
 
 def row(x):
@@ -16,7 +17,7 @@ def col(x):
 
 
 @dataclass(frozen=True)
-class ExitFlag:
+class ExitFlag(AsDictMixin):
     log_likelihood: float = -np.inf
     delta_log_likelihood: float = np.nan
     iterations: int = 0
