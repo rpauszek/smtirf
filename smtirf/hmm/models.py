@@ -14,7 +14,7 @@ class HiddenMarkovModel:
     exit_flag: ExitFlag = field(default_factory=ExitFlag)
 
     @classmethod
-    def guess(cls, K, x):
+    def guess(cls, x, K):
         pi = Categorical.initialize_vector(K)
         A = Categorical.initalize_array(K, self_transition=10)
         phi = Normal.initialize_kmeans(K, x)
