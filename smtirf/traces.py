@@ -31,8 +31,7 @@ class BaseTrace(ABC):
         self.pk = SMSpotCoordinate(pk)
         self.isSelected = isSelected
         self.set_cluster_index(clusterIndex)
-        if model is None or isinstance(model, HiddenMarkovModel):
-            self.model = model
+        self.model = model
         self.deBlur = deBlur
         self.deSpike = deSpike
         self.dwells = DwellTable(self) if self.model is not None else None

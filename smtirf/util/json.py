@@ -37,4 +37,5 @@ class SMJsonDecoder(json.JSONDecoder):
         for key, val in obj.items():
             if isinstance(val, list):
                 obj[key] = np.array(val)
+
         return obj

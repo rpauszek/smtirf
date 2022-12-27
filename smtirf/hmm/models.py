@@ -1,3 +1,4 @@
+import numpy as np
 from dataclasses import dataclass, field
 from . import col, ExitFlag
 from .distributions import Categorical, Normal
@@ -49,3 +50,24 @@ class HiddenMarkovModel(AsDictMixin):
 
     def label(self, x):
         return viterbi(self.pi.mu, self.A.mu, self.phi.pdf(x).T).astype(int)
+
+
+def _construct_from_old_version(model):
+    """Construct a HiddenMarkovModel from old JSON format, <v0.2.0"""
+
+    if model["modelType"] != "em":
+        raise NotImplementedError("Only Classic (Expectation-Maximization) models are supported currently.")
+
+    K = int(model["K"])
+    pi = Categorical(K, np.array(model["pi"]))
+    A = Categorical(K, np.array(model["A"]))
+    phi = Normal(K, np.array(model["mu"]), np.array(model["tau"]))
+
+    flag = ExitFlag(
+        model["exitFlag"]["L"][-1],
+        model["exitFlag"]["L"][-1] - model["exitFlag"]["L"][-2],
+        len(model["exitFlag"]["L"]),
+        model["exitFlag"]["isConverged"],
+    )
+
+    return HiddenMarkovModel(K, pi, A, phi, flag)

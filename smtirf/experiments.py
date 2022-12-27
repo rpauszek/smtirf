@@ -14,6 +14,7 @@ from .util.json import SMJsonDecoder, SMJsonEncoder
 from . import traces
 from . import io
 from .hmm_original.autobaseline import AutoBaselineModel
+from .hmm import models
 from .results import Results
 
 # ==============================================================================
@@ -203,6 +204,7 @@ class Experiment():
             cls = Experiment.CLASS_TYPES[HF.attrs["experimentType"]]
             frameLength = HF.attrs["frameLength"]
             comments = HF.attrs["comments"]
+            version = [int(x) for x in HF.attrs["version"].split(".")]
 
             # load MovieList ---------------------------------------------------
             images = HF["movies"][:]
@@ -222,6 +224,10 @@ class Experiment():
                 _id = SMTraceID(key)
                 try:
                     model = json.loads(item.attrs["model"], cls=SMJsonDecoder)
+                    if version[1] < 2:
+                        # seems there was a bug in v0.1.4 where the model was
+                        # stored as a str inside a str, need to re-load
+                        model = models._construct_from_old_version(json.loads(model))
                 except KeyError:
                     model = None
                 props = json.loads(item.attrs["properties"], cls=SMJsonDecoder)
