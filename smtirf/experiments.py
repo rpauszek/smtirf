@@ -93,6 +93,19 @@ class BaseExperiment():
         self.results.hist.calculate()
         self.results.tdp.calculate()
 
+    def train(self, K, *, shared_variance=False):
+        observations = [trace.X for trace in self if trace.isSelected]
+
+        theta = models.HiddenMarkovModel.guess(np.hstack(observations), K, shared_variance)
+        theta = theta.train(*observations)
+
+        for trace in self:
+            if trace.isSelected:
+                trace.model = theta
+                trace.label_statepath()
+            else:
+                trace.model = None
+
 
 
 # ==============================================================================

@@ -20,6 +20,8 @@ class SMJsonEncoder(json.JSONEncoder):
             return int(obj)
         elif np.issubdtype(obj, np.float):
             return float(obj)
+        elif np.issubdtype(obj, np.bool_):
+            return bool(obj)
 
         return json.JSONEncoder.default(self, obj)
 
