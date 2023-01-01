@@ -226,8 +226,8 @@ class BaseTrace(ABC):
     def X(self):
         ...
 
-    def train(self, K, sharedVariance=True, **kwargs):
-        theta = HiddenMarkovModel.guess(self.X, K)
+    def train(self, K, *, shared_variance=False, **kwargs):
+        theta = HiddenMarkovModel.guess(self.X, K, shared_variance)
         self.model = theta.train(self.X)
         self.label_statepath()
 

@@ -16,10 +16,10 @@ class HiddenMarkovModel(AsDictMixin):
     exit_flag: ExitFlag = field(default_factory=ExitFlag)
 
     @classmethod
-    def guess(cls, x, K):
+    def guess(cls, x, K, shared_variance=False):
         pi = Categorical.initialize_vector(K)
         A = Categorical.initalize_array(K, self_transition=10)
-        phi = Normal.initialize_kmeans(K, x)
+        phi = Normal.initialize_kmeans(K, x, shared_variance)
         return cls(K, pi, A, phi)
 
     def train(self, x, max_iter=250, tol=1e-5):

@@ -39,16 +39,21 @@ class Normal(AsDictMixin):
     tau: np.ndarray or float
 
     @classmethod
-    def initialize_kmeans(cls, K, x):
+    def initialize_kmeans(cls, K, x, shared_variance):
         model = KMeans(n_clusters=K)
         labels = model.fit_predict(col(x))
 
         mu = model.cluster_centers_.squeeze()
-        x0 = x - mu[labels]
-        std = np.array([np.std(x0[labels == j]) for j in np.unique(labels)])
-
         idx = np.argsort(mu)
-        return cls(K, mu[idx], 1 / std[idx] ** 2)
+
+        x0 = x - mu[labels]
+        std = (
+            np.array([np.std(x0)])
+            if shared_variance
+            else np.array([np.std(x0[labels == j]) for j in np.unique(labels)])[idx]
+        )
+
+        return cls(K, mu[idx], 1 / std**2)
 
     @property
     def var(self):
@@ -75,5 +80,11 @@ class Normal(AsDictMixin):
         return N_k, x_bar, variance
 
     def update(self, x, gamma):
-        _, x_bar, variance = self._calc_sufficient_statistics(x, gamma)
+        N_k, x_bar, variance = self._calc_sufficient_statistics(x, gamma)
+
+        # shared variance
+        # un-normalize variance, sum, re-normalize
+        if len(self.tau) == 1:
+            variance = np.array([np.sum(variance * N_k) / N_k.sum()])
+
         return Normal(self.K, x_bar, 1 / variance)
