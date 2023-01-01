@@ -22,30 +22,50 @@ class HiddenMarkovModel(AsDictMixin):
         phi = Normal.initialize_kmeans(K, x, shared_variance)
         return cls(K, pi, A, phi)
 
-    def train(self, x, max_iter=250, tol=1e-5):
-        gamma, xi, ln_Z = fwdback(self.pi.mu, self.A.mu, self.phi.pdf(x).T)
-        theta = HiddenMarkovModel(self.K, self.pi, self.A, self.phi, ExitFlag(ln_Z))
+    def train(self, *observations, max_iter=250, tol=1e-5):
 
-        for _ in range(max_iter):
-            theta, gamma, xi, ln_Z = theta._update(x, gamma, xi, tol=tol)
+        results = [fwdback(self.pi.mu, self.A.mu, self.phi.pdf(x).T) for x in observations]
+
+        gammas = [r[0] for r in results]
+        xis = [r[1] for r in results]
+        Ls = [r[2] for r in results]
+
+        theta = HiddenMarkovModel(self.K, self.pi, self.A, self.phi, ExitFlag(np.sum(Ls)))
+        print("***", theta.exit_flag)
+
+        for itr in range(max_iter):
+            theta, gammas, xis, Ls = theta._update(observations, gammas, xis, tol=tol)
+            print(itr)
+            print(theta.exit_flag)
             if theta.exit_flag.is_converged:
                 break
 
         return theta
 
-    def _update(self, x, gamma, xi, tol=1e-5):
+    def _update(self, observations, gammas, xis, tol=1e-5):
+        # observations : list
+
+        gamma0 = np.vstack([gamma[0] for gamma in gammas]).sum(axis=0) / len(gammas)
+        xi_sum = np.stack(xis, axis=2).sum(axis=2)
+        gamma_sum = np.vstack([gamma[:-1].sum(axis=0) for gamma in gammas]).sum(axis=0)
+
         # M-Step
-        pi = self.pi.update(gamma[0])
-        A = self.A.update(xi / col(gamma[:-1].sum(axis=0)))
-        phi = self.phi.update(x, gamma)
+        pi = self.pi.update(gamma0)
+        A = self.A.update(xi_sum / col(gamma_sum))
+        phi = self.phi.update(np.hstack(observations), np.vstack(gammas))
 
         # E-Step
-        gamma, xi, ln_Z = fwdback(pi.mu, A.mu, phi.pdf(x).T)
+        results = [fwdback(pi.mu, A.mu, phi.pdf(x).T) for x in observations]
+
+        gammas = [r[0] for r in results]
+        xis = [r[1] for r in results]
+        Ls = [r[2] for r in results]
+
         return (
-            HiddenMarkovModel(self.K, pi, A, phi, self.exit_flag.step(ln_Z, tol=tol)),
-            gamma,
-            xi,
-            ln_Z,
+            HiddenMarkovModel(self.K, pi, A, phi, self.exit_flag.step(np.sum(Ls), tol=tol)),
+            gammas,
+            xis,
+            Ls,
         )
 
     def label(self, x):
