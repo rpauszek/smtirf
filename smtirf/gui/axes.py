@@ -69,6 +69,9 @@ class SelectedDataAxes(BaseTraceDataAxes):
         self.selectedSpan.set_facecolor(selected_span_color)
         self.lineFull.set_data(trace.t, trace.E)
         self.lineSelected.set_data(trace.t[trace.limits], trace.X)
+        self.lineSelected.set_color(
+            config.colors.selected if trace.isSelected else config.colors.not_selected
+        )
         self.lineFit.set_data(*fit_data)
 
 

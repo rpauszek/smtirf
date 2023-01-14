@@ -1,6 +1,7 @@
 {
     "colors": {
-        "selected": "#7A67EE",
+        "selected": "#4169E1",
+        "not_selected": "#8DB6CD",
         "selected_dim": "#BCD2EE",
         "donor": "#9ACD32",
         "acceptor": "#CD1076",

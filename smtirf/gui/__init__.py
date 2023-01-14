@@ -9,6 +9,7 @@ lib_path = Path(__file__).parent / "lib"
 @dataclass
 class Colors:
     selected: str = "#7A67EE"
+    not_selected: str = "#8DB6CD"
     selected_dim: str = "#BCD2EE"
     donor: str = "#9ACD32"
     acceptor: str = "#CD1076"
