@@ -2,72 +2,66 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 import contextlib
 
 
-def set_enabler(widget, enabler):
-    if enabler is not None:
-        widget.setEnabled(False)
-        enabler.connect(lambda: widget.setEnabled(True))
+class ToolButton(QtWidgets.QToolButton):
+    def __init__(self, toolbar, icon, label, enabler=None):
+        super().__init__()
+        self.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.setIcon(QtGui.QIcon(f":{icon}.svg"))
+        self.setText(label)
 
+        if enabler is not None:
+            self.setEnabled(False)
+            enabler.connect(lambda: self.setEnabled(True))
 
-def add_popup_toolbutton(toolbar, icon, label, enabler=None):
-    btn = QtWidgets.QToolButton()
-    btn.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-    btn.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
-    btn.setIcon(QtGui.QIcon(f":{icon}.svg"))
-    btn.setText(label)
-    set_enabler(btn, enabler)
-    toolbar.addWidget(btn)
-    return btn
+        toolbar.addWidget(self)
 
+    def add_action(self, label, callback, shortcut=None, enabler=None):
+        action = QtWidgets.QAction(label, self.parent())
+        if shortcut is not None:
+            action.setShortcut(shortcut)
+        with contextlib.suppress(TypeError):
+            action.triggered.connect(callback)
 
-def add_popup_action(btn, label, callback, shortcut=None, enabler=None):
-    action = QtWidgets.QAction(label, btn.parent())
-    if shortcut is not None:
-        action.setShortcut(shortcut)
-    with contextlib.suppress(TypeError):
-        action.triggered.connect(callback)
-    set_enabler(action, enabler)
-    btn.addAction(action)
+        if enabler is not None:
+            action.setEnabled(False)
+            enabler.connect(lambda: action.setEnabled(True))
+
+        self.addAction(action)
 
 
 class MainToolbar(QtWidgets.QToolBar):
     def __init__(self, controller, import_method, open_method, save_method):
         super().__init__("main")
 
-        btn = add_popup_toolbutton(self, "microscope", "Experiment")
-        add_popup_action(btn, "Import PMA", import_method, "Ctrl+N")
-        add_popup_action(btn, "Open Project", open_method, "Ctrl+O")
-        add_popup_action(
-            btn,
+        btn = ToolButton(self, "microscope", "Experiment")
+        btn.add_action("Import PMA", import_method, "Ctrl+N")
+        btn.add_action("Open Project", open_method, "Ctrl+O")
+        btn.add_action(
             "Save Project",
             save_method,
             "Ctrl+S",
             enabler=controller.experimentChanged,
         )
 
-        btn = add_popup_toolbutton(
+        btn = ToolButton(
             self, "gaussian", "Results", enabler=controller.experimentChanged
         )
 
-        btn = add_popup_toolbutton(
-            self, "sort", "Sort", enabler=controller.experimentChanged
-        )
-        add_popup_action(btn, "By Index", lambda: controller.sort_traces("index"))
-        add_popup_action(btn, "By Selected", lambda: controller.sort_traces("selected"))
-        add_popup_action(
-            btn, "By Correlation", lambda: controller.sort_traces("corrcoef")
-        )
+        btn = ToolButton(self, "sort", "Sort", enabler=controller.experimentChanged)
+        btn.add_action("By Index", lambda: controller.sort_traces("index"))
+        btn.add_action("By Selected", lambda: controller.sort_traces("selected"))
+        btn.add_action("By Correlation", lambda: controller.sort_traces("corrcoef"))
 
-        btn = add_popup_toolbutton(
-            self, "select", "Select", enabler=controller.experimentChanged
-        )
-        add_popup_action(btn, "Select All", controller.select_all)
-        add_popup_action(btn, "Select None", controller.select_none)
+        btn = ToolButton(self, "select", "Select", enabler=controller.experimentChanged)
+        btn.add_action("Select All", controller.select_all)
+        btn.add_action("Select None", controller.select_none)
 
-        btn = add_popup_toolbutton(
+        btn = ToolButton(
             self, "baseline", "Baseline", enabler=controller.experimentChanged
         )
 
-        btn = add_popup_toolbutton(self, "settings", "Settings")
+        btn = ToolButton(self, "settings", "Settings")
 
         self.setIconSize(QtCore.QSize(32, 32))
         self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
