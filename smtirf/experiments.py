@@ -13,7 +13,8 @@ from .util.identifiers import SMTraceID
 from .util.json import SMJsonDecoder, SMJsonEncoder
 from . import traces
 from . import io
-from .hmm.autobaseline import AutoBaselineModel
+from .hmm_original.autobaseline import AutoBaselineModel
+from .hmm import models
 from .results import Results
 
 # ==============================================================================
@@ -92,6 +93,19 @@ class BaseExperiment():
         self.results.hist.calculate()
         self.results.tdp.calculate()
 
+    def train(self, K, *, shared_variance=False):
+        observations = [trace.X for trace in self if trace.isSelected]
+
+        theta = models.HiddenMarkovModel.guess(np.hstack(observations), K, shared_variance)
+        theta = theta.train(*observations)
+
+        for trace in self:
+            if trace.isSelected:
+                trace.model = theta
+                trace.label_statepath()
+            else:
+                trace.model = None
+
 
 
 # ==============================================================================
@@ -168,10 +182,7 @@ class Experiment():
             for trc in experiment:
                 dataset = traceGroup.create_dataset(str(trc._id), data=trc._raw_data, compression="gzip")
                 dataset.attrs["properties"] = trc._as_json()
-                try:
-                    dataset.attrs["model"] = json.dumps(trc.model._as_json(), cls=SMJsonEncoder)
-                except AttributeError: # model is None
-                    pass
+                dataset.attrs["model"] = json.dumps(trc.model, cls=SMJsonEncoder)
 
             # store results ----------------------------------------------------
             resultsGroup = HF.create_group("results")
@@ -206,6 +217,7 @@ class Experiment():
             cls = Experiment.CLASS_TYPES[HF.attrs["experimentType"]]
             frameLength = HF.attrs["frameLength"]
             comments = HF.attrs["comments"]
+            version = [int(x) for x in HF.attrs["version"].split(".")]
 
             # load MovieList ---------------------------------------------------
             images = HF["movies"][:]
@@ -225,6 +237,10 @@ class Experiment():
                 _id = SMTraceID(key)
                 try:
                     model = json.loads(item.attrs["model"], cls=SMJsonDecoder)
+                    if version[1] < 2:
+                        # seems there was a bug in v0.1.4 where the model was
+                        # stored as a str inside a str, need to re-load
+                        model = models._construct_from_old_version(json.loads(model))
                 except KeyError:
                     model = None
                 props = json.loads(item.attrs["properties"], cls=SMJsonDecoder)

@@ -190,7 +190,7 @@ class DwellTable():
             bounds = find_contiguous(trc.SP == j)
             lengths = np.diff(bounds, axis=1)
             state = np.ones((bounds.shape[0], 1))*j
-            mu = np.ones((bounds.shape[0],1))*trc.model.mu[j]
+            mu = np.ones((bounds.shape[0],1))*trc.model.phi.mu[j]
             try:
                 xbar = np.hstack([np.median(trc.X[slice(*bound)]) for bound in bounds])
                 xbar = xbar[:,np.newaxis]

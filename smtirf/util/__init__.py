@@ -7,6 +7,21 @@ smtirf >> util >> __init__
 import numpy as np
 
 
+class AsDictMixin:
+
+    def _as_dict(self):
+        d = {field: getattr(self, field) for field in self.__dataclass_fields__}
+        d["_class_name"] = (self.__class__.__module__, self.__class__.__name__)
+        return d
+
+    @classmethod
+    def _from_json(cls, **kwargs):
+        for key, val in kwargs.items():
+            if isinstance(val, list):
+                kwargs[key] = np.array(val)
+        return cls(**kwargs)
+
+
 def find_contiguous(condition):
     """
     Finds contiguous True regions of the boolean array "condition".

@@ -13,7 +13,9 @@ class PlotConfig:
     d_color: str = "#9ACD32"
     a_color: str = "#CD1076"
     i_color: str = "#8B8B83"
+    fit_color: str = "#000000"
     line_width: float = 1
+    fit_line_width: float = 2
     zoom_span: dict = field(default_factory={})
     selection_span: dict = field(default_factory={})
     baseline_span: dict = field(default_factory={})

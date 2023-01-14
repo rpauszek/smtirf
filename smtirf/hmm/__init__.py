@@ -1,64 +1,41 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> hmm >> __init__.py
-"""
 import numpy as np
-from numpy import AxisError
+from dataclasses import dataclass
+import warnings
+from ..util import AsDictMixin
 
 
 def row(x):
-    try:
-        return x[np.newaxis,:]
-    except IndexError:
-        return x
-    except TypeError:
-        return x
+    x = np.atleast_1d(x)
+    assert x.ndim == 1, "Cannot form a row vector from a 2D array."
+    return x[np.newaxis, :]
+
 
 def col(x):
-    try:
-        return x[:,np.newaxis]
-    except IndexError:
-        return x
-    except TypeError:
-        return x
+    x = np.atleast_1d(x)
+    assert x.ndim == 1, "Cannot form a column vector from a 2D array."
+    return x[:, np.newaxis]
 
-def normalize_rows(x):
-    try:
-        return x/col(x.sum(axis=1))
-    except AxisError:
-        return x/x.sum()
-    except AttributeError:
-        return normalize_rows(np.array(x))
 
-class ExitFlag():
-
-    def __init__(self, L, isConverged):
-        self.L = L
-        self.isConverged = isConverged
-
-    def _as_dict(self):
-        return {"L": self.L, "isConverged": self.isConverged}
+@dataclass(frozen=True)
+class ExitFlag(AsDictMixin):
+    log_likelihood: float = -np.inf
+    delta_log_likelihood: float = np.nan
+    iterations: int = 0
+    is_converged: bool = False
 
     def __str__(self):
-        s = f"\nTraining Summary:\nlog(L):\t{self.Lmax:0.2f} (Δ={self.deltaL:0.2e})"
-        s += f"\nIterations:\t{self.iterations}"
-        s += f"\nConverged:\t{self.isConverged}\n"
-        return s
+        return (
+            f"\nTraining Summary:\n"
+            f"  {'log(L)': <13}" + f"{self.log_likelihood:0.6f}\n"
+            f"  {'Δ log(L)': <13}" + f"{self.delta_log_likelihood:0.2e}\n"
+            f"  {'Iterations': <13}" + f"{self.iterations}\n"
+            f"  {'Converged': <13}" + f"{self.is_converged}\n"
+        )
 
-    @property
-    def iterations(self):
-        return self.L.size
-
-    @property
-    def deltaL(self):
-        return self.L[-1] - self.L[-2]
-
-    @property
-    def Lmax(self):
-        return self.L[-1]
-
-
-from . import hyperparameters
-from . import models
-from .models import HiddenMarkovModel
+    def step(self, new_log_likelihood, tol):
+        delta_ln_Z = new_log_likelihood - self.log_likelihood
+        if delta_ln_Z < 0:
+            warnings.warn(f"log likelihood decreased by {np.abs(delta_ln_Z):0.4e}")
+        is_converged = delta_ln_Z < tol
+        iterations = self.iterations + 1
+        return ExitFlag(new_log_likelihood, delta_ln_Z, iterations, is_converged)

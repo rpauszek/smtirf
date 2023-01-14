@@ -4,7 +4,9 @@
     "d_color": "#9ACD32",
     "a_color": "#CD1076",
     "i_color": "#8B8B83",
+    "fit_color": "#000000",
     "line_width": 1,
+    "fit_line_width": 2,
     "zoom_span": {
         "alpha": 0.2,
         "facecolor": "#C0FF3E"

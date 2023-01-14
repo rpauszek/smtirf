@@ -1,5 +1,6 @@
 import numpy as np
 import json
+from importlib import import_module
 
 
 class SMJsonEncoder(json.JSONEncoder):
@@ -19,6 +20,8 @@ class SMJsonEncoder(json.JSONEncoder):
             return int(obj)
         elif np.issubdtype(obj, np.float):
             return float(obj)
+        elif np.issubdtype(obj, np.bool_):
+            return bool(obj)
 
         return json.JSONEncoder.default(self, obj)
 
@@ -28,7 +31,13 @@ class SMJsonDecoder(json.JSONDecoder):
         super().__init__(object_hook=self.object_hook, *args, **kwargs)
 
     def object_hook(self, obj):
+        if "_class_name" in obj:
+            module, cls_name = obj.pop("_class_name")
+            cls = getattr(import_module(module), cls_name)
+            return cls._from_json(**obj)
+
         for key, val in obj.items():
             if isinstance(val, list):
                 obj[key] = np.array(val)
+
         return obj

@@ -31,7 +31,7 @@ class BaseTrace(ABC):
         self.pk = SMSpotCoordinate(pk)
         self.isSelected = isSelected
         self.set_cluster_index(clusterIndex)
-        self.model = HiddenMarkovModel.from_json(model)
+        self.model = model
         self.deBlur = deBlur
         self.deSpike = deSpike
         self.dwells = DwellTable(self) if self.model is not None else None
@@ -226,19 +226,19 @@ class BaseTrace(ABC):
     def X(self):
         ...
 
-    def train(self, modelType, K, sharedVariance=True, **kwargs):
-        theta = HiddenMarkovModel.train_new(modelType, self.X, K, sharedVariance, **kwargs)
-        self.model = theta
+    def train(self, K, *, shared_variance=False, **kwargs):
+        theta = HiddenMarkovModel.guess(self.X, K, shared_variance)
+        self.model = theta.train(self.X)
         self.label_statepath()
 
     def label_statepath(self):
         if self.model is not None:
-            self.set_statepath(self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike))
+            self.set_statepath(self.model.label(self.X))
             self.dwells = DwellTable(self)
 
     @property
     def EP(self):
-        return self.model.get_emission_path(self.SP)
+        return self.model.phi.mu[self.SP]
 
     @abstractmethod
     def get_export_data(self):
