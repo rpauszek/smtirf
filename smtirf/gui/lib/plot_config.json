@@ -1,23 +1,29 @@
 {
-    "x_color": "#7A67EE",
-    "x_color_dim": "#BCD2EE",
-    "d_color": "#9ACD32",
-    "a_color": "#CD1076",
-    "i_color": "#8B8B83",
-    "fit_color": "#000000",
-    "line_width": 1,
-    "fit_line_width": 2,
-    "zoom_span": {
-        "alpha": 0.2,
-        "facecolor": "#C0FF3E"
+    "colors": {
+        "selected": "#7A67EE",
+        "selected_dim": "#BCD2EE",
+        "donor": "#9ACD32",
+        "acceptor": "#CD1076",
+        "total": "#8B8B83",
+        "fit": "#000000",
+        "dim_background": "#DEDEDE"
     },
-    "selection_span": {
-        "alpha": 1.0,
-        "facecolor": "#FFFFFF"
+    "line_widths": {
+        "default": 1,
+        "fit": 2
     },
-    "baseline_span": {
-        "alpha": 0.4,
-        "facecolor": "#DC143C"
-    },
-    "axes_dim_background": "#DEDEDE"
+    "spans": {
+        "zoom": {
+            "alpha": 0.2,
+            "facecolor": "#C0FF3E"
+        },
+        "selection": {
+            "alpha": 1.0,
+            "facecolor": "#FFFFFF"
+        },
+        "baseline": {
+            "alpha": 0.4,
+            "facecolor": "#DC143C"
+        }
+    }
 }

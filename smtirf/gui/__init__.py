@@ -7,30 +7,37 @@ lib_path = Path(__file__).parent / "lib"
 
 
 @dataclass
-class PlotConfig:
-    x_color: str = "#7A67EE"
-    x_color_dim: str = "#BCD2EE"
-    d_color: str = "#9ACD32"
-    a_color: str = "#CD1076"
-    i_color: str = "#8B8B83"
-    fit_color: str = "#000000"
-    line_width: float = 1
-    fit_line_width: float = 2
-    zoom_span: dict = field(default_factory={})
-    selection_span: dict = field(default_factory={})
-    baseline_span: dict = field(default_factory={})
-    axes_dim_background: str = "#DEDEDE"
+class Colors:
+    selected: str = "#7A67EE"
+    selected_dim: str = "#BCD2EE"
+    donor: str = "#9ACD32"
+    acceptor: str = "#CD1076"
+    total: str = "#8B8B83"
+    fit: str = "#000000"
+    dim_background: str = "#DEDEDE"
 
-    @classmethod
-    def from_json(cls, filename):
-        with open(filename, "r") as J:
-            return cls(**json.load(J))
+
+@dataclass
+class LineWidths:
+    default: float = 1
+    fit: float = 2
+
+
+@dataclass
+class Spans:
+    zoom: dict = field(default_factory={})
+    selection: dict = field(default_factory={})
+    baseline: dict = field(default_factory={})
 
 
 class Config:
-
     def __init__(self):
-        self.plot = PlotConfig.from_json(lib_path / "plot_config.json")
+        with open(lib_path / "plot_config.json", "r") as J:
+            config_dict = json.load(J)
+
+        self.colors = Colors(**config_dict["colors"])
+        self.linewidths = LineWidths(**config_dict["line_widths"])
+        self.spans = Spans(**config_dict["spans"])
 
 
 config = Config()
