@@ -35,14 +35,14 @@ class MainToolbar(QtWidgets.QToolBar):
         super().__init__("main")
 
         btn = ToolButton(self, "microscope", "Experiment")
-        btn.add_action("Import PMA", import_method, "Ctrl+N")
-        btn.add_action("Open Project", open_method, "Ctrl+O")
-        btn.add_action(
-            "Save Project",
-            save_method,
-            "Ctrl+S",
-            enabler=controller.experimentChanged,
+        action_details = (
+            ("Import PMA", "Open Project", "Save Project"),
+            (import_method, open_method, save_method),
+            ("N", "O", "S"),
+            (None, None, controller.experimentChanged),
         )
+        for label, method, shortcut, enabler in zip(*action_details):
+            btn.add_action(label, method, f"Ctrl+{shortcut}", enabler)
 
         btn = ToolButton(
             self, "gaussian", "Results", enabler=controller.experimentChanged
