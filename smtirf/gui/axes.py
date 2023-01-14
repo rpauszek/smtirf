@@ -51,13 +51,28 @@ class SelectedDataAxes(BaseTraceDataAxes):
         self.lineSelected = self.make_line(color=config.colors.selected)
         self.lineFit = self.make_line(color=config.colors.fit, lw=config.linewidths.fit)
         self.set_xmargin(0)
-        self.set_ylim(-0.2, 1.2)
+        self.set_ylim(*config.fret_range)
 
     @relim("x")
     def update_data(self, trace, relim):
-        self.lineFull.set_data(trace.t, trace.E)
-        self.lineSelected.set_data(trace.t[trace.limits], trace.X)
         fit_data = (trace.t[trace.limits], trace.EP) if trace.model else ([], [])
+        is_out_of_bounds = np.logical_or(
+            np.any(trace.X < config.fret_fit_range[0]),
+            np.any(trace.X > config.fret_fit_range[1])
+        )
+        color = (
+            config.colors.out_of_bounds if is_out_of_bounds else config.colors.selected
+        )
+        dim_color = (
+            config.colors.out_of_bounds_dim if is_out_of_bounds else config.colors.selected_dim
+        )
+
+        self.lineFull.set_data(trace.t, trace.E)
+        self.lineFull.set_color(dim_color)
+
+        self.lineSelected.set_data(trace.t[trace.limits], trace.X)
+        self.lineSelected.set_color(color)
+
         self.lineFit.set_data(*fit_data)
 
 

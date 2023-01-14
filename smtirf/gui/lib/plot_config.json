@@ -5,8 +5,10 @@
         "donor": "#9ACD32",
         "acceptor": "#CD1076",
         "total": "#8B8B83",
-        "fit": "#000000",
-        "dim_background": "#DEDEDE"
+        "fit": "#191970",
+        "dim_background": "#DEDEDE",
+        "out_of_bounds": "#FF6347",
+        "out_of_bounds_dim": "#FFE4E1"
     },
     "line_widths": {
         "default": 1,
@@ -25,5 +27,7 @@
             "alpha": 0.4,
             "facecolor": "#DC143C"
         }
-    }
+    },
+    "fret_range": [-0.2, 1.2],
+    "fret_fit_range": [-0.3, 1.3]
 }

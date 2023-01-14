@@ -15,6 +15,8 @@ class Colors:
     total: str = "#8B8B83"
     fit: str = "#000000"
     dim_background: str = "#DEDEDE"
+    out_of_bounds: str = "#ff0000"
+    out_of_bounds_dim: str = "#00ff00"
 
 
 @dataclass
@@ -38,6 +40,9 @@ class Config:
         self.colors = Colors(**config_dict["colors"])
         self.linewidths = LineWidths(**config_dict["line_widths"])
         self.spans = Spans(**config_dict["spans"])
+
+        self.fret_range = config_dict["fret_range"]
+        self.fret_fit_range = config_dict["fret_fit_range"]
 
 
 config = Config()
