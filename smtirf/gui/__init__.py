@@ -15,8 +15,7 @@ class Colors:
     total: str = "#8B8B83"
     fit: str = "#000000"
     dim_background: str = "#DEDEDE"
-    out_of_bounds: str = "#ff0000"
-    out_of_bounds_dim: str = "#00ff00"
+    out_of_bounds: str = "#FFE4E1"
 
 
 @dataclass

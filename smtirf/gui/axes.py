@@ -60,19 +60,15 @@ class SelectedDataAxes(BaseTraceDataAxes):
             np.any(trace.X < config.fret_fit_range[0]),
             np.any(trace.X > config.fret_fit_range[1])
         )
-        color = (
-            config.colors.out_of_bounds if is_out_of_bounds else config.colors.selected
-        )
-        dim_color = (
-            config.colors.out_of_bounds_dim if is_out_of_bounds else config.colors.selected_dim
+        selected_span_color = (
+            config.colors.out_of_bounds
+            if is_out_of_bounds
+            else config.spans.selection["facecolor"]
         )
 
+        self.selectedSpan.set_facecolor(selected_span_color)
         self.lineFull.set_data(trace.t, trace.E)
-        self.lineFull.set_color(dim_color)
-
         self.lineSelected.set_data(trace.t[trace.limits], trace.X)
-        self.lineSelected.set_color(color)
-
         self.lineFit.set_data(*fit_data)
 
 

@@ -7,8 +7,7 @@
         "total": "#8B8B83",
         "fit": "#191970",
         "dim_background": "#DEDEDE",
-        "out_of_bounds": "#FF6347",
-        "out_of_bounds_dim": "#FFE4E1"
+        "out_of_bounds": "#FFE4E1"
     },
     "line_widths": {
         "default": 1,
