@@ -7,6 +7,7 @@ from .controllers import ExperimentController
 from .dialogs import ImportPmaDialog
 from .canvases import InteractiveTraceViewer
 from . import widgets
+from . import panels
 from .util import make_messagebox
 from . import lib_path
 
@@ -84,32 +85,12 @@ class SMTirfMainWindow(QMainWindow):
         right_vbox.addSpacerItem(QSpacerItem(200, 0, QSizePolicy.Expanding, QSizePolicy.Fixed))
         hbox.addLayout(right_vbox)
 
-        # *** trace info panel
-        traceGroup = QtWidgets.QGroupBox("Current Trace")
-        set_enabler(traceGroup, self.controller.experimentChanged)
-        vbox = QtWidgets.QVBoxLayout()
-        vbox.addWidget(widgets.TraceSelectionButton(self.controller))
-        vbox.addWidget(widgets.TraceIdLabel(self.controller))
-        vbox.addWidget(widgets.CorrelationLabel(self.controller))
-
-        traceGroup.setLayout(vbox)
-        right_vbox.addWidget(traceGroup)
-
-        # *** experiment info panel
-        experimentGroup = QtWidgets.QGroupBox("Experiment")
-        set_enabler(experimentGroup, self.controller.experimentChanged)
-        gbox = QtWidgets.QGridLayout()
-        row = 0
-        gbox.addWidget(widgets.SelectedTraceCounter(self.controller), row, 0, 1, 2)
-        row += 1
-        gbox.addItem(QSpacerItem(5, 15, QSizePolicy.Fixed, QSizePolicy.Fixed), row, 0)
-
-        row += 1
-        gbox.addWidget(widgets.ResetOffsetsButton(self.controller), row, 0)
-        gbox.addWidget(widgets.ResetLimitsButton(self.controller), row, 1)
-
-        experimentGroup.setLayout(gbox)
-        right_vbox.addWidget(experimentGroup)
+        right_vbox.addWidget(
+            panels.TraceGroup(self.controller, self.controller.experimentChanged)
+        )
+        right_vbox.addWidget(
+            panels.ExperimentGroup(self.controller, self.controller.experimentChanged)
+        )
 
         # *** coordinate label
         right_vbox.addSpacerItem(QSpacerItem(0, 0, QSizePolicy.Fixed, QSizePolicy.Expanding))
