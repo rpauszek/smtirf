@@ -49,6 +49,7 @@ class SelectedDataAxes(BaseTraceDataAxes):
         super().__init__(*args, parent=parent)
         self.lineFull = self.make_line(color=config.plot.x_color_dim)
         self.lineSelected = self.make_line(color=config.plot.x_color)
+        self.lineFit = self.make_line(color=config.plot.fit_color, lw=config.plot.fit_line_width)
         self.set_xmargin(0)
         self.set_ylim(-0.2, 1.2)
 
@@ -56,6 +57,8 @@ class SelectedDataAxes(BaseTraceDataAxes):
     def update_data(self, trace, relim):
         self.lineFull.set_data(trace.t, trace.E)
         self.lineSelected.set_data(trace.t[trace.limits], trace.X)
+        fit_data = (trace.t[trace.limits], trace.EP) if trace.model else ([], [])
+        self.lineFit.set_data(*fit_data)
 
 
 class ChannelDataAxes(BaseTraceDataAxes):
