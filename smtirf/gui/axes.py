@@ -12,8 +12,8 @@ class BaseTraceDataAxes(Axes):
 
     def __init__(self, *args, parent=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.selectedSpan = self.axvspan(0, 1, **config.plot.selection_span)
-        self.set_facecolor(config.plot.axes_dim_background)
+        self.selectedSpan = self.axvspan(0, 1, **config.spans.selection)
+        self.set_facecolor(config.colors.dim_background)
         self.axhline(0, color="k", lw="0.5")
 
         selected_span_updater = lambda trace: set_span_xlimits(self.selectedSpan,
@@ -27,7 +27,7 @@ class BaseTraceDataAxes(Axes):
         raise NotImplemented("base axes class cannot be instantiated")
 
     def make_line(self, color, **kwargs):
-        formatting = {"lw": config.plot.line_width, **kwargs}
+        formatting = {"lw": config.linewidths.default, **kwargs}
         line, = self.plot([], [], color=color, **formatting)
         return line
 
@@ -47,17 +47,31 @@ class SelectedDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
-        self.lineFull = self.make_line(color=config.plot.x_color_dim)
-        self.lineSelected = self.make_line(color=config.plot.x_color)
-        self.lineFit = self.make_line(color=config.plot.fit_color, lw=config.plot.fit_line_width)
+        self.lineFull = self.make_line(color=config.colors.selected_dim)
+        self.lineSelected = self.make_line(color=config.colors.selected)
+        self.lineFit = self.make_line(color=config.colors.fit, lw=config.linewidths.fit)
         self.set_xmargin(0)
-        self.set_ylim(-0.2, 1.2)
+        self.set_ylim(*config.fret_range)
 
     @relim("x")
     def update_data(self, trace, relim):
+        fit_data = (trace.t[trace.limits], trace.EP) if trace.model else ([], [])
+        is_out_of_bounds = np.logical_or(
+            np.any(trace.X < config.fret_fit_range[0]),
+            np.any(trace.X > config.fret_fit_range[1])
+        )
+        selected_span_color = (
+            config.colors.out_of_bounds
+            if is_out_of_bounds
+            else config.spans.selection["facecolor"]
+        )
+
+        self.selectedSpan.set_facecolor(selected_span_color)
         self.lineFull.set_data(trace.t, trace.E)
         self.lineSelected.set_data(trace.t[trace.limits], trace.X)
-        fit_data = (trace.t[trace.limits], trace.EP) if trace.model else ([], [])
+        self.lineSelected.set_color(
+            config.colors.selected if trace.isSelected else config.colors.not_selected
+        )
         self.lineFit.set_data(*fit_data)
 
 
@@ -65,8 +79,8 @@ class ChannelDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
-        self.lineDonor = self.make_line(color=config.plot.d_color)
-        self.lineAcceptor = self.make_line(color=config.plot.a_color)
+        self.lineDonor = self.make_line(color=config.colors.donor)
+        self.lineAcceptor = self.make_line(color=config.colors.acceptor)
 
         self.set_xmargin(0)
         self.set_ymargin(0.1)
@@ -81,7 +95,7 @@ class TotalDataAxes(BaseTraceDataAxes):
 
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
-        self.lineFull = self.make_line(color=config.plot.i_color)
+        self.lineFull = self.make_line(color=config.colors.total)
 
         self.set_xmargin(0)
         self.set_ymargin(0.1)
