@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QSpacerItem, QSizePolicy
+from . import controllers
 from . import widgets
 
 
@@ -33,3 +34,26 @@ class ExperimentGroup(QtWidgets.QGroupBox):
 
         self.setEnabled(False)
         enabler_signal.connect(lambda: self.setEnabled(True))
+
+
+class ModelGroup(QtWidgets.QGroupBox):
+    def __init__(self, controller, enabler_signal):
+        super().__init__("Model")
+        model_controller = controllers.ModelController()
+
+        self.nstates_slider = widgets.ModelStatesSlider(model_controller)
+        self.shared_var_checkbox = widgets.SharedVarCheckbox(model_controller)
+        self.train_button = widgets.TrainGlobalButton(model_controller)
+
+        vbox = QtWidgets.QVBoxLayout()
+        vbox.addWidget(self.nstates_slider)
+        vbox.addWidget(self.shared_var_checkbox)
+        vbox.addSpacerItem(QtWidgets.QSpacerItem(4, 10, QtWidgets.QSizePolicy.Expanding, QSizePolicy.Fixed))
+        vbox.addWidget(self.train_button)
+        self.setLayout(vbox)
+
+        self.setEnabled(False)
+        enabler_signal.connect(lambda: self.setEnabled(True))
+
+        model_controller.numberOfStatesChanged.connect(lambda i: model_controller.set_nstates(i))
+        model_controller.sharedVarChanged.connect(lambda b: model_controller.set_shared_var(b))
