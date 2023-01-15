@@ -62,12 +62,10 @@ class HiddenMarkovModel(AsDictMixin):
             self.K, self.pi, self.A, self.phi, ExitFlag(np.sum(log_likelihoods))
         )
 
-        for itr in range(max_iter):
+        for _ in range(max_iter):
             theta, gammas, xis, log_likelihoods = theta._update(
                 observations, gammas, xis, tol=tol
             )
-            print(itr)
-            print(theta.exit_flag)
             if theta.exit_flag.is_converged:
                 break
 

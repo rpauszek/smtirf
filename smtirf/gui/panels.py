@@ -57,3 +57,7 @@ class ModelGroup(QtWidgets.QGroupBox):
 
         model_controller.numberOfStatesChanged.connect(lambda i: model_controller.set_nstates(i))
         model_controller.sharedVarChanged.connect(lambda b: model_controller.set_shared_var(b))
+
+        model_controller.trainGlobalModel.connect(lambda i, b: controller.train_global(i, b))
+        controller.trainingStarted.connect(lambda: self.setEnabled(False))
+        controller.trainingFinished.connect(lambda: self.setEnabled(True))
