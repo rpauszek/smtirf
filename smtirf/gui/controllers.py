@@ -17,6 +17,8 @@ class ExperimentController(QObject):
     traceStateChanged: ClassVar[pyqtSignal] = pyqtSignal(object)
     stepIndexTriggered: ClassVar[pyqtSignal] = pyqtSignal(int)
     mplMotionNotifyEvent: ClassVar[pyqtSignal] = pyqtSignal(object)
+    trainingStarted: ClassVar[pyqtSignal] = pyqtSignal()
+    trainingFinished: ClassVar[pyqtSignal] = pyqtSignal()
 
     def __post_init__(self):
         super().__init__()
@@ -100,6 +102,12 @@ class ExperimentController(QObject):
         self.trace.toggle()
         self.traceStateChanged.emit(self.trace)
 
+    def train_global(self, nstates, shared_var):
+        self.trainingStarted.emit()
+        self.experiment.train(nstates, shared_variance=shared_var)
+        self.trainingFinished.emit()
+        self.traceStateChanged.emit(self.trace)
+
 
 @dataclass
 class ModelController(QObject):
@@ -107,6 +115,7 @@ class ModelController(QObject):
     _shared_var: bool = False
     numberOfStatesChanged: ClassVar[pyqtSignal] = pyqtSignal(int)
     sharedVarChanged: ClassVar[pyqtSignal] = pyqtSignal(bool)
+    trainGlobalModel: ClassVar[pyqtSignal] = pyqtSignal(int, bool)
 
     def __post_init__(self):
         super().__init__()
@@ -117,5 +126,5 @@ class ModelController(QObject):
     def set_shared_var(self, value):
         self._shared_var = value
 
-    def train_global(self):
-        pass
+    def call_train_global(self):
+        self.trainGlobalModel.emit(self._nstates, self._shared_var)

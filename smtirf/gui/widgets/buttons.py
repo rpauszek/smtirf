@@ -65,4 +65,4 @@ class ResetLimitsButton(QtWidgets.QPushButton):
 class TrainGlobalButton(QtWidgets.QPushButton):
     def __init__(self, controller):
         super().__init__("Train Experiment")
-        self.clicked.connect(controller.train_global)
+        self.clicked.connect(controller.call_train_global)
