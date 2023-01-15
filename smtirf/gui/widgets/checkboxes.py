@@ -5,7 +5,7 @@ __all__ = ["SharedVarCheckbox"]
 class SharedVarCheckbox(QtWidgets.QCheckBox):
 
     def __init__(self, controller):
-        super().__init__("# states: ")
+        super().__init__("shared variance")
         self.setChecked(controller._shared_var)
 
         # controller -> ModelController
