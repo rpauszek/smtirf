@@ -6,7 +6,6 @@ __all__ = ["ExperimentTypeButtonGroup"]
 
 
 class BaseButtonGroup(QtWidgets.QWidget):
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.buttonTypeMap = {}
@@ -22,7 +21,9 @@ class BaseButtonGroup(QtWidgets.QWidget):
             hbox.addWidget(btn)
             self.buttonGroup.addButton(btn)
             self.buttonTypeMap[btn] = key
-        hbox.addItem(QtWidgets.QSpacerItem(5, 5, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        hbox.addItem(
+            QtWidgets.QSpacerItem(5, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
+        )
         self.setLayout(hbox)
 
     def make_buttons(self):
@@ -30,7 +31,6 @@ class BaseButtonGroup(QtWidgets.QWidget):
 
 
 class ExperimentTypeButtonGroup(BaseButtonGroup):
-
     def make_buttons(self):
         radFretExperimentType = QtWidgets.QRadioButton("FRET")
         radPifeExperimentType = QtWidgets.QRadioButton("PIFE")

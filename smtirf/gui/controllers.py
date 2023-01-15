@@ -46,8 +46,12 @@ class ExperimentController(QObject):
         self._trace = self.experiment[index]
         self.traceIndexChanged.emit(self.trace)
 
-    def import_pma_file(self, filename, experimentType="fret", bleed=0.05, gamma=1, comments=""):
-        self.experiment = Experiment.from_pma(filename, experimentType, bleed, gamma, comments)
+    def import_pma_file(
+        self, filename, experimentType="fret", bleed=0.05, gamma=1, comments=""
+    ):
+        self.experiment = Experiment.from_pma(
+            filename, experimentType, bleed, gamma, comments
+        )
         self.filename = Path(filename).with_suffix(".smtrc")
 
     def open_experiment(self, filename):

@@ -6,7 +6,6 @@ from . import widgets
 
 
 class ImportPmaDialog(QDialog):
-
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Import PMA experiment")
@@ -16,12 +15,15 @@ class ImportPmaDialog(QDialog):
         self.layout()
 
     def layout(self):
-        self.buttonBox = QDialogButtonBox(QDialogButtonBox.Open | QDialogButtonBox.Cancel)
+        self.buttonBox = QDialogButtonBox(
+            QDialogButtonBox.Open | QDialogButtonBox.Cancel
+        )
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
-        self.filenameLabel = widgets.FileSelectionLabel(caption="Select file to import",
-                                                        filterString="PMA traces (*.traces)")
+        self.filenameLabel = widgets.FileSelectionLabel(
+            caption="Select file to import", filterString="PMA traces (*.traces)"
+        )
         buttonOpen = self.buttonBox.button(QDialogButtonBox.Open)
         buttonOpen.setEnabled(False)
         self.filenameLabel.filenameIsSet.connect(buttonOpen.setEnabled)
@@ -37,6 +39,10 @@ class ImportPmaDialog(QDialog):
 
     @property
     def importArgs(self):
-        return {"filename": self.filenameLabel.filename,
-                "experimentType": self.experimentTypeGroup.experimentType,
-                "bleed": 0.05, "gamma": 1, "comments": ""}
+        return {
+            "filename": self.filenameLabel.filename,
+            "experimentType": self.experimentTypeGroup.experimentType,
+            "bleed": 0.05,
+            "gamma": 1,
+            "comments": "",
+        }

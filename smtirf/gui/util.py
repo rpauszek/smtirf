@@ -14,10 +14,14 @@ def make_messagebox(title, icon, message, buttons):
 def confirm_click(title, message):
     def update(func):
         def wrapped_update():
-            msg = make_messagebox(title, "question", message, (QMessageBox.Yes | QMessageBox.Cancel))
+            msg = make_messagebox(
+                title, "question", message, (QMessageBox.Yes | QMessageBox.Cancel)
+            )
             msg.exec()
             response = msg.buttonRole(msg.clickedButton())
             if response == QMessageBox.YesRole:
                 func()
+
         return wrapped_update
+
     return update

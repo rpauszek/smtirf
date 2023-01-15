@@ -2,14 +2,20 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSpacerItem, QSizePolicy, QFileDialog
 
 
-__all__ = ["FileSelectionLabel", "TraceIdLabel", "CorrelationLabel", "SelectedTraceCounter",
-           "CoordinateLabel"]
+__all__ = [
+    "FileSelectionLabel",
+    "TraceIdLabel",
+    "CorrelationLabel",
+    "SelectedTraceCounter",
+    "CoordinateLabel",
+]
 
 
 class LeftElidedLabel(QtWidgets.QLabel):
-
     def setText(self, s):
-        s = QtGui.QFontMetrics(self.font()).elidedText(s, QtCore.Qt.ElideLeft, self.width())
+        s = QtGui.QFontMetrics(self.font()).elidedText(
+            s, QtCore.Qt.ElideLeft, self.width()
+        )
         super().setText(s)
 
 
@@ -46,8 +52,9 @@ class FileSelectionLabel(QtWidgets.QWidget):
         self.filenameIsSet.emit(bool(self.filename))
 
     def choose_file(self):
-        filename, _ = QFileDialog.getOpenFileName(caption=self.caption,
-                                                  filter=self.filter)
+        filename, _ = QFileDialog.getOpenFileName(
+            caption=self.caption, filter=self.filter
+        )
         if filename:
             self.filename = filename
             self.filenameLabel.setText(filename)
@@ -101,7 +108,6 @@ class CorrelationLabel(TraceLabel):
 
 
 class SelectedItemsCounter(QtWidgets.QProgressBar):
-
     def __init__(self, loadSignal, editSignal, **kwargs):
         super().__init__(**kwargs)
         self.setFormat(r" %v/%m")
@@ -121,13 +127,13 @@ class SelectedItemsCounter(QtWidgets.QProgressBar):
 
 
 class SelectedTraceCounter(SelectedItemsCounter):
-
     def __init__(self, controller, **kwargs):
-        super().__init__(controller.experimentChanged, controller.traceStateChanged, **kwargs)
+        super().__init__(
+            controller.experimentChanged, controller.traceStateChanged, **kwargs
+        )
 
 
 class CoordinateLabel(QtWidgets.QLabel):
-
     def __init__(self, controller, **kwargs):
         super().__init__("x: , y: ", **kwargs)
         self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
@@ -135,6 +141,4 @@ class CoordinateLabel(QtWidgets.QLabel):
         self.setStyleSheet("color: #888888;")
 
     def update_text(self, evt):
-        self.setText(
-            f"x: {evt.xdata:0.2f}, y: {evt.ydata:0.2f}" if evt.inaxes else ""
-        )
+        self.setText(f"x: {evt.xdata:0.2f}, y: {evt.ydata:0.2f}" if evt.inaxes else "")

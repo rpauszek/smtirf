@@ -4,7 +4,12 @@ from PyQt5 import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QSizePolicy
 
 
-__all__ = ["TraceIndexSlider", "LabeledSlider", "LabeledIntervalSlider", "LabeledScientificSlider"]
+__all__ = [
+    "TraceIndexSlider",
+    "LabeledSlider",
+    "LabeledIntervalSlider",
+    "LabeledScientificSlider",
+]
 
 
 class SpinSlider(QtWidgets.QWidget):
@@ -15,7 +20,9 @@ class SpinSlider(QtWidgets.QWidget):
         super().__init__()
 
         self.spinbox = QtWidgets.QSpinBox(minimum=1, value=1)
-        self.slider = QtWidgets.QSlider(minimum=0, value=0, orientation=QtCore.Qt.Horizontal)
+        self.slider = QtWidgets.QSlider(
+            minimum=0, value=0, orientation=QtCore.Qt.Horizontal
+        )
         self.slider.setTracking(False)
         self.cmdStepFwd = QtWidgets.QPushButton(">>")
         self.cmdStepFwd.setMaximumWidth(25)
@@ -39,40 +46,31 @@ class SpinSlider(QtWidgets.QWidget):
         self.cmdStepFwd.clicked.connect(lambda: self.step(1))
         self.cmdStepBack.clicked.connect(lambda: self.step(-1))
 
-    # ==========================================================================
-    # internal event handling
-    # ==========================================================================
     def _update_index(self, index):
-        """ triggered when slider value is changed
-            updates the spinbox value to match slider and emits widget signal """
-        self.spinbox.setValue(index+1) # 0-based => 1-based
+        """triggered when slider value is changed
+        updates the spinbox value to match slider and emits widget signal"""
+        self.spinbox.setValue(index + 1)  # 0-based => 1-based
         self.indexChanged.emit(self.value())
 
     def _forward_spinbox_to_slider(self):
         # -> self.slider.valueChanged() -> self._update_index()
-        self.setValue(self.spinbox.value()-1) # 1-based => 0-based
+        self.setValue(self.spinbox.value() - 1)  # 1-based => 0-based
 
-    # ==========================================================================
-    # public API
-    # ==========================================================================
     def step(self, step):
-        """ step index by `step` value; can connect to user definied shortcuts """
+        """step index by `step` value; can connect to user definied shortcuts"""
         if self.isEnabled():
-            self.setValue(self.value()+step)
+            self.setValue(self.value() + step)
 
     def refresh_limits(self, listObject):
         self.setMaximum(len(listObject))
         self.indexChanged.emit(self.value())
         self.setEnabled(True)
 
-    # ==========================================================================
-    # re-implement PyQt interface
-    # ==========================================================================
     def value(self):
         return self.slider.value()
 
     def setValue(self, value):
-        self.slider.setValue(value) # -> self.slider.valueChanged -> self._update_index
+        self.slider.setValue(value)  # -> self.slider.valueChanged -> self._update_index
 
     def setEnabled(self, value):
         for w in self.widgets:
@@ -82,16 +80,15 @@ class SpinSlider(QtWidgets.QWidget):
         return self.slider.isEnabled()
 
     def setMaximum(self, value):
-        """ accepts 1-based value: corresponds to len(obj)
-            sets maximums for both widgets """
-        self.slider.setMaximum(value-1) # 0-based
+        """accepts 1-based value: corresponds to len(obj)
+        sets maximums for both widgets"""
+        self.slider.setMaximum(value - 1)  # 0-based
         self.spinbox.setMaximum(value)  # 1-based
         self.slider.setMinimum(0)
         self.spinbox.setMinimum(1)
 
 
 class TraceIndexSlider(SpinSlider):
-
     def __init__(self, controller, label="Trace Index"):
         super().__init__(label=label)
         self.setEnabled(False)
@@ -103,7 +100,6 @@ class TraceIndexSlider(SpinSlider):
 
 
 class LabeledSlider(QtWidgets.QWidget):
-
     def __init__(self, label, minimum=0, maximum=100, value=0):
         super().__init__()
 
@@ -111,7 +107,7 @@ class LabeledSlider(QtWidgets.QWidget):
             minimum=minimum,
             maximum=maximum,
             value=value,
-            orientation=QtCore.Qt.Horizontal
+            orientation=QtCore.Qt.Horizontal,
         )
         # self.slider.setTracking(False)
         self.label = QtWidgets.QLabel("1")
@@ -137,16 +133,15 @@ class LabeledSlider(QtWidgets.QWidget):
 
 
 class LabeledIntervalSlider(LabeledSlider):
-
     def __init__(self, label, minimum=0, maximum=1000, value=0, interval=10):
         assert (maximum - minimum) % interval == 0
         self._interval = interval
         self._minimum = minimum
         super().__init__(
             label=label,
-            minimum=minimum/interval,
-            maximum=maximum/interval,
-            value=value/interval
+            minimum=minimum / interval,
+            maximum=maximum / interval,
+            value=value / interval,
         )
 
     def value(self):
@@ -157,7 +152,6 @@ class LabeledIntervalSlider(LabeledSlider):
 
 
 class LabeledScientificSlider(LabeledSlider):
-
     def __init__(self, label, minimum=1e-12, maximum=1, value=1):
         self.min_decade = np.log10(minimum)
         max_decade = np.log10(maximum)
@@ -179,7 +173,7 @@ class LabeledScientificSlider(LabeledSlider):
     def value(self):
         index = self.slider.value()
         significand = index - (9 * (index // 9)) + 1
-        return significand * 10**(self.min_decade + index // 9)
+        return significand * 10 ** (self.min_decade + index // 9)
 
     def _update_label(self, index):
         value = self.value()

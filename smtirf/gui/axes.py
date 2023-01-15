@@ -9,16 +9,15 @@ __all__ = ["TraceAxes"]
 
 
 class BaseTraceDataAxes(Axes):
-
     def __init__(self, *args, parent=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.selectedSpan = self.axvspan(0, 1, **config.spans.selection)
         self.set_facecolor(config.colors.dim_background)
         self.axhline(0, color="k", lw="0.5")
 
-        selected_span_updater = lambda trace: set_span_xlimits(self.selectedSpan,
-                                                               trace.t[trace.limits][0],
-                                                               trace.t[trace.limits][-1])
+        selected_span_updater = lambda trace: set_span_xlimits(
+            self.selectedSpan, trace.t[trace.limits][0], trace.t[trace.limits][-1]
+        )
 
         parent.traceChanged.connect(selected_span_updater)
         parent.traceChanged.connect(self.update_data)
@@ -28,7 +27,7 @@ class BaseTraceDataAxes(Axes):
 
     def make_line(self, color, **kwargs):
         formatting = {"lw": config.linewidths.default, **kwargs}
-        line, = self.plot([], [], color=color, **formatting)
+        (line,) = self.plot([], [], color=color, **formatting)
         return line
 
 
@@ -39,12 +38,13 @@ def relim(axis):
             if relim:
                 self.relim()
                 self.autoscale(enable=True, axis=axis)
+
         return wrapped_update
+
     return update
 
 
 class SelectedDataAxes(BaseTraceDataAxes):
-
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
         self.lineFull = self.make_line(color=config.colors.selected_dim)
@@ -58,7 +58,7 @@ class SelectedDataAxes(BaseTraceDataAxes):
         fit_data = (trace.t[trace.limits], trace.EP) if trace.model else ([], [])
         is_out_of_bounds = np.logical_or(
             np.any(trace.X < config.fret_fit_range[0]),
-            np.any(trace.X > config.fret_fit_range[1])
+            np.any(trace.X > config.fret_fit_range[1]),
         )
         selected_span_color = (
             config.colors.out_of_bounds
@@ -76,7 +76,6 @@ class SelectedDataAxes(BaseTraceDataAxes):
 
 
 class ChannelDataAxes(BaseTraceDataAxes):
-
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
         self.lineDonor = self.make_line(color=config.colors.donor)
@@ -92,7 +91,6 @@ class ChannelDataAxes(BaseTraceDataAxes):
 
 
 class TotalDataAxes(BaseTraceDataAxes):
-
     def __init__(self, *args, parent=None):
         super().__init__(*args, parent=parent)
         self.lineFull = self.make_line(color=config.colors.total)
@@ -109,9 +107,11 @@ class TotalDataAxes(BaseTraceDataAxes):
 class TraceAxes:
     parent: object
     dataType: InitVar[str]
-    axesTypes: ClassVar[dict] = {"selection": SelectedDataAxes,
-                                 "channels": ChannelDataAxes,
-                                 "total": TotalDataAxes}
+    axesTypes: ClassVar[dict] = {
+        "selection": SelectedDataAxes,
+        "channels": ChannelDataAxes,
+        "total": TotalDataAxes,
+    }
 
     def __post_init__(self, dataType):
         self.cls = TraceAxes.axesTypes[dataType]
