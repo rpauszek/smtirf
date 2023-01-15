@@ -4,6 +4,7 @@ from typing import ClassVar
 from pathlib import Path
 
 from .. import Experiment
+from . import threads
 
 
 @dataclass
@@ -22,6 +23,9 @@ class ExperimentController(QObject):
 
     def __post_init__(self):
         super().__init__()
+        self.training_thread = threads.TrainGlobalThread(self)
+        self.training_thread.started_training.connect(self.trainingStarted.emit)
+        self.training_thread.finished_training.connect(self.trainingFinished.emit)
 
     @property
     def experiment(self):
@@ -103,10 +107,8 @@ class ExperimentController(QObject):
         self.traceStateChanged.emit(self.trace)
 
     def train_global(self, nstates, shared_var):
-        self.trainingStarted.emit()
-        self.experiment.train(nstates, shared_variance=shared_var)
-        self.trainingFinished.emit()
-        self.traceStateChanged.emit(self.trace)
+        self.training_thread.set_parameters(nstates, shared_var)
+        self.training_thread.start()
 
 
 @dataclass

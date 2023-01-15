@@ -59,5 +59,9 @@ class ModelGroup(QtWidgets.QGroupBox):
         model_controller.sharedVarChanged.connect(lambda b: model_controller.set_shared_var(b))
 
         model_controller.trainGlobalModel.connect(lambda i, b: controller.train_global(i, b))
-        controller.trainingStarted.connect(lambda: self.setEnabled(False))
-        controller.trainingFinished.connect(lambda: self.setEnabled(True))
+        controller.trainingStarted.connect(lambda: self.set_status(True))
+        controller.trainingFinished.connect(lambda: self.set_status(False))
+
+    def set_status(self, is_training):
+        self.train_button.set_training_status(is_training)
+        self.setEnabled(not is_training)
