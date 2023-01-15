@@ -64,5 +64,10 @@ class ResetLimitsButton(QtWidgets.QPushButton):
 
 class TrainGlobalButton(QtWidgets.QPushButton):
     def __init__(self, controller):
-        super().__init__("Train Experiment")
+        super().__init__("")
+        self.set_training_status(False)
         self.clicked.connect(controller.call_train_global)
+
+    def set_training_status(self, is_training):
+        label = "training..." if is_training else "Train Experiment"
+        self.setText(label)

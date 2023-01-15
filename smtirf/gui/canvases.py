@@ -26,6 +26,7 @@ class QtCanvas(FigureCanvas):
 class InteractiveTraceViewer(QtCanvas):
 
     traceChanged = pyqtSignal(object, bool)
+    modelChanged = pyqtSignal(object, bool)
     baselineSelected = pyqtSignal(float, float)
     axes = {"selection": None, "channels": None, "total": None}
 
@@ -40,6 +41,9 @@ class InteractiveTraceViewer(QtCanvas):
         )
         controller.traceStateChanged.connect(
             lambda trace: self.update_plots(trace, False)
+        )
+        controller.trainingFinished.connect(
+            lambda: self.update_plots(self.controller.trace, False)
         )
         self.mpl_connect(
             "scroll_event",
