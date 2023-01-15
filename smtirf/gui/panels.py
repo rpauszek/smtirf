@@ -45,22 +45,38 @@ class ModelGroup(QtWidgets.QGroupBox):
         self.shared_var_checkbox = widgets.SharedVarCheckbox(model_controller)
         self.train_button = widgets.TrainGlobalButton(model_controller)
 
+        spacer_settings = (4, 10, QtWidgets.QSizePolicy.Expanding, QSizePolicy.Fixed)
+
         vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.nstates_slider)
         vbox.addWidget(self.shared_var_checkbox)
-        vbox.addSpacerItem(QtWidgets.QSpacerItem(4, 10, QtWidgets.QSizePolicy.Expanding, QSizePolicy.Fixed))
+        vbox.addSpacerItem(QtWidgets.QSpacerItem(*spacer_settings))
         vbox.addWidget(self.train_button)
+        vbox.addSpacerItem(QtWidgets.QSpacerItem(*spacer_settings))
+        vbox.addWidget(widgets.LogLikelihoodLabel(model_controller))
+        vbox.addWidget(widgets.DeltaLogLikelihoodLabel(model_controller))
+        vbox.addWidget(widgets.IterationsLabel(model_controller))
+        vbox.addWidget(widgets.IsConvergedLabel(model_controller))
         self.setLayout(vbox)
 
         self.setEnabled(False)
         enabler_signal.connect(lambda: self.setEnabled(True))
 
-        model_controller.numberOfStatesChanged.connect(lambda i: model_controller.set_nstates(i))
-        model_controller.sharedVarChanged.connect(lambda b: model_controller.set_shared_var(b))
+        model_controller.numberOfStatesChanged.connect(
+            lambda i: model_controller.set_nstates(i)
+        )
+        model_controller.sharedVarChanged.connect(
+            lambda b: model_controller.set_shared_var(b)
+        )
 
-        model_controller.trainGlobalModel.connect(lambda i, b: controller.train_global(i, b))
+        model_controller.trainGlobalModel.connect(
+            lambda i, b: controller.train_global(i, b)
+        )
         controller.trainingStarted.connect(lambda: self.set_status(True))
-        controller.trainingFinished.connect(lambda: self.set_status(False))
+        controller.trainingFinished.connect(lambda _: self.set_status(False))
+        controller.trainingFinished.connect(
+            lambda model: model_controller.updateExitFlag.emit(model.exit_flag)
+        )
 
     def set_status(self, is_training):
         self.train_button.set_training_status(is_training)

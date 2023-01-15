@@ -8,6 +8,10 @@ __all__ = [
     "CorrelationLabel",
     "SelectedTraceCounter",
     "CoordinateLabel",
+    "LogLikelihoodLabel",
+    "DeltaLogLikelihoodLabel",
+    "IterationsLabel",
+    "IsConvergedLabel",
 ]
 
 
@@ -60,12 +64,8 @@ class FileSelectionLabel(QtWidgets.QWidget):
             self.filenameLabel.setText(filename)
 
 
-class TraceLabel(QtWidgets.QWidget):
-    """Base widget for labels to display trace attribute information.
-
-    Static label describing attribute is left-aligned,
-    retrieved information is right aligned.
-    """
+class InfoLabel(QtWidgets.QWidget):
+    """Base widget for labels to display left-aligned attribute and right-aligned value."""
 
     _label = ""  # static label describing information
     _get_text = lambda *_: " "  # function to retrieve text from trace instance
@@ -89,12 +89,31 @@ class TraceLabel(QtWidgets.QWidget):
         self._labelWidget.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self._textWidget.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
-        # * connect
+
+class TraceLabel(InfoLabel):
+    """Base widget for labels to display trace attribute information.
+
+    Static label describing attribute is left-aligned,
+    retrieved information is right aligned.
+    """
+
+    def __init__(self, controller, **kwargs):
+        super().__init__(controller, **kwargs)
+
         controller.traceIndexChanged.connect(self.update_text)
         controller.traceStateChanged.connect(self.update_text)
 
     def update_text(self, trace):
         self._textWidget.setText(self._get_text(trace))
+
+
+class ExitFlagLabel(InfoLabel):
+    def __init__(self, controller, **kwargs):
+        super().__init__(controller, **kwargs)
+        controller.updateExitFlag.connect(self.update_text)
+
+    def update_text(self, flag):
+        self._textWidget.setText(self._get_text(flag))
 
 
 class TraceIdLabel(TraceLabel):
@@ -105,6 +124,26 @@ class TraceIdLabel(TraceLabel):
 class CorrelationLabel(TraceLabel):
     _label = "Correlation: "
     _get_text = lambda _, trace: f"{trace.corrcoef:0.3f}"
+
+
+class LogLikelihoodLabel(ExitFlagLabel):
+    _label = "log Likelihood: "
+    _get_text = lambda _, flag: f"{flag.log_likelihood:0.4f}"
+
+
+class DeltaLogLikelihoodLabel(ExitFlagLabel):
+    _label = "Δ log Likelihood: "
+    _get_text = lambda _, flag: f"{flag.delta_log_likelihood:0.3e}"
+
+
+class IterationsLabel(ExitFlagLabel):
+    _label = "Iterations: "
+    _get_text = lambda _, flag: f"{flag.iterations}"
+
+
+class IsConvergedLabel(ExitFlagLabel):
+    _label = "Converged: "
+    _get_text = lambda _, flag: f"{flag.is_converged}"
 
 
 class SelectedItemsCounter(QtWidgets.QProgressBar):
