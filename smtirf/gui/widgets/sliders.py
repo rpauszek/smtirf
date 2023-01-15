@@ -101,7 +101,7 @@ class TraceIndexSlider(SpinSlider):
 
 
 class LabeledSlider(QtWidgets.QWidget):
-    def __init__(self, label, minimum=0, maximum=100, value=0):
+    def __init__(self, label, minimum=0, maximum=100, value=0, layout="vertical"):
         super().__init__()
 
         self.slider = QtWidgets.QSlider(
@@ -113,14 +113,24 @@ class LabeledSlider(QtWidgets.QWidget):
         # self.slider.setTracking(False)
         self.label = QtWidgets.QLabel("1")
 
-        box = QtWidgets.QGridLayout()
-        # box.setContentsMargins(0, 0, 0, 0)
-        box.addWidget(QtWidgets.QLabel(f"{label}: "), 0, 0, 1, 2)
-        box.addWidget(self.slider, 1, 0)
-        box.addWidget(self.label, 1, 1, QtCore.Qt.AlignRight)
+        if layout not in ("vertical", "horizontal"):
+            raise ValueError("layout must be 'vertical' or 'horizontal'")
 
-        box.setColumnStretch(0, 4)
-        box.setColumnStretch(1, 1)
+        if layout == "vertical":
+            box = QtWidgets.QGridLayout()
+            # box.setContentsMargins(0, 0, 0, 0)
+            box.addWidget(QtWidgets.QLabel(f"{label}: "), 0, 0, 1, 2)
+            box.addWidget(self.slider, 1, 0)
+            box.addWidget(self.label, 1, 1, QtCore.Qt.AlignRight)
+            box.setColumnStretch(0, 4)
+            box.setColumnStretch(1, 1)
+        else:
+            box = QtWidgets.QHBoxLayout()
+            box.setContentsMargins(0, 0, 0, 0)
+            box.addWidget(QtWidgets.QLabel(f"{label}: "))
+            box.addWidget(self.slider, stretch=1)
+            box.addWidget(self.label)
+
         self.setLayout(box)
 
         self.slider.valueChanged.connect(self._update_label)
@@ -186,7 +196,13 @@ class LabeledScientificSlider(LabeledSlider):
 
 class ModelStatesSlider(LabeledSlider):
     def __init__(self, controller):
-        super().__init__("# states", minimum=2, maximum=20, value=controller._nstates)
+        super().__init__(
+            "# states",
+            minimum=2,
+            maximum=20,
+            value=controller._nstates,
+            layout="horizontal",
+        )
         self.slider.setSingleStep(1)
         self.slider.setPageStep(1)
 
