@@ -9,6 +9,7 @@ __all__ = [
     "LabeledSlider",
     "LabeledIntervalSlider",
     "LabeledScientificSlider",
+    "ModelStatesSlider",
 ]
 
 
@@ -181,3 +182,15 @@ class LabeledScientificSlider(LabeledSlider):
         significand = value / 10**exponent
 
         self.label.setText(f"{significand:0.0f} e{exponent:0.0f}")
+
+
+class ModelStatesSlider(LabeledSlider):
+    def __init__(self, controller):
+        super().__init__("# states", minimum=2, maximum=20, value=controller._nstates)
+        self.slider.setSingleStep(1)
+        self.slider.setPageStep(1)
+
+        # controller -> ModelController
+        self.slider.valueChanged.connect(
+            lambda i: controller.numberOfStatesChanged.emit(i)
+        )

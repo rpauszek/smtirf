@@ -3,7 +3,12 @@ from PyQt5.QtWidgets import QMessageBox
 from ..util import confirm_click
 
 
-__all__ = ["TraceSelectionButton", "ResetOffsetsButton", "ResetLimitsButton"]
+__all__ = [
+    "TraceSelectionButton",
+    "ResetOffsetsButton",
+    "ResetLimitsButton",
+    "TrainGlobalButton",
+]
 
 
 class TraceSelectionButton(QtWidgets.QPushButton):
@@ -55,3 +60,9 @@ class ResetLimitsButton(QtWidgets.QPushButton):
             controller.reset_limits()
 
         self.clicked.connect(click_callback)
+
+
+class TrainGlobalButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("Train Experiment")
+        self.clicked.connect(controller.train_global)

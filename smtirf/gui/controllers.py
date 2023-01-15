@@ -99,3 +99,23 @@ class ExperimentController(QObject):
     def toggle_selected(self):
         self.trace.toggle()
         self.traceStateChanged.emit(self.trace)
+
+
+@dataclass
+class ModelController(QObject):
+    _nstates: int = 2
+    _shared_var: bool = False
+    numberOfStatesChanged: ClassVar[pyqtSignal] = pyqtSignal(int)
+    sharedVarChanged: ClassVar[pyqtSignal] = pyqtSignal(bool)
+
+    def __post_init__(self):
+        super().__init__()
+
+    def set_nstates(self, value):
+        self._nstates = value
+
+    def set_shared_var(self, value):
+        self._shared_var = value
+
+    def train_global(self):
+        pass
