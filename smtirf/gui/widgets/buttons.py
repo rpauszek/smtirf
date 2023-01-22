@@ -5,6 +5,7 @@ from ..util import confirm_click
 
 __all__ = [
     "TraceSelectionButton",
+    "ResetTraceButton",
     "ResetOffsetsButton",
     "ResetLimitsButton",
     "TrainGlobalButton",
@@ -26,6 +27,12 @@ class TraceSelectionButton(QtWidgets.QPushButton):
         )
         controller.traceIndexChanged.connect(updater)
         controller.traceStateChanged.connect(updater)
+
+
+class ResetTraceButton(QtWidgets.QPushButton):
+    def __init__(self, controller, **kwargs):
+        super().__init__("Reset Trace")
+        self.clicked.connect(controller.reset_trace)
 
 
 class ResetOffsetsButton(QtWidgets.QPushButton):

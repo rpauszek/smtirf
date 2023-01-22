@@ -11,6 +11,7 @@ class TraceGroup(QtWidgets.QGroupBox):
         vbox.addWidget(widgets.TraceSelectionButton(controller))
         vbox.addWidget(widgets.TraceIdLabel(controller))
         vbox.addWidget(widgets.CorrelationLabel(controller))
+        vbox.addWidget(widgets.ResetTraceButton(controller))
         self.setLayout(vbox)
 
         self.setEnabled(False)
