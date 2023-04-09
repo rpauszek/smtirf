@@ -115,3 +115,19 @@ class InteractiveTraceViewer(QtCanvas):
                 self.controller.set_trace_start_time(evt.xdata)
             elif evt.button == 3:  # stop
                 self.controller.set_trace_stop_time(evt.xdata)
+
+
+class SplitHistogramCanvas(QtCanvas):
+
+    def __init__(self, controller):
+        super().__init__()
+        self.controller = controller
+        self.ax = self.figure.add_subplot(1, 1, 1)
+
+
+class TdpCanvas(QtCanvas):
+
+    def __init__(self, controller):
+        super().__init__()
+        self.controller = controller
+        self.ax = self.figure.add_subplot(1, 1, 1, aspect="equal")

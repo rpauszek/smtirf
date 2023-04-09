@@ -3,6 +3,8 @@ from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtWidgets
 
 from . import widgets
+from . import canvases
+from . import main_stylesheet
 
 
 class ImportPmaDialog(QDialog):
@@ -13,6 +15,7 @@ class ImportPmaDialog(QDialog):
         self.setMaximumWidth(700)
         self.setModal(True)
         self.layout()
+        self.setStyleSheet(main_stylesheet)
 
     def layout(self):
         self.buttonBox = QDialogButtonBox(
@@ -56,6 +59,22 @@ class SplitHistogramDialog(QDialog):
         self.setFixedHeight(700)
         self.setModal(True)
         self.layout()
+        self.setStyleSheet(main_stylesheet)
+
+    def layout(self):
+        box = QtWidgets.QVBoxLayout()
+        box.addWidget(canvases.SplitHistogramCanvas(None))
+
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addItem(
+            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
+        )
+        b = QtWidgets.QPushButton("calculate")
+        hbox.addWidget(b)
+        box.addLayout(hbox)
+
+        self.setLayout(box)
+
 
 class TdpDialog(QDialog):
     def __init__(self, parent=None):
@@ -65,3 +84,18 @@ class TdpDialog(QDialog):
         self.setFixedHeight(700)
         self.setModal(True)
         self.layout()
+        self.setStyleSheet(main_stylesheet)
+
+    def layout(self):
+        box = QtWidgets.QVBoxLayout()
+        box.addWidget(canvases.TdpCanvas(None))
+
+        hbox = QtWidgets.QHBoxLayout()
+        hbox.addItem(
+            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
+        )
+        b = QtWidgets.QPushButton("calculate")
+        hbox.addWidget(b)
+        box.addLayout(hbox)
+
+        self.setLayout(box)
