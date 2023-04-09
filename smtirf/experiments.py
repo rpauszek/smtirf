@@ -217,7 +217,10 @@ class Experiment():
             cls = Experiment.CLASS_TYPES[HF.attrs["experimentType"]]
             frameLength = HF.attrs["frameLength"]
             comments = HF.attrs["comments"]
-            version = [int(x) for x in HF.attrs["version"].split(".")]
+            try:
+                version = [int(x) for x in HF.attrs["version"].split(".")]
+            except KeyError:
+                version = [0, 0, 0]
 
             # load MovieList ---------------------------------------------------
             images = HF["movies"][:]

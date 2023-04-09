@@ -80,7 +80,7 @@ class InteractiveTraceViewer(QtCanvas):
             "horizontal",
             useblit=True,
             button=1,
-            rectprops=config.spans.zoom,
+            props=config.spans.zoom,
         )
 
         self.baselineSpan = SpanSelector(
@@ -90,7 +90,7 @@ class InteractiveTraceViewer(QtCanvas):
             minspan=0.5,
             useblit=True,
             button=1,
-            rectprops=config.spans.baseline,
+            props=config.spans.baseline,
         )
 
     def update_plots(self, trace, relim):

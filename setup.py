@@ -13,7 +13,7 @@ setuptools.setup(
     url="https://github.com/rpauszek/smtirf",
     license="BSD-2",
     packages=setuptools.find_packages(),
-    python_requires=">=3.7",
+    python_requires="3.10",
     install_requires=[
         "black",
         "pytest>=3.5",
