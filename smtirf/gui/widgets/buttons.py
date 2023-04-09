@@ -8,6 +8,7 @@ __all__ = [
     "ResetTraceButton",
     "ResetOffsetsButton",
     "ResetLimitsButton",
+    "RemoveProblemTracesButton",
     "TrainGlobalButton",
 ]
 
@@ -67,6 +68,12 @@ class ResetLimitsButton(QtWidgets.QPushButton):
             controller.reset_limits()
 
         self.clicked.connect(click_callback)
+
+
+class RemoveProblemTracesButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("Remove Problem Traces")
+        self.clicked.connect(controller.remove_problem_traces)
 
 
 class TrainGlobalButton(QtWidgets.QPushButton):

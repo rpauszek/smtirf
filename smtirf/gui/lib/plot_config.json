@@ -28,6 +28,6 @@
             "facecolor": "#DC143C"
         }
     },
-    "fret_range": [-0.2, 1.2],
-    "fret_fit_range": [-0.3, 1.3]
+    "fret_range": [-0.1, 1.1],
+    "fret_fit_range": [-0.5, 1.5]
 }

@@ -1,3 +1,4 @@
+import numpy as np
 from dataclasses import dataclass
 from PyQt5.QtCore import QObject, pyqtSignal
 from typing import ClassVar
@@ -121,6 +122,13 @@ class ExperimentController(QObject):
     def train_global(self, nstates, shared_var):
         self.training_thread.set_parameters(nstates, shared_var)
         self.training_thread.start()
+
+    def remove_problem_traces(self):
+        for trace in self.experiment:
+            if trace.isSelected:
+                if np.logical_or(np.any(trace.X < -0.5), np.any(trace.X > 1.5)):
+                    trace.isSelected = False
+        self.traceStateChanged.emit(self.trace)
 
 
 @dataclass
