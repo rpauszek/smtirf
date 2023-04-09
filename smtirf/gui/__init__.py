@@ -5,6 +5,9 @@ import json
 
 lib_path = Path(__file__).parent / "lib"
 
+with open(lib_path / "default.css", "r") as f:
+    main_stylesheet = f.read()
+
 
 @dataclass
 class Colors:

@@ -15,7 +15,7 @@ from . import widgets
 from . import panels
 from . import toolbars
 from .util import make_messagebox
-from . import lib_path
+from . import main_stylesheet
 
 
 WINDOW_TITLE = "smTIRF Analysis"
@@ -42,9 +42,7 @@ class SMTirfMainWindow(QMainWindow):
         )
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
         self.layout()
-
-        with open(lib_path / "default.css", "r") as f:
-            self.setStyleSheet(f.read())
+        self.setStyleSheet(main_stylesheet)
 
     def layout(self):
         panel = QtWidgets.QWidget()
