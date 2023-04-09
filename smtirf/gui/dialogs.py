@@ -46,3 +46,22 @@ class ImportPmaDialog(QDialog):
             "gamma": 1,
             "comments": "",
         }
+
+
+class SplitHistogramDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Results: histogram")
+        self.setFixedWidth(800)
+        self.setFixedHeight(700)
+        self.setModal(True)
+        self.layout()
+
+class TdpDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Results: histogram")
+        self.setFixedWidth(800)
+        self.setFixedHeight(700)
+        self.setModal(True)
+        self.layout()

@@ -10,6 +10,9 @@ __all__ = [
     "ResetLimitsButton",
     "RemoveProblemTracesButton",
     "TrainGlobalButton",
+    "HistogramResultsButton",
+    "TdpResultsButton",
+    "DwelltimeResultsButton",
 ]
 
 
@@ -85,3 +88,21 @@ class TrainGlobalButton(QtWidgets.QPushButton):
     def set_training_status(self, is_training):
         label = "training..." if is_training else "Train Experiment"
         self.setText(label)
+
+
+class HistogramResultsButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("Histogram")
+        self.clicked.connect(lambda: controller.show_results("hist"))
+
+
+class TdpResultsButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("Transition Density Plot")
+        self.clicked.connect(lambda: controller.show_results("tdp"))
+
+
+class DwelltimeResultsButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("Dwell Times")
+        self.clicked.connect(lambda: controller.show_results("dwell"))

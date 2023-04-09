@@ -67,6 +67,9 @@ class SMTirfMainWindow(QMainWindow):
         right_vbox.addWidget(
             panels.ModelGroup(self.controller, self.controller.experimentChanged)
         )
+        right_vbox.addWidget(
+            panels.ResultsGroup(self.controller, self.controller.experimentChanged)
+        )
         right_vbox.addSpacerItem(
             QSpacerItem(0, 0, QSizePolicy.Fixed, QSizePolicy.Expanding)
         )

@@ -5,7 +5,7 @@ from typing import ClassVar
 from pathlib import Path
 
 from .. import Experiment
-from . import threads
+from . import threads, dialogs
 
 
 @dataclass
@@ -129,6 +129,19 @@ class ExperimentController(QObject):
                 if np.logical_or(np.any(trace.X < -0.5), np.any(trace.X > 1.5)):
                     trace.isSelected = False
         self.traceStateChanged.emit(self.trace)
+
+    def show_results(self, kind):
+        match kind:
+            case "hist":
+                dlg = dialogs.SplitHistogramDialog()
+            case "tdp":
+                dlg = dialogs.TdpDialog()
+            case "dwell":
+                raise NotImplementedError("Dwelltime analysis is not yet implemented.")
+            case _:
+                raise ValueError(f"'kind' argument '{kind}' not valid.")
+
+        _ = dlg.exec()
 
 
 @dataclass
