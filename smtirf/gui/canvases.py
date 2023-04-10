@@ -1,5 +1,6 @@
 import numpy as np
 import io
+from sklearn.neighbors import KernelDensity
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtGui import QPalette, QImage
@@ -163,6 +164,8 @@ class SplitHistogramCanvas(QtCanvas):
 
         self.ax.stairs(full_density, bins, ec="k")
 
+        self.ax.set_xlabel("FRET")
+        self.ax.set_ylabel("density")
         self.ax.legend()
         self.draw()
 
@@ -179,7 +182,6 @@ class SplitHistogramCanvas(QtCanvas):
         )
 
         if filename:
-            print(filename)
             _, states, fractions, bins = self._calculate_bars(
                 experiment, n_bins, lower_bound, upper_bound
             )
@@ -203,3 +205,90 @@ class TdpCanvas(QtCanvas):
         super().__init__()
         self.controller = controller
         self.ax = self.figure.add_subplot(1, 1, 1, aspect="equal")
+
+    def _calculate_tdp(
+        self, experiment, n_grid_points, lower_bound, upper_bound, bandwidth
+    ):
+        for trace in experiment:
+            if trace.isSelected:
+                model = trace.model
+                break
+
+        data = np.vstack(
+            [
+                trace.dwells.get_transitions(dataType="data")
+                for trace in experiment
+                if trace.isSelected and trace.dwells is not None
+            ]
+        )
+        mesh = np.linspace(lower_bound, upper_bound, n_grid_points)
+        x, y = np.meshgrid(mesh, mesh)
+        coords = np.vstack((x.ravel(), y.ravel())).T
+        kde = KernelDensity(kernel="gaussian", bandwidth=bandwidth).fit(data)
+        z = np.exp(kde.score_samples(coords)).reshape(x.shape)
+
+        return x, y, z, model
+
+    def update_plot(
+        self,
+        experiment,
+        n_grid_points=100,
+        lower_bound=-0.2,
+        upper_bound=1.2,
+        bandwidth=0.02,
+        n_contours=20,
+        show_diagonal=False,
+        show_fitted_states=False,
+    ):
+        x, y, z, model = self._calculate_tdp(
+            experiment, n_grid_points, lower_bound, upper_bound, bandwidth
+        )
+
+        self.ax.cla()
+        self.ax.contourf(x, y, z, n_contours)
+
+        if show_fitted_states:
+            for mu in model.phi.mu:
+                self.ax.axhline(mu, c="w", ls=":", lw=0.5)
+                self.ax.axvline(mu, c="w", ls=":", lw=0.5)
+
+        if show_diagonal:
+            self.ax.plot(
+                (lower_bound, upper_bound),
+                (lower_bound, upper_bound),
+                c="w",
+                ls=":",
+            )
+
+        self.ax.set_xlabel("initial FRET")
+        self.ax.set_ylabel("final FRET")
+
+        self.draw()
+
+    def take_snapshot(self):
+        with io.BytesIO() as buffer:
+            self.figure.savefig(buffer)
+            QtWidgets.QApplication.clipboard().setImage(
+                QImage.fromData(buffer.getvalue())
+            )
+
+    def export_as_csv(
+        self,
+        experiment,
+        n_grid_points=100,
+        lower_bound=-0.2,
+        upper_bound=1.2,
+        bandwidth=0.02,
+    ):
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            caption="Export plot data as...", filter="CSV (*.csv)"
+        )
+
+        if filename:
+            x, y, z, _ = self._calculate_tdp(
+                experiment, n_grid_points, lower_bound, upper_bound, bandwidth
+            )
+
+            data = np.vstack((x.ravel(), y.ravel(), z.ravel())).T
+            header = "\t".join(["initial FRET", "final FRET", "density"])
+            np.savetxt(filename, data, header=header, delimiter="\t")

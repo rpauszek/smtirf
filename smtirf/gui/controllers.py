@@ -135,7 +135,7 @@ class ExperimentController(QObject):
             case "hist":
                 dlg = dialogs.SplitHistogramDialog(self.experiment)
             case "tdp":
-                dlg = dialogs.TdpDialog()
+                dlg = dialogs.TdpDialog(self.experiment)
             case "dwell":
                 raise NotImplementedError("Dwelltime analysis is not yet implemented.")
             case _:
