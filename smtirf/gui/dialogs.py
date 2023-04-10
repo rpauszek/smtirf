@@ -89,6 +89,16 @@ class SplitHistogramDialog(QDialog):
                 "upper_bound": upper.value(),
             }
 
+        snapshot = QtWidgets.QPushButton("snapshot")
+        snapshot.clicked.connect(canvas.take_snapshot)
+        hbox.addWidget(snapshot)
+
+        export = QtWidgets.QPushButton("export CSV")
+        export.clicked.connect(
+            lambda: canvas.export_as_csv(self.experiment, **get_parameters())
+        )
+        hbox.addWidget(export)
+
         hbox.addItem(
             QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
         )

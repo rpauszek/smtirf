@@ -1,7 +1,8 @@
 import numpy as np
+import io
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QPalette
+from PyQt5.QtGui import QPalette, QImage
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
@@ -122,20 +123,35 @@ class SplitHistogramCanvas(QtCanvas):
         self.controller = controller
         self.ax = self.figure.add_subplot(1, 1, 1)
 
-    def update_plot(self, experiment, n_bins=100, lower_bound=-0.2, upper_bound=1.2):
+    def _calculate_bars(self, experiment, n_bins, lower_bound, upper_bound):
         observations = np.hstack([trace.X for trace in experiment if trace.isSelected])
         statepath = np.hstack([trace.SP for trace in experiment if trace.isSelected])
         bins = np.linspace(lower_bound, upper_bound, n_bins)
-        bin_width = np.diff(bins[:2])
 
-        self.ax.cla()
+        full_counts, _ = np.histogram(observations, bins)
+        full_density = full_counts / np.trapz(full_counts, bins[:-1])
 
+        state_densities = []
+        fractions = []
         for state in np.unique(statepath):
             data = observations[statepath == state]
             counts, _ = np.histogram(data, bins)
             fraction = data.size / observations.size
             density = counts / np.trapz(counts, bins[:-1]) * fraction
+            state_densities.append(density)
+            fractions.append(fraction)
 
+        return full_density, state_densities, fractions, bins
+
+    def update_plot(self, experiment, n_bins=100, lower_bound=-0.2, upper_bound=1.2):
+        full_density, states, fractions, bins = self._calculate_bars(
+            experiment, n_bins, lower_bound, upper_bound
+        )
+        bin_width = np.diff(bins[:2])
+
+        self.ax.cla()
+
+        for state, (density, fraction) in enumerate(zip(states, fractions)):
             self.ax.bar(
                 bins[:-1],
                 density,
@@ -145,9 +161,41 @@ class SplitHistogramCanvas(QtCanvas):
                 label=f"state {state} = {fraction*100:0.2f}%",
             )
 
-        self.ax.hist(observations, bins, histtype="step", ec="k", density=True)
+        self.ax.stairs(full_density, bins, ec="k")
+
         self.ax.legend()
         self.draw()
+
+    def take_snapshot(self):
+        with io.BytesIO() as buffer:
+            self.figure.savefig(buffer)
+            QtWidgets.QApplication.clipboard().setImage(
+                QImage.fromData(buffer.getvalue())
+            )
+
+    def export_as_csv(self, experiment, n_bins=100, lower_bound=-0.2, upper_bound=1.2):
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+            caption="Export plot data as...", filter="CSV (*.csv)"
+        )
+
+        if filename:
+            print(filename)
+            _, states, fractions, bins = self._calculate_bars(
+                experiment, n_bins, lower_bound, upper_bound
+            )
+            full_density = np.vstack(states).sum(axis=0)
+
+            bin_width = np.diff(bins[:2])
+            centers = bins[:-1] + (bin_width / 2)
+            data = np.vstack((centers, full_density, *states)).T
+
+            state_headers = [
+                f"state {state} density ({fraction*100:0.4f}%)"
+                for state, fraction in enumerate(fractions)
+            ]
+            header = "\t".join(["FRET (bin center)", "Full density", *state_headers])
+
+            np.savetxt(filename, data, header=header, delimiter="\t")
 
 
 class TdpCanvas(QtCanvas):
