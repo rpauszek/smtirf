@@ -24,7 +24,6 @@ class QtCanvas(FigureCanvas):
 
 
 class InteractiveTraceViewer(QtCanvas):
-
     traceChanged = pyqtSignal(object, bool)
     modelChanged = pyqtSignal(object, bool)
     baselineSelected = pyqtSignal(float, float)
@@ -118,15 +117,40 @@ class InteractiveTraceViewer(QtCanvas):
 
 
 class SplitHistogramCanvas(QtCanvas):
-
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
         self.ax = self.figure.add_subplot(1, 1, 1)
 
+    def update_plot(self, experiment, n_bins=100, lower_bound=-0.2, upper_bound=1.2):
+        observations = np.hstack([trace.X for trace in experiment if trace.isSelected])
+        statepath = np.hstack([trace.SP for trace in experiment if trace.isSelected])
+        bins = np.linspace(lower_bound, upper_bound, n_bins)
+        bin_width = np.diff(bins[:2])
+
+        self.ax.cla()
+
+        for state in np.unique(statepath):
+            data = observations[statepath == state]
+            counts, _ = np.histogram(data, bins)
+            fraction = data.size / observations.size
+            density = counts / np.trapz(counts, bins[:-1]) * fraction
+
+            self.ax.bar(
+                bins[:-1],
+                density,
+                bin_width,
+                alpha=0.3,
+                align="edge",
+                label=f"state {state} = {fraction*100:0.2f}%",
+            )
+
+        self.ax.hist(observations, bins, histtype="step", ec="k", density=True)
+        self.ax.legend()
+        self.draw()
+
 
 class TdpCanvas(QtCanvas):
-
     def __init__(self, controller):
         super().__init__()
         self.controller = controller

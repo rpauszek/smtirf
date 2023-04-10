@@ -133,7 +133,7 @@ class ExperimentController(QObject):
     def show_results(self, kind):
         match kind:
             case "hist":
-                dlg = dialogs.SplitHistogramDialog()
+                dlg = dialogs.SplitHistogramDialog(self.experiment)
             case "tdp":
                 dlg = dialogs.TdpDialog()
             case "dwell":
