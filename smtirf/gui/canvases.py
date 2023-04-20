@@ -127,7 +127,7 @@ class SplitHistogramCanvas(QtCanvas):
     def _calculate_bars(self, experiment, n_bins, lower_bound, upper_bound):
         observations = np.hstack([trace.X for trace in experiment if trace.isSelected])
         statepath = np.hstack([trace.SP for trace in experiment if trace.isSelected])
-        bins = np.linspace(lower_bound, upper_bound, n_bins)
+        bins = np.linspace(lower_bound, upper_bound, n_bins + 1)
 
         full_counts, _ = np.histogram(observations, bins)
         full_density = full_counts / np.trapz(full_counts, bins[:-1])
