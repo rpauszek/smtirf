@@ -100,10 +100,12 @@ class CalculateResultsButton(QtWidgets.QPushButton):
 class ExportResultsButton(QtWidgets.QPushButton):
     def __init__(self, controller):
         super().__init__("export CSV")
+        self.setMinimumHeight(30)
         self.clicked.connect(lambda: controller.export_results())
 
 
 class SnapshotResultsButton(QtWidgets.QPushButton):
     def __init__(self, controller):
         super().__init__("snapshot")
+        self.setMinimumHeight(30)
         self.clicked.connect(controller.canvas.take_snapshot)

@@ -83,3 +83,9 @@ class ModelGroup(QtWidgets.QGroupBox):
     def set_status(self, is_training):
         self.train_button.set_training_status(is_training)
         self.setEnabled(not is_training)
+
+
+class ResultsParamGroup(QtWidgets.QGroupBox):
+    def __init__(self, controller):
+        super().__init__("Parameters")
+        self.controller = controller
