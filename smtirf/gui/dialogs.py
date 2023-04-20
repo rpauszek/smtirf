@@ -52,35 +52,51 @@ class ImportPmaDialog(QDialog):
         }
 
 
-class SplitHistogramDialog(QDialog):
-    def __init__(self, experiment, parent=None):
+class BaseResultsDialog(QDialog):
+    def __init__(self, experiment, title, canvas, parent=None):
         self.experiment = experiment
 
         super().__init__(parent)
-        self.setWindowTitle("Results: histogram")
-        self.setFixedWidth(800)
-        self.setFixedHeight(700)
+        self.setWindowTitle(f"Results: {title}")
+        self.setFixedWidth(1000)
+        self.setFixedHeight(600)
         self.setModal(True)
-        self.layout()
         self.setStyleSheet(main_stylesheet)
+        self._setup(canvas)
 
-    def layout(self):
-        box = QtWidgets.QVBoxLayout()
-        canvas = canvases.SplitHistogramCanvas(None)
-        box.addWidget(canvas)
+    def _setup(self, canvas):
+        box = QtWidgets.QHBoxLayout()
+        box.addWidget(canvas, stretch=1)
 
-        hbox = QtWidgets.QHBoxLayout()
+        side_panel = QtWidgets.QGridLayout()
+        side_panel.addItem(
+            QtWidgets.QSpacerItem(200, 0, QSizePolicy.Fixed, QSizePolicy.Fixed), 0, 0, 1, 2
+        )
+        box.addLayout(side_panel)
+
+        self.setLayout(box)
+        self.layout(side_panel, canvas)
+
+
+class SplitHistogramDialog(BaseResultsDialog):
+    def __init__(self, experiment, parent=None):
+        super().__init__(
+            experiment, "histogram", canvases.SplitHistogramCanvas(None), parent=parent
+        )
+
+    def layout(self, side_panel, canvas):
         bins = QtWidgets.QSpinBox(minimum=10, maximum=500, value=100)
-        hbox.addWidget(QtWidgets.QLabel("# bins: "))
-        hbox.addWidget(bins)
+        side_panel.addWidget(QtWidgets.QLabel("# bins: "), 1, 0)
+        side_panel.addWidget(bins, 1, 1)
 
         lower = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=-0.2)
         lower.setSingleStep(0.05)
         upper = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1.2)
         upper.setSingleStep(0.05)
-        hbox.addWidget(QtWidgets.QLabel("limits: "))
-        hbox.addWidget(lower)
-        hbox.addWidget(upper)
+        side_panel.addWidget(QtWidgets.QLabel("lower limit: "), 2, 0)
+        side_panel.addWidget(lower, 2, 1)
+        side_panel.addWidget(QtWidgets.QLabel("upper limit: "), 3, 0)
+        side_panel.addWidget(upper, 3, 1)
 
         def get_parameters():
             return {
@@ -89,82 +105,72 @@ class SplitHistogramDialog(QDialog):
                 "upper_bound": upper.value(),
             }
 
+        side_panel.addItem(
+            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Fixed, QSizePolicy.Expanding), 4, 0, 1, 2
+        )
+
         snapshot = QtWidgets.QPushButton("snapshot")
         snapshot.clicked.connect(canvas.take_snapshot)
-        hbox.addWidget(snapshot)
+        side_panel.addWidget(snapshot, 5, 0, 1, 2)
 
         export = QtWidgets.QPushButton("export CSV")
         export.clicked.connect(
             lambda: canvas.export_as_csv(self.experiment, **get_parameters())
         )
-        hbox.addWidget(export)
+        side_panel.addWidget(export, 6, 0, 1, 2)
 
-        hbox.addItem(
-            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
+
+        side_panel.addItem(
+            QtWidgets.QSpacerItem(10, 15, QSizePolicy.Fixed, QSizePolicy.Fixed), 7, 0, 1, 2
         )
 
         calculate = QtWidgets.QPushButton("calculate")
+        calculate.setMinimumHeight(35)
         calculate.clicked.connect(
             lambda: canvas.update_plot(self.experiment, **get_parameters())
         )
-
-        hbox.addWidget(calculate)
-        box.addLayout(hbox)
-        self.setLayout(box)
+        side_panel.addWidget(calculate, 8, 0, 1, 2)
 
 
-class TdpDialog(QDialog):
+class TdpDialog(BaseResultsDialog):
     def __init__(self, experiment, parent=None):
-        self.experiment = experiment
+        super().__init__(
+            experiment, "transition density probability", canvases.TdpCanvas(None), parent=parent
+        )
 
-        super().__init__(parent)
-        self.setWindowTitle("Results: histogram")
-        self.setFixedWidth(800)
-        self.setFixedHeight(700)
-        self.setModal(True)
-        self.layout()
-        self.setStyleSheet(main_stylesheet)
-
-    def layout(self):
-        box = QtWidgets.QVBoxLayout()
-        canvas = canvases.TdpCanvas(None)
-        box.addWidget(canvas)
-
-        hbox = QtWidgets.QHBoxLayout()
+    def layout(self, side_panel, canvas):
         grid_points = QtWidgets.QSpinBox(minimum=10, maximum=500, value=100)
-        hbox.addWidget(QtWidgets.QLabel("KDE resolution: "))
-        hbox.addWidget(grid_points)
+        side_panel.addWidget(QtWidgets.QLabel("KDE resolution: "), 1, 0)
+        side_panel.addWidget(grid_points, 1, 1)
 
         bandwidth = QtWidgets.QDoubleSpinBox(minimum=1e-3, maximum=1, value=0.02)
-        hbox.addWidget(QtWidgets.QLabel("KDE bandwidth: "))
-        hbox.addWidget(bandwidth)
+        side_panel.addWidget(QtWidgets.QLabel("KDE bandwidth: "), 2, 0)
+        side_panel.addWidget(bandwidth, 2, 1)
 
         lower = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=0)
         lower.setSingleStep(0.05)
         upper = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1)
         upper.setSingleStep(0.05)
-        hbox.addWidget(QtWidgets.QLabel("limits: "))
-        hbox.addWidget(lower)
-        hbox.addWidget(upper)
+        side_panel.addWidget(QtWidgets.QLabel("lower limit: "), 3, 0)
+        side_panel.addWidget(lower, 3, 1)
+        side_panel.addWidget(QtWidgets.QLabel("upper limit: "), 4, 0)
+        side_panel.addWidget(upper, 4, 1)
 
-        hbox.addItem(
-            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
+        side_panel.addItem(
+            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed), 5, 0, 1, 2
         )
-        box.addLayout(hbox)
-
-        hbox = QtWidgets.QHBoxLayout()
 
         diagonal = QtWidgets.QCheckBox("Show diagonal")
         diagonal.setChecked(False)
-        hbox.addWidget(diagonal)
+        side_panel.addWidget(diagonal, 6, 0, 1, 2)
 
         states = QtWidgets.QCheckBox("Show fitted states")
         states.setChecked(True)
-        hbox.addWidget(states)
+        side_panel.addWidget(states, 7, 0, 1, 2)
 
         contours = QtWidgets.QSpinBox(minimum=10, maximum=100, value=50)
-        hbox.addWidget(QtWidgets.QLabel("# contours: "))
-        hbox.addWidget(contours)
+        side_panel.addWidget(QtWidgets.QLabel("# contours: "), 8, 0)
+        side_panel.addWidget(contours, 8, 1)
 
         def get_parameters():
             return {
@@ -177,9 +183,13 @@ class TdpDialog(QDialog):
                 "show_fitted_states": bool(states.checkState()),
             }
 
+        side_panel.addItem(
+            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Fixed, QSizePolicy.Expanding), 9, 0, 1, 2
+        )
+
         snapshot = QtWidgets.QPushButton("snapshot")
         snapshot.clicked.connect(canvas.take_snapshot)
-        hbox.addWidget(snapshot)
+        side_panel.addWidget(snapshot, 10, 0, 1, 2)
 
         def get_export_parameters():
             return {
@@ -193,17 +203,16 @@ class TdpDialog(QDialog):
         export.clicked.connect(
             lambda: canvas.export_as_csv(self.experiment, **get_export_parameters())
         )
-        hbox.addWidget(export)
+        side_panel.addWidget(export, 11, 0, 1, 2)
 
-        hbox.addItem(
-            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
+        side_panel.addItem(
+            QtWidgets.QSpacerItem(10, 15, QSizePolicy.Fixed, QSizePolicy.Expanding), 12, 0, 1, 2
         )
 
         calculate = QtWidgets.QPushButton("calculate")
+        calculate.setMinimumHeight(35)
         calculate.clicked.connect(
             lambda: canvas.update_plot(self.experiment, **get_parameters())
         )
 
-        hbox.addWidget(calculate)
-        box.addLayout(hbox)
-        self.setLayout(box)
+        side_panel.addWidget(calculate, 13, 0, 1, 2)
