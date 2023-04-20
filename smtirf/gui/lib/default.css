@@ -4,6 +4,10 @@ QPushButton {
     padding: 5px;
 }
 
+QPushButton:pressed {
+    background-color: #a1a1a1;
+}
+
 TraceSelectionButton {
     font-weight: normal;
 }
@@ -12,6 +16,16 @@ TraceSelectionButton:checked {
     font-weight: bold;
     background-color: #1e8fff;
     color: #ececec;
+}
+
+CalculateResultsButton {
+    font-weight: bold;
+    background-color: #1e8fff;
+    color: #ececec;
+}
+
+CalculateResultsButton:pressed {
+    background-color: #419efc;
 }
 
 QProgressBar {
