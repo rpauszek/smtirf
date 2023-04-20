@@ -15,7 +15,7 @@ from . import widgets
 from . import panels
 from . import toolbars
 from .util import make_messagebox
-from . import lib_path
+from . import main_stylesheet
 
 
 WINDOW_TITLE = "smTIRF Analysis"
@@ -42,9 +42,7 @@ class SMTirfMainWindow(QMainWindow):
         )
         self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
         self.layout()
-
-        with open(lib_path / "default.css", "r") as f:
-            self.setStyleSheet(f.read())
+        self.setStyleSheet(main_stylesheet)
 
     def layout(self):
         panel = QtWidgets.QWidget()
@@ -66,6 +64,9 @@ class SMTirfMainWindow(QMainWindow):
         )
         right_vbox.addWidget(
             panels.ModelGroup(self.controller, self.controller.experimentChanged)
+        )
+        right_vbox.addWidget(
+            panels.ResultsGroup(self.controller, self.controller.experimentChanged)
         )
         right_vbox.addSpacerItem(
             QSpacerItem(0, 0, QSizePolicy.Fixed, QSizePolicy.Expanding)
