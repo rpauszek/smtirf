@@ -1,5 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 import contextlib
+from .dialogs import SplitHistogramDialog, TdpDialog
 
 
 class ToolButton(QtWidgets.QToolButton):
@@ -30,6 +31,10 @@ class ToolButton(QtWidgets.QToolButton):
         self.addAction(action)
 
 
+def results_callback(controller, dialog):
+    return lambda: controller.show_results(dialog(controller.experiment))
+
+
 class MainToolbar(QtWidgets.QToolBar):
     def __init__(self, controller, import_method, open_method, save_method):
         super().__init__("main")
@@ -47,6 +52,8 @@ class MainToolbar(QtWidgets.QToolBar):
         btn = ToolButton(
             self, "gaussian", "Results", enabler=controller.experimentChanged
         )
+        btn.add_action("Histogram", results_callback(controller, SplitHistogramDialog))
+        btn.add_action("TDP", results_callback(controller, TdpDialog))
 
         btn = ToolButton(self, "sort", "Sort", enabler=controller.experimentChanged)
         btn.add_action("By Index", lambda: controller.sort_traces("index"))

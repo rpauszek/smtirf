@@ -83,20 +83,3 @@ class ModelGroup(QtWidgets.QGroupBox):
     def set_status(self, is_training):
         self.train_button.set_training_status(is_training)
         self.setEnabled(not is_training)
-
-
-class ResultsGroup(QtWidgets.QGroupBox):
-    def __init__(self, controller, enabler_signal):
-        super().__init__("Results")
-        box = QtWidgets.QVBoxLayout()
-
-        box.addWidget(widgets.HistogramResultsButton(controller))
-        box.addWidget(widgets.TdpResultsButton(controller))
-        # TODO: implement dwelltime analysis
-        b = widgets.DwelltimeResultsButton(controller)
-        b.setEnabled(False)
-        box.addWidget(b)
-        self.setLayout(box)
-
-        self.setEnabled(False)
-        enabler_signal.connect(lambda: self.setEnabled(True))

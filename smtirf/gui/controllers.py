@@ -5,7 +5,7 @@ from typing import ClassVar
 from pathlib import Path
 
 from .. import Experiment
-from . import threads, dialogs
+from . import threads
 
 
 @dataclass
@@ -130,17 +130,7 @@ class ExperimentController(QObject):
                     trace.isSelected = False
         self.traceStateChanged.emit(self.trace)
 
-    def show_results(self, kind):
-        match kind:
-            case "hist":
-                dlg = dialogs.SplitHistogramDialog(self.experiment)
-            case "tdp":
-                dlg = dialogs.TdpDialog(self.experiment)
-            case "dwell":
-                raise NotImplementedError("Dwelltime analysis is not yet implemented.")
-            case _:
-                raise ValueError(f"'kind' argument '{kind}' not valid.")
-
+    def show_results(self, dlg):
         _ = dlg.exec()
 
 
