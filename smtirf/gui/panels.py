@@ -89,3 +89,15 @@ class ResultsParamGroup(QtWidgets.QGroupBox):
     def __init__(self, controller):
         super().__init__("Parameters")
         self.controller = controller
+        self.grid = QtWidgets.QGridLayout()
+        self.setLayout(self.grid)
+        self._current_row = 0
+
+    def add_spinbox(self, label, widget):
+        self.grid.addWidget(QtWidgets.QLabel(f"{label}: "), self._current_row, 0)
+        self.grid.addWidget(widget, self._current_row, 1)
+        self._current_row += 1
+
+    def add_checkbox(self, widget):
+        self.grid.addWidget(widget, self._current_row, 0, 1, 2)
+        self._current_row += 1
