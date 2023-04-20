@@ -10,6 +10,9 @@ __all__ = [
     "ResetLimitsButton",
     "RemoveProblemTracesButton",
     "TrainGlobalButton",
+    "CalculateResultsButton",
+    "ExportResultsButton",
+    "SnapshotResultsButton",
 ]
 
 
@@ -85,3 +88,22 @@ class TrainGlobalButton(QtWidgets.QPushButton):
     def set_training_status(self, is_training):
         label = "training..." if is_training else "Train Experiment"
         self.setText(label)
+
+
+class CalculateResultsButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("calculate")
+        self.setMinimumHeight(35)
+        self.clicked.connect(lambda: controller.update_plot())
+
+
+class ExportResultsButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("export CSV")
+        self.clicked.connect(lambda: controller.export_results())
+
+
+class SnapshotResultsButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("snapshot")
+        self.clicked.connect(controller.canvas.take_snapshot)

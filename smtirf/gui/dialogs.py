@@ -3,9 +3,8 @@ from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtWidgets
 
-from . import widgets
-from . import canvases
-from . import main_stylesheet
+from . import widgets, canvases, main_stylesheet
+from .controllers import ResultsController
 
 
 class ImportPmaDialog(QDialog):
@@ -54,7 +53,8 @@ class ImportPmaDialog(QDialog):
 
 class BaseResultsDialog(QDialog):
     def __init__(self, experiment, title, canvas, parent=None):
-        self.experiment = experiment
+        self.controller = ResultsController(experiment)
+        self.controller.register_canvas(canvas)
 
         super().__init__(parent)
         self.setWindowTitle(f"Results: {title}")
@@ -86,6 +86,7 @@ class SplitHistogramDialog(BaseResultsDialog):
 
     def layout(self, side_panel, canvas):
         bins = QtWidgets.QSpinBox(minimum=10, maximum=500, value=100)
+        self.controller.register_parameter_widget("n_bins", bins.value)
         side_panel.addWidget(QtWidgets.QLabel("# bins: "), 1, 0)
         side_panel.addWidget(bins, 1, 1)
 
@@ -93,43 +94,27 @@ class SplitHistogramDialog(BaseResultsDialog):
         lower.setSingleStep(0.05)
         upper = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1.2)
         upper.setSingleStep(0.05)
+        self.controller.register_parameter_widget("lower_bound", lower.value)
+        self.controller.register_parameter_widget("upper_bound", upper.value)
         side_panel.addWidget(QtWidgets.QLabel("lower limit: "), 2, 0)
         side_panel.addWidget(lower, 2, 1)
         side_panel.addWidget(QtWidgets.QLabel("upper limit: "), 3, 0)
         side_panel.addWidget(upper, 3, 1)
 
-        def get_parameters():
-            return {
-                "n_bins": bins.value(),
-                "lower_bound": lower.value(),
-                "upper_bound": upper.value(),
-            }
-
         side_panel.addItem(
             QtWidgets.QSpacerItem(10, 5, QSizePolicy.Fixed, QSizePolicy.Expanding), 4, 0, 1, 2
         )
 
-        snapshot = QtWidgets.QPushButton("snapshot")
-        snapshot.clicked.connect(canvas.take_snapshot)
-        side_panel.addWidget(snapshot, 5, 0, 1, 2)
+        side_panel.addWidget(widgets.SnapshotResultsButton(self.controller), 5, 0, 1, 2)
 
-        export = QtWidgets.QPushButton("export CSV")
-        export.clicked.connect(
-            lambda: canvas.export_as_csv(self.experiment, **get_parameters())
-        )
-        side_panel.addWidget(export, 6, 0, 1, 2)
+        side_panel.addWidget(widgets.ExportResultsButton(self.controller), 6, 0, 1, 2)
 
 
         side_panel.addItem(
             QtWidgets.QSpacerItem(10, 15, QSizePolicy.Fixed, QSizePolicy.Fixed), 7, 0, 1, 2
         )
 
-        calculate = QtWidgets.QPushButton("calculate")
-        calculate.setMinimumHeight(35)
-        calculate.clicked.connect(
-            lambda: canvas.update_plot(self.experiment, **get_parameters())
-        )
-        side_panel.addWidget(calculate, 8, 0, 1, 2)
+        side_panel.addWidget(widgets.CalculateResultsButton(self.controller), 8, 0, 1, 2)
 
 
 class TdpDialog(BaseResultsDialog):
@@ -140,10 +125,12 @@ class TdpDialog(BaseResultsDialog):
 
     def layout(self, side_panel, canvas):
         grid_points = QtWidgets.QSpinBox(minimum=10, maximum=500, value=100)
+        self.controller.register_parameter_widget("n_grid_points", grid_points.value)
         side_panel.addWidget(QtWidgets.QLabel("KDE resolution: "), 1, 0)
         side_panel.addWidget(grid_points, 1, 1)
 
         bandwidth = QtWidgets.QDoubleSpinBox(minimum=1e-3, maximum=1, value=0.02)
+        self.controller.register_parameter_widget("bandwidth", bandwidth.value)
         side_panel.addWidget(QtWidgets.QLabel("KDE bandwidth: "), 2, 0)
         side_panel.addWidget(bandwidth, 2, 1)
 
@@ -151,6 +138,8 @@ class TdpDialog(BaseResultsDialog):
         lower.setSingleStep(0.05)
         upper = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1)
         upper.setSingleStep(0.05)
+        self.controller.register_parameter_widget("lower_bound", lower.value)
+        self.controller.register_parameter_widget("upper_bound", upper.value)
         side_panel.addWidget(QtWidgets.QLabel("lower limit: "), 3, 0)
         side_panel.addWidget(lower, 3, 1)
         side_panel.addWidget(QtWidgets.QLabel("upper limit: "), 4, 0)
@@ -162,57 +151,29 @@ class TdpDialog(BaseResultsDialog):
 
         diagonal = QtWidgets.QCheckBox("Show diagonal")
         diagonal.setChecked(False)
+        self.controller.register_parameter_widget("show_diagonal", lambda: bool(diagonal.checkState()), on_export=False)
         side_panel.addWidget(diagonal, 6, 0, 1, 2)
 
         states = QtWidgets.QCheckBox("Show fitted states")
         states.setChecked(True)
+        self.controller.register_parameter_widget("show_fitted_states", lambda: bool(states.checkState()), on_export=False)
         side_panel.addWidget(states, 7, 0, 1, 2)
 
         contours = QtWidgets.QSpinBox(minimum=10, maximum=100, value=50)
+        self.controller.register_parameter_widget("n_contours", contours.value, on_export=False)
         side_panel.addWidget(QtWidgets.QLabel("# contours: "), 8, 0)
         side_panel.addWidget(contours, 8, 1)
-
-        def get_parameters():
-            return {
-                "n_grid_points": grid_points.value(),
-                "lower_bound": lower.value(),
-                "upper_bound": upper.value(),
-                "bandwidth": bandwidth.value(),
-                "n_contours": contours.value(),
-                "show_diagonal": bool(diagonal.checkState()),
-                "show_fitted_states": bool(states.checkState()),
-            }
 
         side_panel.addItem(
             QtWidgets.QSpacerItem(10, 5, QSizePolicy.Fixed, QSizePolicy.Expanding), 9, 0, 1, 2
         )
 
-        snapshot = QtWidgets.QPushButton("snapshot")
-        snapshot.clicked.connect(canvas.take_snapshot)
-        side_panel.addWidget(snapshot, 10, 0, 1, 2)
+        side_panel.addWidget(widgets.SnapshotResultsButton(self.controller), 10, 0, 1, 2)
 
-        def get_export_parameters():
-            return {
-                "n_grid_points": grid_points.value(),
-                "lower_bound": lower.value(),
-                "upper_bound": upper.value(),
-                "bandwidth": bandwidth.value(),
-            }
-
-        export = QtWidgets.QPushButton("export CSV")
-        export.clicked.connect(
-            lambda: canvas.export_as_csv(self.experiment, **get_export_parameters())
-        )
-        side_panel.addWidget(export, 11, 0, 1, 2)
+        side_panel.addWidget(widgets.ExportResultsButton(self.controller), 11, 0, 1, 2)
 
         side_panel.addItem(
             QtWidgets.QSpacerItem(10, 15, QSizePolicy.Fixed, QSizePolicy.Expanding), 12, 0, 1, 2
         )
 
-        calculate = QtWidgets.QPushButton("calculate")
-        calculate.setMinimumHeight(35)
-        calculate.clicked.connect(
-            lambda: canvas.update_plot(self.experiment, **get_parameters())
-        )
-
-        side_panel.addWidget(calculate, 13, 0, 1, 2)
+        side_panel.addWidget(widgets.CalculateResultsButton(self.controller), 13, 0, 1, 2)

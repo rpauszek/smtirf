@@ -1,5 +1,5 @@
 import numpy as np
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from PyQt5.QtCore import QObject, pyqtSignal
 from typing import ClassVar
 from pathlib import Path
@@ -154,3 +154,39 @@ class ModelController(QObject):
 
     def call_train_global(self):
         self.trainGlobalModel.emit(self._nstates, self._shared_var)
+
+
+@dataclass
+class ResultsController(QObject):
+    _experiment: object = None
+    _canvas: object = None
+    parameters: dict = field(default_factory=dict)
+    export_parameters: dict = field(default_factory=dict)
+
+    @property
+    def experiment(self):
+        return self._experiment
+
+    @property
+    def canvas(self):
+        return self._canvas
+
+    def register_canvas(self, canvas):
+        self._canvas = canvas
+
+    def register_parameter_widget(self, name, value, on_export=True):
+        self.parameters[name] = value
+        if on_export:
+            self.export_parameters[name] = value
+
+    def get_parameters(self):
+        return {name: value() for name, value in self.parameters.items()}
+
+    def get_export_parameters(self):
+        return {name: value() for name, value in self.export_parameters.items()}
+
+    def update_plot(self):
+        self.canvas.update_plot(self.experiment, **self.get_parameters())
+
+    def export_results(self):
+        self.canvas.export_as_csv(self.experiment, **self.get_export_parameters())
