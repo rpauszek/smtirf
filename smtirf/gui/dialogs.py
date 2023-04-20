@@ -3,8 +3,7 @@ from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtWidgets
 
-from . import widgets, canvases, main_stylesheet
-from .controllers import ResultsController
+from . import controllers, widgets, canvases, main_stylesheet
 from .panels import ResultsParamGroup
 
 
@@ -53,8 +52,7 @@ class ImportPmaDialog(QDialog):
 
 
 class BaseResultsDialog(QDialog):
-    def __init__(self, experiment, title, canvas, parent=None):
-        self.controller = ResultsController(experiment)
+    def __init__(self, title, canvas, parent=None):
         self.controller.register_canvas(canvas)
 
         super().__init__(parent)
@@ -93,8 +91,9 @@ class BaseResultsDialog(QDialog):
 
 class SplitHistogramDialog(BaseResultsDialog):
     def __init__(self, experiment, parent=None):
+        self.controller = controllers.SplitHistogramController(experiment)
         super().__init__(
-            experiment, "histogram", canvases.SplitHistogramCanvas(None), parent=parent
+            "histogram", canvases.SplitHistogramCanvas(self.controller), parent=parent
         )
 
     def layout(self, params):
@@ -118,10 +117,10 @@ class SplitHistogramDialog(BaseResultsDialog):
 
 class TdpDialog(BaseResultsDialog):
     def __init__(self, experiment, parent=None):
+        self.controller = controllers.TdpController(experiment)
         super().__init__(
-            experiment,
             "transition density probability",
-            canvases.TdpCanvas(None),
+            canvases.TdpCanvas(self.controller),
             parent=parent,
         )
 

@@ -108,4 +108,4 @@ class SnapshotResultsButton(QtWidgets.QPushButton):
     def __init__(self, controller):
         super().__init__("snapshot")
         self.setMinimumHeight(30)
-        self.clicked.connect(controller.canvas.take_snapshot)
+        self.clicked.connect(lambda: controller.take_snapshot())

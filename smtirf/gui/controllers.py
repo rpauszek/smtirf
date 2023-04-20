@@ -1,6 +1,10 @@
 import numpy as np
 from dataclasses import dataclass, field
+from io import BytesIO
+from sklearn.neighbors import KernelDensity
+from PyQt5.QtWidgets import QApplication, QFileDialog
 from PyQt5.QtCore import QObject, pyqtSignal
+from PyQt5.QtGui import QImage
 from typing import ClassVar
 from pathlib import Path
 
@@ -186,7 +190,100 @@ class ResultsController(QObject):
         return {name: value() for name, value in self.export_parameters.items()}
 
     def update_plot(self):
-        self.canvas.update_plot(self.experiment, **self.get_parameters())
+        self.canvas.update_plot(**self.get_parameters())
 
     def export_results(self):
-        self.canvas.export_as_csv(self.experiment, **self.get_export_parameters())
+        filename, _ = QFileDialog.getSaveFileName(
+            caption="Export plot data as...", filter="CSV (*.csv)"
+        )
+
+        if filename:
+            header, data = self._calculate_export_data(**self.get_export_parameters())
+            np.savetxt(filename, data, header=header, delimiter="\t")
+
+    def _calculate_export_data(self, **kwargs):
+        raise NotImplementedError("not implemented in base class")
+
+    def take_snapshot(self):
+        with BytesIO() as buffer:
+            self.canvas.figure.savefig(buffer)
+            QApplication.clipboard().setImage(QImage.fromData(buffer.getvalue()))
+
+
+class SplitHistogramController(ResultsController):
+    def _calculate_bars(self, n_bins, lower_bound, upper_bound):
+        observations = np.hstack(
+            [trace.X for trace in self.experiment if trace.isSelected]
+        )
+        statepath = np.hstack(
+            [trace.SP for trace in self.experiment if trace.isSelected]
+        )
+        bins = np.linspace(lower_bound, upper_bound, n_bins + 1)
+
+        full_counts, _ = np.histogram(observations, bins)
+        full_density = full_counts / np.trapz(full_counts, bins[:-1])
+
+        state_densities = []
+        fractions = []
+        for state in np.unique(statepath):
+            data = observations[statepath == state]
+            counts, _ = np.histogram(data, bins)
+            fraction = data.size / observations.size
+            density = counts / np.trapz(counts, bins[:-1]) * fraction
+            state_densities.append(density)
+            fractions.append(fraction)
+
+        return full_density, state_densities, fractions, bins
+
+    def _calculate_export_data(self, n_bins=100, lower_bound=-0.2, upper_bound=1.2):
+        _, states, fractions, bins = self._calculate_bars(
+            n_bins, lower_bound, upper_bound
+        )
+        full_density = np.vstack(states).sum(axis=0)
+
+        bin_width = np.diff(bins[:2])
+        centers = bins[:-1] + (bin_width / 2)
+        data = np.vstack((centers, full_density, *states)).T
+
+        state_headers = [
+            f"state {state} density ({fraction*100:0.4f}%)"
+            for state, fraction in enumerate(fractions)
+        ]
+        header = "\t".join(["FRET (bin center)", "Full density", *state_headers])
+
+        return header, data
+
+
+class TdpController(ResultsController):
+    def _calculate_tdp(self, n_grid_points, lower_bound, upper_bound, bandwidth):
+        for trace in self.experiment:
+            if trace.isSelected:
+                model = trace.model
+                break
+
+        data = np.vstack(
+            [
+                trace.dwells.get_transitions(dataType="data")
+                for trace in self.experiment
+                if trace.isSelected and trace.dwells is not None
+            ]
+        )
+        mesh = np.linspace(lower_bound, upper_bound, n_grid_points)
+        x, y = np.meshgrid(mesh, mesh)
+        coords = np.vstack((x.ravel(), y.ravel())).T
+        kde = KernelDensity(kernel="gaussian", bandwidth=bandwidth).fit(data)
+        z = np.exp(kde.score_samples(coords)).reshape(x.shape)
+
+        return x, y, z, model
+
+    def _calculate_export_data(
+        self, n_grid_points, lower_bound, upper_bound, bandwidth
+    ):
+        x, y, z, _ = self._calculate_tdp(
+            n_grid_points, lower_bound, upper_bound, bandwidth
+        )
+
+        data = np.vstack((x.ravel(), y.ravel(), z.ravel())).T
+        header = "\t".join(["initial FRET", "final FRET", "density"])
+
+        return header, data
