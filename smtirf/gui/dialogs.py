@@ -75,7 +75,7 @@ class BaseResultsDialog(QDialog):
         box.addLayout(side_panel)
 
         self.setLayout(box)
-        self.layout(side_panel, canvas)
+        self.layout(side_panel)
 
 
 class SplitHistogramDialog(BaseResultsDialog):
@@ -84,18 +84,15 @@ class SplitHistogramDialog(BaseResultsDialog):
             experiment, "histogram", canvases.SplitHistogramCanvas(None), parent=parent
         )
 
-    def layout(self, side_panel, canvas):
-        bins = QtWidgets.QSpinBox(minimum=10, maximum=500, value=100)
-        self.controller.register_parameter_widget("n_bins", bins.value)
+    def layout(self, side_panel):
+        bins = widgets.ResultsParamSpinBox(self.controller, "n_bins", minimum=10, maximum=500, value=100)
         side_panel.addWidget(QtWidgets.QLabel("# bins: "), 1, 0)
         side_panel.addWidget(bins, 1, 1)
 
-        lower = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=-0.2)
+        lower = widgets.ResultsParamDoubleSpinBox(self.controller, "lower_bound", minimum=-2, maximum=2, value=-0.2)
         lower.setSingleStep(0.05)
-        upper = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1.2)
+        upper = widgets.ResultsParamDoubleSpinBox(self.controller, "upper_bound", minimum=-2, maximum=2, value=1.2)
         upper.setSingleStep(0.05)
-        self.controller.register_parameter_widget("lower_bound", lower.value)
-        self.controller.register_parameter_widget("upper_bound", upper.value)
         side_panel.addWidget(QtWidgets.QLabel("lower limit: "), 2, 0)
         side_panel.addWidget(lower, 2, 1)
         side_panel.addWidget(QtWidgets.QLabel("upper limit: "), 3, 0)
@@ -123,23 +120,19 @@ class TdpDialog(BaseResultsDialog):
             experiment, "transition density probability", canvases.TdpCanvas(None), parent=parent
         )
 
-    def layout(self, side_panel, canvas):
-        grid_points = QtWidgets.QSpinBox(minimum=10, maximum=500, value=100)
-        self.controller.register_parameter_widget("n_grid_points", grid_points.value)
+    def layout(self, side_panel):
+        grid_points = widgets.ResultsParamSpinBox(self.controller, "n_grid_points", minimum=10, maximum=500, value=100)
         side_panel.addWidget(QtWidgets.QLabel("KDE resolution: "), 1, 0)
         side_panel.addWidget(grid_points, 1, 1)
 
-        bandwidth = QtWidgets.QDoubleSpinBox(minimum=1e-3, maximum=1, value=0.02)
-        self.controller.register_parameter_widget("bandwidth", bandwidth.value)
+        bandwidth = widgets.ResultsParamDoubleSpinBox(self.controller, "bandwidth", minimum=1e-3, maximum=1, value=0.02)
         side_panel.addWidget(QtWidgets.QLabel("KDE bandwidth: "), 2, 0)
         side_panel.addWidget(bandwidth, 2, 1)
 
-        lower = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=0)
+        lower = widgets.ResultsParamDoubleSpinBox(self.controller, "lower_bound", minimum=-2, maximum=2, value=-0.2)
         lower.setSingleStep(0.05)
-        upper = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1)
+        upper = widgets.ResultsParamDoubleSpinBox(self.controller, "upper_bound", minimum=-2, maximum=2, value=1.2)
         upper.setSingleStep(0.05)
-        self.controller.register_parameter_widget("lower_bound", lower.value)
-        self.controller.register_parameter_widget("upper_bound", upper.value)
         side_panel.addWidget(QtWidgets.QLabel("lower limit: "), 3, 0)
         side_panel.addWidget(lower, 3, 1)
         side_panel.addWidget(QtWidgets.QLabel("upper limit: "), 4, 0)
@@ -149,18 +142,13 @@ class TdpDialog(BaseResultsDialog):
             QtWidgets.QSpacerItem(10, 5, QSizePolicy.Expanding, QSizePolicy.Fixed), 5, 0, 1, 2
         )
 
-        diagonal = QtWidgets.QCheckBox("Show diagonal")
-        diagonal.setChecked(False)
-        self.controller.register_parameter_widget("show_diagonal", lambda: bool(diagonal.checkState()), on_export=False)
+        diagonal = widgets.ResultsParamCheckbox(self.controller, "Show diagonal", "show_diagonal", checked=False, on_export=False)
         side_panel.addWidget(diagonal, 6, 0, 1, 2)
 
-        states = QtWidgets.QCheckBox("Show fitted states")
-        states.setChecked(True)
-        self.controller.register_parameter_widget("show_fitted_states", lambda: bool(states.checkState()), on_export=False)
+        states = widgets.ResultsParamCheckbox(self.controller, "Show fitted states", "show_fitted_states", checked=True, on_export=False)
         side_panel.addWidget(states, 7, 0, 1, 2)
 
-        contours = QtWidgets.QSpinBox(minimum=10, maximum=100, value=50)
-        self.controller.register_parameter_widget("n_contours", contours.value, on_export=False)
+        contours = widgets.ResultsParamSpinBox(self.controller, "n_contours", on_export=False, minimum=10, maximum=100, value=50)
         side_panel.addWidget(QtWidgets.QLabel("# contours: "), 8, 0)
         side_panel.addWidget(contours, 8, 1)
 
