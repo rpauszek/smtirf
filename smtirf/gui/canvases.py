@@ -188,3 +188,26 @@ class TdpCanvas(QtCanvas):
         self.ax.set_ylabel("final FRET")
 
         self.draw()
+
+
+class StateCounterCanvas(QtCanvas):
+    def __init__(self, controller):
+        super().__init__()
+        self.controller = controller
+        self.ax = self.figure.add_subplot(1, 1, 1)
+
+    def update_plot(self):
+        count_dict = self.controller._calculate_counts()
+        xlabels = list(count_dict.keys())
+        data = list(count_dict.values())
+
+        self.ax.cla()
+        rects = self.ax.bar(np.arange(len(data)), data, width=0.8)
+        self.ax.bar_label(rects, padding=3)
+        self.ax.set_xticks(np.arange(len(data)))
+        self.ax.set_xticklabels(xlabels)
+
+        self.ax.set_ylabel("counts (traces)")
+        self.ax.set_xlabel("state set")
+
+        self.draw()

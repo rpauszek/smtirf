@@ -1,4 +1,5 @@
 import numpy as np
+import itertools
 from dataclasses import dataclass, field
 from io import BytesIO
 from sklearn.neighbors import KernelDensity
@@ -287,3 +288,21 @@ class TdpController(ResultsController):
         header = "\t".join(["initial FRET", "final FRET", "density"])
 
         return header, data
+
+
+class StateCounterController(ResultsController):
+    def _calculate_counts(self):
+        trace_states = [
+            np.unique(trace.SP) for trace in self.experiment if trace.isSelected
+        ]
+        available_states = np.arange((n_states := np.max(np.hstack(trace_states)) + 1))
+
+        combos = itertools.chain(
+            *[itertools.combinations(available_states, n + 1) for n in range(n_states)]
+        )
+        counts = {c: 0 for c in combos}
+
+        for trace in trace_states:
+            counts[tuple(trace)] += 1
+
+        return counts

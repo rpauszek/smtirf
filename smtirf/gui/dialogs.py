@@ -52,7 +52,9 @@ class ImportPmaDialog(QDialog):
 
 
 class BaseResultsDialog(QDialog):
-    def __init__(self, title, canvas, parent=None):
+    def __init__(
+        self, title, canvas, parent=None, disable_export=False, hide_params=False
+    ):
         self.controller.register_canvas(canvas)
 
         super().__init__(parent)
@@ -61,9 +63,9 @@ class BaseResultsDialog(QDialog):
         self.setFixedHeight(600)
         self.setModal(True)
         self.setStyleSheet(main_stylesheet)
-        self._setup(canvas)
+        self._setup(canvas, disable_export, hide_params)
 
-    def _setup(self, canvas):
+    def _setup(self, canvas, disable_export, hide_params):
         box = QtWidgets.QHBoxLayout()
         box.addWidget(canvas, stretch=1)
         self.setLayout(box)
@@ -78,15 +80,21 @@ class BaseResultsDialog(QDialog):
         )
 
         side_panel.addWidget(params := ResultsParamGroup(self.controller))
+        params.setVisible(not hide_params)
 
         side_panel.addItem(
             QtWidgets.QSpacerItem(10, 5, QSizePolicy.Fixed, QSizePolicy.Expanding)
         )
 
         side_panel.addWidget(widgets.SnapshotResultsButton(self.controller))
-        side_panel.addWidget(widgets.ExportResultsButton(self.controller))
+
+        side_panel.addWidget(export := widgets.ExportResultsButton(self.controller))
+        export.setEnabled(not disable_export)
 
         self.layout(params)
+
+    def layout(self, params):
+        pass
 
 
 class SplitHistogramDialog(BaseResultsDialog):
@@ -174,3 +182,15 @@ class TdpDialog(BaseResultsDialog):
             value=50,
         )
         params.add_spinbox("# contours", contours)
+
+
+class StateCounterDialog(BaseResultsDialog):
+    def __init__(self, experiment, parent=None):
+        self.controller = controllers.StateCounterController(experiment)
+        super().__init__(
+            "state count",
+            canvases.StateCounterCanvas(self.controller),
+            parent=parent,
+            disable_export=True,
+            hide_params=True,
+        )

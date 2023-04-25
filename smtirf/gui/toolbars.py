@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore, QtGui
 import contextlib
-from .dialogs import SplitHistogramDialog, TdpDialog
+from .dialogs import SplitHistogramDialog, TdpDialog, StateCounterDialog
 
 
 class ToolButton(QtWidgets.QToolButton):
@@ -54,6 +54,7 @@ class MainToolbar(QtWidgets.QToolBar):
         )
         btn.add_action("Histogram", results_callback(controller, SplitHistogramDialog))
         btn.add_action("TDP", results_callback(controller, TdpDialog))
+        btn.add_action("State counts", results_callback(controller, StateCounterDialog))
 
         btn = ToolButton(self, "sort", "Sort", enabler=controller.experimentChanged)
         btn.add_action("By Index", lambda: controller.sort_traces("index"))
