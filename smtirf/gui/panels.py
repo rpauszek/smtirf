@@ -101,3 +101,7 @@ class ResultsParamGroup(QtWidgets.QGroupBox):
     def add_checkbox(self, widget):
         self.grid.addWidget(widget, self._current_row, 0, 1, 2)
         self._current_row += 1
+
+    def add_buttongroup(self, widget):
+        self.grid.addWidget(widget, self._current_row, 0, 1, 2)
+        self._current_row += 1

@@ -192,5 +192,12 @@ class StateCounterDialog(BaseResultsDialog):
             canvases.StateCounterCanvas(self.controller),
             parent=parent,
             disable_export=True,
-            hide_params=True,
         )
+
+    def layout(self, params):
+        value_type = widgets.CountPercentButtonGroup(self.controller, "value_type")
+        params.add_buttongroup(value_type)
+        # grid_points = widgets.ResultsParamSpinBox(
+        #     self.controller, "n_grid_points", minimum=10, maximum=500, value=100
+        # )
+        # params.add_spinbox("KDE resolution", grid_points)

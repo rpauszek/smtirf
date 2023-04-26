@@ -196,18 +196,27 @@ class StateCounterCanvas(QtCanvas):
         self.controller = controller
         self.ax = self.figure.add_subplot(1, 1, 1)
 
-    def update_plot(self):
-        count_dict = self.controller._calculate_counts()
+    def update_plot(self, value_type="percent"):
+        count_dict = self.controller._calculate_counts(value_type)
         xlabels = list(count_dict.keys())
         data = list(count_dict.values())
+        match value_type:
+            case "percent":
+                ylabel = "% traces"
+                bar_labels = [f"{x:0.2f}%" for x in data]
+            case "counts":
+                ylabel = "counts (traces)"
+                bar_labels = data
 
         self.ax.cla()
         rects = self.ax.bar(np.arange(len(data)), data, width=0.8)
-        self.ax.bar_label(rects, padding=3)
+        self.ax.bar_label(rects, labels=bar_labels, padding=3)
         self.ax.set_xticks(np.arange(len(data)))
-        self.ax.set_xticklabels(xlabels)
+        self.ax.set_xticklabels(
+            xlabels, rotation=-30, ha="left", rotation_mode="anchor"
+        )
 
-        self.ax.set_ylabel("counts (traces)")
+        self.ax.set_ylabel(ylabel)
         self.ax.set_xlabel("state set")
 
         self.draw()

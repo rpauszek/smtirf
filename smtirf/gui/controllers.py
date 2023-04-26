@@ -291,7 +291,10 @@ class TdpController(ResultsController):
 
 
 class StateCounterController(ResultsController):
-    def _calculate_counts(self):
+    def _calculate_counts(self, value_type):
+        if value_type not in ("counts", "percent"):
+            raise ValueError(f"invalid value_type '{value_type}'")
+
         trace_states = [
             np.unique(trace.SP) for trace in self.experiment if trace.isSelected
         ]
@@ -304,5 +307,9 @@ class StateCounterController(ResultsController):
 
         for trace in trace_states:
             counts[tuple(trace)] += 1
+
+        if value_type == "percent":
+            total_points = len(trace_states)
+            counts = {key: value / total_points * 100 for key, value in counts.items()}
 
         return counts

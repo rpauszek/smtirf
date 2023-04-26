@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QSizePolicy
 
 
-__all__ = ["ExperimentTypeButtonGroup"]
+__all__ = ["ExperimentTypeButtonGroup", "CountPercentButtonGroup"]
 
 
 class BaseButtonGroup(QtWidgets.QWidget):
@@ -45,3 +45,28 @@ class ExperimentTypeButtonGroup(BaseButtonGroup):
     def experimentType(self):
         btn = self.buttonGroup.checkedButton()
         return self.buttonTypeMap[btn]
+
+
+class CountPercentButtonGroup(BaseButtonGroup):
+    def __init__(self, controller, param_name, on_export=False, **kwargs):
+        controller.register_parameter_widget(
+            param_name, self.value, on_export=on_export
+        )
+        super().__init__(**kwargs)
+
+    def make_buttons(self):
+        buttons = (
+            QtWidgets.QRadioButton("Counts"),
+            radPercent := QtWidgets.QRadioButton("Percent"),
+        )
+        radPercent.setChecked(True)
+
+        keys = ("counts", "percent")
+        return buttons, keys
+
+    @property
+    def valueType(self):
+        return self.buttonTypeMap[self.buttonGroup.checkedButton()]
+
+    def value(self):
+        return self.buttonTypeMap[self.buttonGroup.checkedButton()]
