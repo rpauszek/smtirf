@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtWidgets
 
 from . import controllers, widgets, canvases, main_stylesheet
+from .layouts import ParameterLayout
 from .panels import ResultsParamGroup
 
 
@@ -65,21 +66,26 @@ class FilterTracesDialog(QDialog):
         self.setStyleSheet(main_stylesheet)
 
     def layout(self):
-        gbox = QtWidgets.QGridLayout()
-        gbox.addWidget(QtWidgets.QLabel("Minimum length:"), 0, 0)
-        self.param_widgets["min_length"] = QtWidgets.QDoubleSpinBox(minimum=0, maximum=500, value=1)
-        gbox.addWidget(self.param_widgets["min_length"], 0, 1)
-        gbox.addWidget(QtWidgets.QLabel("seconds"), 0, 2)
+        self.param_box = ParameterLayout()
 
-        self.param_widgets["min_fret"] = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=-0.3)
-        self.param_widgets["max_fret"] = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1.3)
-        gbox.addWidget(QtWidgets.QLabel("FRET range:"), 1, 0)
-        gbox.addWidget(self.param_widgets["min_fret"], 1, 1)
-        gbox.addWidget(QtWidgets.QLabel("min"), 1, 2)
-
-        gbox.addWidget(self.param_widgets["max_fret"], 2, 1)
-        gbox.addWidget(QtWidgets.QLabel("max"), 2, 2)
-        gbox.setColumnStretch(0, 1)
+        self.param_box.add_widget(
+            QtWidgets.QDoubleSpinBox(minimum=0, maximum=500, value=1),
+            "min_length",
+            "Minimum length",
+            "seconds",
+        )
+        self.param_box.add_widget(
+            QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=-0.5),
+            "min_fret",
+            "Minimum FRET",
+            "",
+        )
+        self.param_box.add_widget(
+            QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1.5),
+            "max_fret",
+            "Maximum FRET",
+            "",
+        )
 
         self.buttonBox = QDialogButtonBox()
         self.buttonBox.addButton("Filter", QDialogButtonBox.AcceptRole)
@@ -88,14 +94,16 @@ class FilterTracesDialog(QDialog):
         self.buttonBox.rejected.connect(self.reject)
 
         mainLayout = QtWidgets.QVBoxLayout()
-        mainLayout.addLayout(gbox)
-        mainLayout.addItem(QtWidgets.QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
+        mainLayout.addLayout(self.param_box)
+        mainLayout.addItem(
+            QtWidgets.QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding)
+        )
         mainLayout.addWidget(self.buttonBox)
         self.setLayout(mainLayout)
 
     @property
     def params(self):
-        return {key: w.value() for key, w in self.param_widgets.items()}
+        return self.param_box.get_params()
 
 
 class BaseResultsDialog(QDialog):
@@ -244,7 +252,3 @@ class StateCounterDialog(BaseResultsDialog):
     def layout(self, params):
         value_type = widgets.CountPercentButtonGroup(self.controller, "value_type")
         params.add_buttongroup(value_type)
-        # grid_points = widgets.ResultsParamSpinBox(
-        #     self.controller, "n_grid_points", minimum=10, maximum=500, value=100
-        # )
-        # params.add_spinbox("KDE resolution", grid_points)

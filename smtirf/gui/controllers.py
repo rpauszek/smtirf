@@ -143,17 +143,21 @@ class ExperimentController(QObject):
         dlg = FilterTracesDialog()
         response = dlg.exec()
 
-        if response:
-            params = dlg.params
-            for trace in self.experiment:
-                if trace.isSelected:
-                    if np.logical_or(np.any(trace.X < params["min_fret"]), np.any(trace.X > params["max_fret"])):
-                        trace.isSelected = False
-                    t = trace.t[trace.limits]
-                    if t[-1] - t[0] < params["min_length"]:
-                        trace.isSelected = False
-            self.traceStateChanged.emit(self.trace)
+        if not response:
+            return
 
+        params = dlg.params
+        for trace in self.experiment:
+            if trace.isSelected:
+                if np.logical_or(
+                    np.any(trace.X < params["min_fret"]),
+                    np.any(trace.X > params["max_fret"]),
+                ):
+                    trace.isSelected = False
+                t = trace.t[trace.limits]
+                if t[-1] - t[0] < params["min_length"]:
+                    trace.isSelected = False
+        self.traceStateChanged.emit(self.trace)
 
 
 @dataclass
