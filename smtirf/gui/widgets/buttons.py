@@ -9,6 +9,7 @@ __all__ = [
     "ResetOffsetsButton",
     "ResetLimitsButton",
     "RemoveProblemTracesButton",
+    "FilterTracesButton",
     "TrainGlobalButton",
     "CalculateResultsButton",
     "ExportResultsButton",
@@ -77,6 +78,12 @@ class RemoveProblemTracesButton(QtWidgets.QPushButton):
     def __init__(self, controller):
         super().__init__("Remove Problem Traces")
         self.clicked.connect(controller.remove_problem_traces)
+
+
+class FilterTracesButton(QtWidgets.QPushButton):
+    def __init__(self, controller):
+        super().__init__("Filter Traces")
+        self.clicked.connect(controller.filter_traces)
 
 
 class TrainGlobalButton(QtWidgets.QPushButton):

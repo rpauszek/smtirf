@@ -31,6 +31,9 @@ class ExperimentGroup(QtWidgets.QGroupBox):
         gbox.addWidget(widgets.ResetOffsetsButton(controller), row, 0)
         gbox.addWidget(widgets.ResetLimitsButton(controller), row, 1)
 
+        row += 1
+        gbox.addWidget(widgets.FilterTracesButton(controller), row, 0, 1, 2)
+
         self.setLayout(gbox)
 
         self.setEnabled(False)
@@ -49,7 +52,6 @@ class ModelGroup(QtWidgets.QGroupBox):
         spacer_settings = (4, 10, QtWidgets.QSizePolicy.Expanding, QSizePolicy.Fixed)
 
         vbox = QtWidgets.QVBoxLayout()
-        vbox.addWidget(widgets.RemoveProblemTracesButton(controller))
         vbox.addWidget(self.nstates_slider)
         vbox.addWidget(self.shared_var_checkbox)
         vbox.addSpacerItem(QtWidgets.QSpacerItem(*spacer_settings))

@@ -1,5 +1,5 @@
 import numpy as np
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox, QFileDialog
+from PyQt5.QtWidgets import QDialog, QDialogButtonBox
 from PyQt5.QtWidgets import QSizePolicy
 from PyQt5 import QtWidgets
 
@@ -49,6 +49,53 @@ class ImportPmaDialog(QDialog):
             "gamma": 1,
             "comments": "",
         }
+
+
+class FilterTracesDialog(QDialog):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Filter traces")
+        self.setFixedWidth(300)
+        self.setFixedHeight(300)
+        self.setMaximumWidth(500)
+        self.setModal(True)
+
+        self.param_widgets = {}
+        self.layout()
+        self.setStyleSheet(main_stylesheet)
+
+    def layout(self):
+        gbox = QtWidgets.QGridLayout()
+        gbox.addWidget(QtWidgets.QLabel("Minimum length:"), 0, 0)
+        self.param_widgets["min_length"] = QtWidgets.QDoubleSpinBox(minimum=0, maximum=500, value=1)
+        gbox.addWidget(self.param_widgets["min_length"], 0, 1)
+        gbox.addWidget(QtWidgets.QLabel("seconds"), 0, 2)
+
+        self.param_widgets["min_fret"] = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=-0.3)
+        self.param_widgets["max_fret"] = QtWidgets.QDoubleSpinBox(minimum=-2, maximum=2, value=1.3)
+        gbox.addWidget(QtWidgets.QLabel("FRET range:"), 1, 0)
+        gbox.addWidget(self.param_widgets["min_fret"], 1, 1)
+        gbox.addWidget(QtWidgets.QLabel("min"), 1, 2)
+
+        gbox.addWidget(self.param_widgets["max_fret"], 2, 1)
+        gbox.addWidget(QtWidgets.QLabel("max"), 2, 2)
+        gbox.setColumnStretch(0, 1)
+
+        self.buttonBox = QDialogButtonBox()
+        self.buttonBox.addButton("Filter", QDialogButtonBox.AcceptRole)
+        self.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        mainLayout = QtWidgets.QVBoxLayout()
+        mainLayout.addLayout(gbox)
+        mainLayout.addItem(QtWidgets.QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding))
+        mainLayout.addWidget(self.buttonBox)
+        self.setLayout(mainLayout)
+
+    @property
+    def params(self):
+        return {key: w.value() for key, w in self.param_widgets.items()}
 
 
 class BaseResultsDialog(QDialog):
