@@ -1,11 +1,11 @@
-from PyQt5.QtWidgets import (
+from PyQt6.QtWidgets import (
     QMainWindow,
     QMessageBox,
     QFileDialog,
     QSpacerItem,
     QSizePolicy,
 )
-from PyQt5 import QtWidgets, QtCore
+from PyQt6 import QtWidgets, QtCore, QtGui
 
 from . import resources
 from .controllers import ExperimentController
@@ -29,9 +29,9 @@ class SMTirfMainWindow(QMainWindow):
         self.controller = ExperimentController()
         self.resize(1000, 600)
 
-        QtWidgets.QShortcut("Ctrl+Q", self, activated=self.close)
-        QtWidgets.QShortcut(
-            QtCore.Qt.Key_Space, self, activated=self.controller.toggle_selected
+        QtGui.QShortcut("Ctrl+Q", self, activated=self.close)
+        QtGui.QShortcut(
+            QtCore.Qt.Key.Key_Space, self, activated=self.controller.toggle_selected
         )
 
         self.toolbar = toolbars.MainToolbar(
@@ -40,7 +40,7 @@ class SMTirfMainWindow(QMainWindow):
             self.open_experiment,
             self.save_experiment,
         )
-        self.addToolBar(QtCore.Qt.LeftToolBarArea, self.toolbar)
+        self.addToolBar(QtCore.Qt.ToolBarArea.LeftToolBarArea, self.toolbar)
         self.layout()
         self.setStyleSheet(main_stylesheet)
 
@@ -54,7 +54,7 @@ class SMTirfMainWindow(QMainWindow):
 
         right_vbox = QtWidgets.QVBoxLayout()
         right_vbox.addSpacerItem(
-            QSpacerItem(200, 0, QSizePolicy.Expanding, QSizePolicy.Fixed)
+            QSpacerItem(200, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         )
         right_vbox.addWidget(
             panels.TraceGroup(self.controller, self.controller.experimentChanged)
@@ -66,7 +66,7 @@ class SMTirfMainWindow(QMainWindow):
             panels.ModelGroup(self.controller, self.controller.experimentChanged)
         )
         right_vbox.addSpacerItem(
-            QSpacerItem(0, 0, QSizePolicy.Fixed, QSizePolicy.Expanding)
+            QSpacerItem(0, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
         )
         right_vbox.addWidget(widgets.CoordinateLabel(self.controller))
         main_grid.addLayout(right_vbox, 0, 1, 2, 1)
@@ -93,16 +93,18 @@ class SMTirfMainWindow(QMainWindow):
             "Save experiment?",
             "question",
             f"Save changes with current filename?\n{self.controller.filename}",
-            QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel,
+            QMessageBox.StandardButton.Yes
+            | QMessageBox.StandardButton.No
+            | QMessageBox.StandardButton.Cancel,
         )
         msg.exec()
         response = msg.buttonRole(msg.clickedButton())
 
-        if response == QMessageBox.RejectRole:
+        if response == QMessageBox.ButtonRole.RejectRole:
             return None
-        elif response == QMessageBox.YesRole:
+        elif response == QMessageBox.ButtonRole.YesRole:
             self.controller.save_experiment(self.controller.filename)
-        elif response == QMessageBox.NoRole:
+        elif response == QMessageBox.ButtonRole.NoRole:
             filename, _ = QFileDialog.getSaveFileName(
                 caption="Save experiment as...", filter="smtirf Experiment (*.smtrc)"
             )

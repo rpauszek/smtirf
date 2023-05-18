@@ -1,7 +1,7 @@
 import numpy as np
 
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6.QtWidgets import QSizePolicy
 
 
 __all__ = [
@@ -14,7 +14,6 @@ __all__ = [
 
 
 class SpinSlider(QtWidgets.QWidget):
-
     indexChanged = QtCore.pyqtSignal(int)
 
     def __init__(self, label):
@@ -22,7 +21,7 @@ class SpinSlider(QtWidgets.QWidget):
 
         self.spinbox = QtWidgets.QSpinBox(minimum=1, value=1)
         self.slider = QtWidgets.QSlider(
-            minimum=0, value=0, orientation=QtCore.Qt.Horizontal
+            minimum=0, value=0, orientation=QtCore.Qt.Orientation.Horizontal
         )
         self.slider.setTracking(False)
         self.cmdStepFwd = QtWidgets.QPushButton(">>")
@@ -108,7 +107,7 @@ class LabeledSlider(QtWidgets.QWidget):
             minimum=minimum,
             maximum=maximum,
             value=value,
-            orientation=QtCore.Qt.Horizontal,
+            orientation=QtCore.Qt.Orientation.Horizontal,
         )
         # self.slider.setTracking(False)
         self.label = QtWidgets.QLabel("1")

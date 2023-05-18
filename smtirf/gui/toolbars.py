@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt6 import QtWidgets, QtCore, QtGui
 import contextlib
 from .dialogs import SplitHistogramDialog, TdpDialog, StateCounterDialog
 
@@ -6,8 +6,8 @@ from .dialogs import SplitHistogramDialog, TdpDialog, StateCounterDialog
 class ToolButton(QtWidgets.QToolButton):
     def __init__(self, toolbar, icon, label, enabler=None):
         super().__init__()
-        self.setPopupMode(QtWidgets.QToolButton.InstantPopup)
-        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.setPopupMode(QtWidgets.QToolButton.ToolButtonPopupMode.InstantPopup)
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         self.setIcon(QtGui.QIcon(f":{icon}.svg"))
         self.setText(label)
 
@@ -18,7 +18,7 @@ class ToolButton(QtWidgets.QToolButton):
         toolbar.addWidget(self)
 
     def add_action(self, label, callback, shortcut=None, enabler=None):
-        action = QtWidgets.QAction(label, self.parent())
+        action = QtGui.QAction(label, self.parent())
         if shortcut is not None:
             action.setShortcut(shortcut)
         with contextlib.suppress(TypeError):
@@ -72,7 +72,7 @@ class MainToolbar(QtWidgets.QToolBar):
         btn = ToolButton(self, "settings", "Settings")
 
         self.setIconSize(QtCore.QSize(32, 32))
-        self.setToolButtonStyle(QtCore.Qt.ToolButtonTextUnderIcon)
+        self.setToolButtonStyle(QtCore.Qt.ToolButtonStyle.ToolButtonTextUnderIcon)
         self.setMovable(False)
 
         get_action = lambda a: self.widgetForAction(a).sizeHint()

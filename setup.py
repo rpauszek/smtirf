@@ -24,6 +24,6 @@ setuptools.setup(
         "numba",
         "scikit-learn>=0.18.0",
         "scikit-image>=0.17.2",
-        "PyQt5",
+        "PyQt6",
     ],
 )

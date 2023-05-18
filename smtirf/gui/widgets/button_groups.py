@@ -1,5 +1,5 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QSizePolicy
+from PyQt6 import QtWidgets
+from PyQt6.QtWidgets import QSizePolicy
 
 
 __all__ = ["ExperimentTypeButtonGroup", "CountPercentButtonGroup"]
@@ -22,7 +22,9 @@ class BaseButtonGroup(QtWidgets.QWidget):
             self.buttonGroup.addButton(btn)
             self.buttonTypeMap[btn] = key
         hbox.addItem(
-            QtWidgets.QSpacerItem(5, 5, QSizePolicy.Expanding, QSizePolicy.Fixed)
+            QtWidgets.QSpacerItem(
+                5, 5, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed
+            )
         )
         self.setLayout(hbox)
 

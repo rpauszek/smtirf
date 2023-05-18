@@ -1,5 +1,5 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
-from PyQt5.QtWidgets import QSpacerItem, QSizePolicy, QFileDialog
+from PyQt6 import QtWidgets, QtCore, QtGui
+from PyQt6.QtWidgets import QSpacerItem, QSizePolicy, QFileDialog
 
 
 __all__ = [
@@ -18,7 +18,7 @@ __all__ = [
 class LeftElidedLabel(QtWidgets.QLabel):
     def setText(self, s):
         s = QtGui.QFontMetrics(self.font()).elidedText(
-            s, QtCore.Qt.ElideLeft, self.width()
+            s, QtCore.Qt.TextElideMode.ElideLeft, self.width()
         )
         super().setText(s)
 
@@ -35,7 +35,9 @@ class FileSelectionLabel(QtWidgets.QWidget):
 
     def layout(self):
         self.filenameLabel = LeftElidedLabel()
-        self.filenameLabel.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
+        self.filenameLabel.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
+        )
 
         self.chooseFileButton = QtWidgets.QPushButton("Browse files")
         self.chooseFileButton.clicked.connect(self.choose_file)
@@ -80,14 +82,20 @@ class InfoLabel(QtWidgets.QWidget):
         hbox = QtWidgets.QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
         hbox.addWidget(self._labelWidget)
-        hbox.addSpacerItem(QSpacerItem(5, 5, QSizePolicy.Expanding, QSizePolicy.Fixed))
+        hbox.addSpacerItem(
+            QSpacerItem(5, 5, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        )
         hbox.addWidget(self._textWidget)
         self.setLayout(hbox)
 
         # * align
         self.setMinimumWidth(150)
-        self._labelWidget.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self._textWidget.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self._labelWidget.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
+        self._textWidget.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignLeft | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
 
 
 class TraceLabel(InfoLabel):
@@ -175,7 +183,9 @@ class SelectedTraceCounter(SelectedItemsCounter):
 class CoordinateLabel(QtWidgets.QLabel):
     def __init__(self, controller, **kwargs):
         super().__init__("x: , y: ", **kwargs)
-        self.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        self.setAlignment(
+            QtCore.Qt.AlignmentFlag.AlignRight | QtCore.Qt.AlignmentFlag.AlignVCenter
+        )
         controller.mplMotionNotifyEvent.connect(self.update_text)
         self.setStyleSheet("color: #888888;")
 

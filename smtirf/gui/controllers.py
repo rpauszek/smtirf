@@ -3,9 +3,9 @@ import itertools
 from dataclasses import dataclass, field
 from io import BytesIO
 from sklearn.neighbors import KernelDensity
-from PyQt5.QtWidgets import QApplication, QFileDialog, QDialogButtonBox
-from PyQt5.QtCore import QObject, pyqtSignal
-from PyQt5.QtGui import QImage
+from PyQt6.QtWidgets import QApplication, QFileDialog, QDialogButtonBox
+from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtGui import QImage
 from typing import ClassVar
 from pathlib import Path
 

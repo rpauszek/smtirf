@@ -1,8 +1,7 @@
-from PyQt5 import QtCore
+from PyQt6 import QtCore
 
 
 class TrainGlobalThread(QtCore.QThread):
-
     started_training = QtCore.pyqtSignal()
     finished_training = QtCore.pyqtSignal()
 

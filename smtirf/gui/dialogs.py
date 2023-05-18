@@ -1,7 +1,7 @@
 import numpy as np
-from PyQt5.QtWidgets import QDialog, QDialogButtonBox
-from PyQt5.QtWidgets import QSizePolicy
-from PyQt5 import QtWidgets
+from PyQt6.QtWidgets import QDialog, QDialogButtonBox
+from PyQt6.QtWidgets import QSizePolicy
+from PyQt6 import QtWidgets
 
 from . import controllers, widgets, canvases, main_stylesheet
 from .layouts import ParameterLayout
@@ -20,7 +20,8 @@ class ImportPmaDialog(QDialog):
 
     def layout(self):
         self.buttonBox = QDialogButtonBox(
-            QDialogButtonBox.Open | QDialogButtonBox.Cancel
+            QDialogButtonBox.StandardButton.Open
+            | QDialogButtonBox.StandardButton.Cancel
         )
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
@@ -28,7 +29,7 @@ class ImportPmaDialog(QDialog):
         self.filenameLabel = widgets.FileSelectionLabel(
             caption="Select file to import", filterString="PMA traces (*.traces)"
         )
-        buttonOpen = self.buttonBox.button(QDialogButtonBox.Open)
+        buttonOpen = self.buttonBox.button(QDialogButtonBox.StandardButton.Open)
         buttonOpen.setEnabled(False)
         self.filenameLabel.filenameIsSet.connect(buttonOpen.setEnabled)
 
@@ -88,15 +89,17 @@ class FilterTracesDialog(QDialog):
         )
 
         self.buttonBox = QDialogButtonBox()
-        self.buttonBox.addButton("Filter", QDialogButtonBox.AcceptRole)
-        self.buttonBox.addButton("Cancel", QDialogButtonBox.RejectRole)
+        self.buttonBox.addButton("Filter", QDialogButtonBox.ButtonRole.AcceptRole)
+        self.buttonBox.addButton("Cancel", QDialogButtonBox.ButtonRole.RejectRole)
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
 
         mainLayout = QtWidgets.QVBoxLayout()
         mainLayout.addLayout(self.param_box)
         mainLayout.addItem(
-            QtWidgets.QSpacerItem(5, 5, QSizePolicy.Fixed, QSizePolicy.Expanding)
+            QtWidgets.QSpacerItem(
+                5, 5, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding
+            )
         )
         mainLayout.addWidget(self.buttonBox)
         self.setLayout(mainLayout)
@@ -131,14 +134,18 @@ class BaseResultsDialog(QDialog):
         side_panel.addWidget(widgets.CalculateResultsButton(self.controller))
 
         side_panel.addItem(
-            QtWidgets.QSpacerItem(200, 10, QSizePolicy.Fixed, QSizePolicy.Fixed)
+            QtWidgets.QSpacerItem(
+                200, 10, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+            )
         )
 
         side_panel.addWidget(params := ResultsParamGroup(self.controller))
         params.setVisible(not hide_params)
 
         side_panel.addItem(
-            QtWidgets.QSpacerItem(10, 5, QSizePolicy.Fixed, QSizePolicy.Expanding)
+            QtWidgets.QSpacerItem(
+                10, 5, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding
+            )
         )
 
         side_panel.addWidget(widgets.SnapshotResultsButton(self.controller))

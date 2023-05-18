@@ -1,7 +1,7 @@
 import numpy as np
-from PyQt5 import QtWidgets
-from PyQt5.QtCore import pyqtSignal
-from PyQt5.QtGui import QPalette
+from PyQt6 import QtWidgets
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QPalette
 
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
@@ -18,7 +18,7 @@ class QtCanvas(FigureCanvas):
     def __init__(self):
         self.figure = Figure()
         super().__init__(self.figure)
-        bgcolor = QtWidgets.QWidget().palette().color(QPalette.Background)
+        bgcolor = QtWidgets.QWidget().palette().color(QPalette.ColorRole.Window)
         self.figure.set_facecolor(np.array(bgcolor.getRgb()[:-1]) / 255)
         self.figure.set_tight_layout(True)
 

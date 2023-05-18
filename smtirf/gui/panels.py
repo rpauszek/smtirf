@@ -1,5 +1,5 @@
-from PyQt5 import QtWidgets
-from PyQt5.QtWidgets import QSpacerItem, QSizePolicy
+from PyQt6 import QtWidgets
+from PyQt6.QtWidgets import QSpacerItem, QSizePolicy
 from . import controllers
 from . import widgets
 
@@ -25,7 +25,11 @@ class ExperimentGroup(QtWidgets.QGroupBox):
         row = 0
         gbox.addWidget(widgets.SelectedTraceCounter(controller), row, 0, 1, 2)
         row += 1
-        gbox.addItem(QSpacerItem(5, 15, QSizePolicy.Fixed, QSizePolicy.Fixed), row, 0)
+        gbox.addItem(
+            QSpacerItem(5, 15, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed),
+            row,
+            0,
+        )
 
         row += 1
         gbox.addWidget(widgets.ResetOffsetsButton(controller), row, 0)
@@ -49,7 +53,12 @@ class ModelGroup(QtWidgets.QGroupBox):
         self.shared_var_checkbox = widgets.SharedVarCheckbox(model_controller)
         self.train_button = widgets.TrainGlobalButton(model_controller)
 
-        spacer_settings = (4, 10, QtWidgets.QSizePolicy.Expanding, QSizePolicy.Fixed)
+        spacer_settings = (
+            4,
+            10,
+            QtWidgets.QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
+        )
 
         vbox = QtWidgets.QVBoxLayout()
         vbox.addWidget(self.nstates_slider)
