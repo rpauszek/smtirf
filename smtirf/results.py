@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> results
-"""
-from datetime import datetime
 import json
 import numpy as np
 from sklearn.neighbors import KernelDensity
@@ -19,9 +13,6 @@ class Results():
         self.tdp = Tdp(expt) if tdp is None else Tdp(expt, **tdp)
 
 
-# ==============================================================================
-# AGGREGATE RESULT CLASSES
-# ==============================================================================
 class Histogram():
 
     def __init__(self, expt, data=None, populations=None, minimum=-0.2, maximum=1.2, nBins=75):
@@ -84,7 +75,7 @@ class Histogram():
         return self.edges[:-1] + self.width/2
 
 
-    def calculate(self):#, minimum=-0.2, maximum=1.2, nBins=75):
+    def calculate(self):
         # TODO ==> density normalization !!
 
         # extract full dataset
@@ -172,10 +163,6 @@ class Tdp():
         self.Z = np.exp(kde.score_samples(coords)).reshape(self.X.shape)
 
 
-
-# ==============================================================================
-# DWELLTIMES
-# ==============================================================================
 class DwellTable():
     """ extracts a table of dwelltimes from trace fitted statepath
         dwells as rows, features as columns:

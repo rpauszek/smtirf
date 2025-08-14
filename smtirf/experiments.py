@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> experiments
-"""
 import numpy as np
 from pathlib import Path
 from datetime import datetime
@@ -14,9 +9,7 @@ from . import traces
 from . import io
 from .results import Results
 
-# ==============================================================================
-# BASE EXPERIMENT CLASS
-# ==============================================================================
+
 class BaseExperiment():
 
     def __init__(self, movies, traces, frameLength, comments="", results=None):
@@ -29,9 +22,6 @@ class BaseExperiment():
     def save(self, savename):
         Experiment.write_to_hdf(savename, self)
 
-    # ==========================================================================
-    # sequence interface
-    # ==========================================================================
     def __getitem__(self, index):
         return self._traces[index]
 
@@ -41,16 +31,10 @@ class BaseExperiment():
     def __str__(self):
         return f"{self.__class__.__name__}\t{self.nSelected}/{len(self)} selected"
 
-    # ==========================================================================
-    # properties
-    # ==========================================================================
     @property
     def nSelected(self):
         return sum(1 for trc in self if trc.isSelected)
 
-    # ==========================================================================
-    # instance methods
-    # ==========================================================================
     def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,
                         maxIter=50, tol=1e-3, printWarnings=False,
                         where="first", correctOffsets=True):
@@ -91,10 +75,6 @@ class BaseExperiment():
         self.results.tdp.calculate()
 
 
-
-# ==============================================================================
-# Experiment Concrete Subclasses
-# ==============================================================================
 class FretExperiment(BaseExperiment):
     traceClass = traces.FretTrace
     classLabel = "fret"
@@ -116,10 +96,6 @@ class MultimerExperiment(BaseExperiment):
     classLabel = "multimer"
 
 
-
-# ==============================================================================
-# EXPERIMENT FACTORY CLASS
-# ==============================================================================
 class Experiment():
 
     CLASS_TYPES = {"fret": FretExperiment,
@@ -152,16 +128,16 @@ class Experiment():
     def write_to_hdf(filename, experiment):
         filename = Path(filename).absolute()
         with h5py.File(filename, "w") as HF:
-            # store Experiment -------------------------------------------------
+            # store Experiment
             HF.attrs["experimentType"] = experiment.classLabel
             HF.attrs["frameLength"] = experiment.frameLength
             HF.attrs["comments"] = experiment.comments
 
-            # store MovieList --------------------------------------------------
+            # store MovieList
             dataset = HF.create_dataset("movies", data=experiment._movies._as_image_stack(), compression="gzip")
             dataset.attrs["movies"] = experiment._movies._as_json()
 
-            # store Traces -----------------------------------------------------
+            # store Traces
             traceGroup = HF.create_group("traces")
             for trc in experiment:
                 dataset = traceGroup.create_dataset(str(trc._id), data=trc._raw_data, compression="gzip")
@@ -171,7 +147,7 @@ class Experiment():
                 except AttributeError: # model is None
                     pass
 
-            # store results ----------------------------------------------------
+            # store results
             resultsGroup = HF.create_group("results")
             try:
                 h = experiment.results.hist
@@ -188,9 +164,7 @@ class Experiment():
             except AttributeError: # no result calculated
                 pass
 
-
-
-            # store auxiliary attributes ---------------------------------------
+            # store auxiliary attributes
             HF.attrs["nTraces"] = len(experiment)
             HF.attrs["nSelected"] = experiment.nSelected
             HF.attrs["dateModified"] = datetime.now().strftime("%a %b %d, %Y\t%H:%M:%S")
@@ -200,12 +174,12 @@ class Experiment():
     def load(filename):
         filename = Path(filename).absolute()
         with h5py.File(filename, "r") as HF:
-            # load Experiment --------------------------------------------------
+            # load Experiment
             cls = Experiment.CLASS_TYPES[HF.attrs["experimentType"]]
             frameLength = HF.attrs["frameLength"]
             comments = HF.attrs["comments"]
 
-            # load MovieList ---------------------------------------------------
+            # load MovieList
             images = HF["movies"][:]
             movInfo = json.loads(HF["movies"].attrs["movies"])
             if isinstance(movInfo, dict): # re-format if < v0.1.3
@@ -217,7 +191,7 @@ class Experiment():
                 movInfo = tmp
             movies = SMMovieList().load(images, movInfo)
 
-            # load Traces ------------------------------------------------------
+            # load Traces
             traces = []
             for key, item in HF["traces"].items():
                 _id = SMTraceID(key)
@@ -228,7 +202,7 @@ class Experiment():
                 props = json.loads(item.attrs["properties"], cls=SMJsonDecoder)
                 traces.append(cls.traceClass(_id, item[:], model=model, **props))
 
-            # load Results -----------------------------------------------------
+            # load Results
             try:
                 hist = json.loads(HF["results"]["histogram"].attrs["properties"], cls=SMJsonDecoder)
                 hist["data"] = HF["results"]["histogram"][:]

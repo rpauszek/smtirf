@@ -1,18 +1,9 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> io >> pma
-"""
 import numpy as np
 from skimage.io import imread
 from skimage import color
 from datetime import datetime
-import os.path
-# from pathlib import Path
 
-# ==============================================================================
-# public API
-# ==============================================================================
+
 def read(filename):
     """ import data from IDL-generated files of .pma movies
         N traces of length T frames
@@ -46,9 +37,6 @@ def read(filename):
     return output
 
 
-# ==============================================================================
-# private API
-# ==============================================================================
 def _read_traces(filename):
     with open(filename.with_suffix(".traces"), "rb") as F:
         nFrames = np.fromfile(F, dtype=np.int32, count=1)[0]

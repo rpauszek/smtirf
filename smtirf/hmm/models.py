@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> hmm >> models
-"""
 import numpy as np
 import json
 from .. import SMJsonEncoder, SMJsonDecoder
@@ -11,9 +6,7 @@ from . import algorithms as hmmalg
 from .distributions import *
 from . import hyperparameters as hyper
 
-# ==============================================================================
-# BASE MODEL CLASS
-# ==============================================================================
+
 class BaseHiddenMarkovModel():
 
     def simulate(self, M=1, T=1000):
@@ -30,9 +23,6 @@ class BaseHiddenMarkovModel():
         return self.mu[SP]
 
 
-# ==============================================================================
-# CONCRETE MODEL SUBCLASSES
-# ==============================================================================
 class ClassicHiddenMarkovModel(BaseHiddenMarkovModel):
     modelType = "em"
 
@@ -265,20 +255,12 @@ class MultimerHiddenMarkovModel(VariationalHiddenMarkovModel):
         self._w.update(u, gamma, xi, Nk, dbar, xbar, S)
 
 
-
-
-# ==============================================================================
-# MODEL FACTORY CLASS
-# ==============================================================================
 class HiddenMarkovModel():
 
     MODEL_TYPES = {"em" : ClassicHiddenMarkovModel,
                    "vb" : VariationalHiddenMarkovModel,
                    "multimer" : MultimerHiddenMarkovModel}
 
-    # ==========================================================================
-    # initializers
-    # ==========================================================================
     @staticmethod
     def train_new(modelType, x, K, sharedVariance, **kwargs):
         """ kwargs -> maxIter, tol, printWarnings, {repeats} """
@@ -286,9 +268,6 @@ class HiddenMarkovModel():
         theta = cls.train_new(x, K, sharedVariance, **kwargs)
         return theta
 
-    # ==========================================================================
-    # de-serialization
-    # ==========================================================================
     @staticmethod
     def from_json(jString):
         if jString is None:
