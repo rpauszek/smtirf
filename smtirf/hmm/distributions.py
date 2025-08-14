@@ -4,7 +4,6 @@
 smtirf >> hmm >> distributions
 """
 import numpy as np
-from numpy import AxisError
 from scipy.special import gammaln, digamma
 from sklearn.cluster import KMeans
 from . import row, col, normalize_rows

@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "smtirf"
+version = "0.1.5"
+description = ""
+authors = ["Ray Pauszek <ray.pauszek@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+python = ">=3.12"
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+numpy = ">2.0"
+matplotlib = ">3.9"
+scipy = "*"
+h5py = "*"
+numba = "*"
+scikit-learn = "*"
+scikit-image = "*"
+
+[tool.poetry.dev-dependencies]
+pytest = ">8.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

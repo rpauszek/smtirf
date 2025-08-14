@@ -4,7 +4,7 @@
 smtirf >> hmm >> __init__.py
 """
 import numpy as np
-from numpy import AxisError
+from numpy.exceptions import AxisError
 
 
 def row(x):
