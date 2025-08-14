@@ -4,8 +4,10 @@ from importlib.metadata import version
 
 __version__ = version("smtirf")
 
+
 class SMJsonEncoder(json.JSONEncoder):
-    """ https://bit.ly/2sb9YCT """
+    """https://bit.ly/2sb9YCT"""
+
     def default(self, obj):
         try:
             return obj._as_dict()
@@ -23,6 +25,7 @@ class SMJsonEncoder(json.JSONEncoder):
 
         return json.JSONEncoder.default(self, obj)
 
+
 class SMJsonDecoder(json.JSONDecoder):
     def __init__(self, *args, **kwargs):
         super().__init__(object_hook=self.object_hook, *args, **kwargs)
@@ -32,6 +35,7 @@ class SMJsonDecoder(json.JSONDecoder):
             if isinstance(val, list):
                 obj[key] = np.array(val)
         return obj
+
 
 from . import hmm
 from . import util

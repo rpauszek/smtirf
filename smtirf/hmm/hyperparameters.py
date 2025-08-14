@@ -4,7 +4,7 @@ from . import row
 from .distributions import *
 
 
-class HMMHyperParameters():
+class HMMHyperParameters:
 
     def __init__(self, K, rho, alpha, m, beta, a, b):
         self._K = K
@@ -13,22 +13,24 @@ class HMMHyperParameters():
         self._phi = NormalGamma(m, beta, a, b)
 
     def _as_dict(self):
-        return {"K": self.K,
-                "rho": self._rho.alpha,
-                "alpha": self._alpha.alpha,
-                "m": self._phi.m,
-                "beta": self._phi.beta,
-                "a": self._phi.a,
-                "b": self._phi.b}
+        return {
+            "K": self.K,
+            "rho": self._rho.alpha,
+            "alpha": self._alpha.alpha,
+            "m": self._phi.m,
+            "beta": self._phi.beta,
+            "a": self._phi.a,
+            "b": self._phi.b,
+        }
 
     @classmethod
     def uninformative(cls, K, rho0=1, alpha0_ii=1, m0=0.5, beta0=0.25, a0=2.5, b0=0.1):
         rho = np.ones(K) * rho0
-        alpha = np.eye(K) * alpha0_ii + np.ones((K,K))
+        alpha = np.eye(K) * alpha0_ii + np.ones((K, K))
         m = np.ones(K) * m0
         beta = np.ones(K) * beta0
-        a = np.ones(K)*a0
-        b = np.ones(K)*b0
+        a = np.ones(K) * a0
+        b = np.ones(K) * b0
         return cls(K, rho, alpha, m, beta, a, b)
 
     def draw_parameter_sample(self):
@@ -40,33 +42,40 @@ class HMMHyperParameters():
     def sample_posterior(self, T=1000):
         gamma0, xiSum, xbar, tau = self.draw_parameter_sample()
         gamma0 = row(gamma0)
-        S = 1/tau # precision -> variance
-        Nk = np.ones(self.K) * T/self.K
+        S = 1 / tau  # precision -> variance
+        Nk = np.ones(self.K) * T / self.K
         w = copy.deepcopy(self)
-        w.update(self, gamma0*T, xiSum*T, Nk, xbar, S)
+        w.update(self, gamma0 * T, xiSum * T, Nk, xbar, S)
         w.sort()
         return w
 
     @property
-    def K(self): return self._K
+    def K(self):
+        return self._K
 
     @property
-    def pi(self): return self._rho.mu
+    def pi(self):
+        return self._rho.mu
 
     @property
-    def A(self): return self._alpha.mu
+    def A(self):
+        return self._alpha.mu
 
     @property
-    def mu(self): return self._phi.mu
+    def mu(self):
+        return self._phi.mu
 
     @property
-    def sigma(self): return self._phi.sigma
+    def sigma(self):
+        return self._phi.sigma
 
     @property
-    def lnPiStar(self): return self._rho.lnMuStar
+    def lnPiStar(self):
+        return self._rho.lnMuStar
 
     @property
-    def lnAStar(self): return self._alpha.lnMuStar
+    def lnAStar(self):
+        return self._alpha.lnMuStar
 
     def mahalanobis(self, x):
         return self._phi.mahalanobis(x)
@@ -89,7 +98,6 @@ class HMMHyperParameters():
         self._phi.refine_by_kmeans(x, u)
 
 
-
 class HMMHyperParametersSharedVariance(HMMHyperParameters):
 
     def __init__(self, K, rho, alpha, m, beta, a, b):
@@ -101,7 +109,7 @@ class HMMHyperParametersSharedVariance(HMMHyperParameters):
     @classmethod
     def uninformative(cls, K, rho0=1, alpha0_ii=1, m0=0.5, beta0=0.25, a0=2.5, b0=0.01):
         rho = np.ones(K) * rho0
-        alpha = np.eye(K) * alpha0_ii + np.ones((K,K))
+        alpha = np.eye(K) * alpha0_ii + np.ones((K, K))
         m = np.ones(K) * m0
         beta = np.ones(K) * beta0
         a = a0
@@ -118,30 +126,46 @@ class HmmHyperParametersMultimer(HMMHyperParametersSharedVariance):
         self._phi = MultimerNormalGamma(K, d0, epsilon, m0, beta, a, b)
 
     def _as_dict(self):
-        return {"K": self.K,
-                "rho": self._rho.alpha,
-                "alpha": self._alpha.alpha,
-                "d0": self._phi.d0,
-                "epsilon": self._phi.epsilon,
-                "m0": self._phi.m0,
-                "beta": self._phi.beta,
-                "a": self._phi.a,
-                "b": self._phi.b}
+        return {
+            "K": self.K,
+            "rho": self._rho.alpha,
+            "alpha": self._alpha.alpha,
+            "d0": self._phi.d0,
+            "epsilon": self._phi.epsilon,
+            "m0": self._phi.m0,
+            "beta": self._phi.beta,
+            "a": self._phi.a,
+            "b": self._phi.b,
+        }
 
     @classmethod
-    def uninformative(cls, K, rho0=1, alpha0_ii=1, d0=20, epsilon0=0.25, m0=250, beta0=0.25, a0=10, b0=25000):
+    def uninformative(
+        cls,
+        K,
+        rho0=1,
+        alpha0_ii=1,
+        d0=20,
+        epsilon0=0.25,
+        m0=250,
+        beta0=0.25,
+        a0=10,
+        b0=25000,
+    ):
         rho = np.ones(K) * rho0
-        alpha = np.eye(K) * alpha0_ii + np.ones((K,K))
+        alpha = np.eye(K) * alpha0_ii + np.ones((K, K))
         return cls(K, rho, alpha, d0, epsilon0, m0, beta0, a0, b0)
 
     @property
-    def delta(self): return self._phi.d0
+    def delta(self):
+        return self._phi.d0
 
     @property
-    def mu0(self): return self._phi.m0
+    def mu0(self):
+        return self._phi.m0
 
     @property
-    def mu(self): return self._phi.mu
+    def mu(self):
+        return self._phi.mu
 
     def draw_parameter_sample(self):
         pi = self._rho.sample()
@@ -152,10 +176,10 @@ class HmmHyperParametersMultimer(HMMHyperParametersSharedVariance):
     def sample_posterior(self, T=1000):
         gamma0, xiSum, dbar, xbar, tau = self.draw_parameter_sample()
         gamma0 = row(gamma0)
-        S = 1/tau # precision -> variance
-        Nk = np.ones(self.K) * T/self.K
+        S = 1 / tau  # precision -> variance
+        Nk = np.ones(self.K) * T / self.K
         w = copy.deepcopy(self)
-        w.update(self, gamma0*T, xiSum*T, Nk, dbar, xbar, S)
+        w.update(self, gamma0 * T, xiSum * T, Nk, dbar, xbar, S)
         # w.sort()
         return w
 
