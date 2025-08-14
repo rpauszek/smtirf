@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> traces
-"""
 import numpy as np
 import scipy.stats
 import json, warnings
@@ -11,9 +6,7 @@ import smtirf
 from . import SMSpotCoordinate, SMJsonEncoder
 from . import HiddenMarkovModel
 
-# ==============================================================================
-# BASE TRACE CLASSES
-# ==============================================================================
+
 class BaseTrace(ABC):
 
     def __init__(self, trcID, data, frameLength, pk, bleed, gamma, clusterIndex=-1,
@@ -246,9 +239,7 @@ class BaseTrace(ABC):
         data, fmt, header = self.get_export_data()
         np.savetxt(savename, data, fmt=fmt, delimiter='\t', header=header)
 
-# ==============================================================================
-# Experiment Trace Subclasses
-# ==============================================================================
+
 class SingleColorTrace(BaseTrace):
 
     def __init__(self, trcID, data, frameLength, pk, bleed, gamma, channel=1, **kwargs):

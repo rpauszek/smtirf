@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> auxiliary
-"""
 import numpy as np
 import json
 from datetime import datetime
@@ -119,9 +114,6 @@ class SMSpotCoordinate():
         return self._coords
 
 
-# ==============================================================================
-# functions
-# ==============================================================================
 def where(condition):
     """
     Finds contiguous True regions of the boolean array "condition".

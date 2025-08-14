@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> util >> autobaseline
-"""
-
 import numpy as np
 from sklearn import mixture
 import warnings
@@ -98,9 +92,7 @@ class AutoBaselineModel():
 
         self.SP = sp
 
-# ==============================================================================
-# util functions
-# ==============================================================================
+
 def hcol(x):
     return x[:,np.newaxis,np.newaxis]
 

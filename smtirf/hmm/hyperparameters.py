@@ -1,12 +1,6 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> hmm >> hyperparameters
-"""
 import numpy as np
-# from scipy.special import gammaln, digamma
 import copy
-from . import row, col
+from . import row
 from .distributions import *
 
 
@@ -28,7 +22,7 @@ class HMMHyperParameters():
                 "b": self._phi.b}
 
     @classmethod
-    def uninformative(cls, K, rho0=1, alpha0_ii=1, m0=0.5, beta0=0.25, a0=2.5, b0=0.1): #b0=0.01
+    def uninformative(cls, K, rho0=1, alpha0_ii=1, m0=0.5, beta0=0.25, a0=2.5, b0=0.1):
         rho = np.ones(K) * rho0
         alpha = np.eye(K) * alpha0_ii + np.ones((K,K))
         m = np.ones(K) * m0

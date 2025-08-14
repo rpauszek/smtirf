@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> __init__
-"""
 import numpy as np
 import json
 from importlib.metadata import version

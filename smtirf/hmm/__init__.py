@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> hmm >> __init__.py
-"""
 import numpy as np
 from numpy.exceptions import AxisError
 

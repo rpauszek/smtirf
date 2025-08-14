@@ -1,18 +1,10 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> hmm >> algorithms
-"""
 import numpy as np
-from scipy.special import gammaln, digamma
 from numba import jit
 import warnings
-from . import row, col, ExitFlag
+from . import ExitFlag
 from .distributions import *
 
-# ==============================================================================
-# training algorithms
-# ==============================================================================
+
 def train_baumwelch(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
     L = np.zeros(maxIter)
     isConverged = False
@@ -57,9 +49,6 @@ def train_variational(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
 
     return ExitFlag(L[:itr+1], isConverged)
 
-# ==============================================================================
-# forward-backward algorithm
-# ==============================================================================
 @jit(nopython=True)
 def fwdback(pi, A, B):
     T, K = B.shape
@@ -96,9 +85,7 @@ def fwdback(pi, A, B):
 
     return gamma, xi, L
 
-# ==============================================================================
-# Viterbi algorithm
-# ==============================================================================
+
 @jit(nopython=True)
 def _viterbi(x, pi, A, B):
     # setup
@@ -127,9 +114,7 @@ def _viterbi(x, pi, A, B):
 
     return Q
 
-# ==============================================================================
-# Kullback-Leibler divergence
-# ==============================================================================
+
 def kldiv(u, w):
     DKL = Dirichlet.kldiv(u._rho, w._rho)
     DKL += DirichletArray.kldiv(u._alpha, w._alpha)
@@ -137,9 +122,6 @@ def kldiv(u, w):
     return DKL
 
 
-# ==============================================================================
-# draw statepath
-# ==============================================================================
 @jit(nopython=True)
 def sample_statepath(K, pi, A, T):
     S = np.zeros(T, dtype=np.uint32)

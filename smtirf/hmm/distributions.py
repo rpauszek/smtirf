@@ -1,8 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@author: Raymond F. Pauszek III, Ph.D. (2020)
-smtirf >> hmm >> distributions
-"""
 import numpy as np
 from scipy.special import gammaln, digamma
 from sklearn.cluster import KMeans
@@ -19,10 +14,6 @@ class Categorical():
 
     def __init__(self, mu):
         assert mu.ndim == self._NDIM
-        # if self._NDIM == 1:
-        #     assert np.sum(mu) == 1
-        # elif self._NDIM == 2:
-        #     assert np.all(np.sum(mu, axis=1) == 1)
         self._mu = mu
 
     @property
