@@ -57,16 +57,16 @@ def _read_traces(filename):
         if (nRecords % 1) != 0:
             raise ValueError(f"non-integer number of traces in dataset [{nRecords}]")
         else:
-            nTraces = (nRecords/2).astype(np.int)
+            nTraces = (nRecords/2).astype(int)
         # read data, records as columns
         data = np.fromfile(F, dtype=np.int16, count=-1).reshape((nFrames, nRecords), order="C")
     # split channels, traces as rows
     D0 = data[:, 0::2].T
     A0 = data[:, 1::2].T
     # default signal state label
-    S0 = np.zeros((nTraces, nFrames)).astype(np.int)
+    S0 = np.zeros((nTraces, nFrames)).astype(int)
     # default HMM statepath
-    SP = np.ones((nTraces, nFrames)).astype(np.int) * -1
+    SP = np.ones((nTraces, nFrames)).astype(int) * -1
     return {"D0":D0, "A0":A0, "S0":S0, "SP":SP, "nTraces":nTraces, "nFrames":nFrames}
 
 def _read_pks(filename):
@@ -92,4 +92,5 @@ def _read_log(filename):
 
 def _read_tif(filename):
     filename = filename.parent / (filename.stem + "_ave.tif")
-    return color.rgb2gray(imread(filename))
+    image = imread(filename)
+    return image if image.ndim == 2 else color.rgb2gray(image)

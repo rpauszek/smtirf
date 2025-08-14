@@ -66,7 +66,7 @@ class BaseTrace(ABC):
 
     @property
     def SP(self): # state path
-        return self._SP[self.limits].astype(np.int)
+        return self._SP[self.limits].astype(int)
 
     def set_statepath(self, sp):
         SP = np.full(self._SP.shape, -1)

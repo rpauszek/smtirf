@@ -112,7 +112,7 @@ def viterbi_batch(pi, A, p_X):
         p_X -> [K x T x M]
     """
     K, T, M = p_X.shape
-    Psi = np.zeros((K, T, M)).astype(np.int)
+    Psi = np.zeros((K, T, M)).astype(int)
     with np.errstate(divide="ignore"):
         pi = np.log(pi)
         A = np.log(A)
@@ -132,7 +132,7 @@ def viterbi_batch(pi, A, p_X):
         delta = np.max(delta, axis=0) + B[:,t,:] # K x M
         delta = delta[:,np.newaxis,:] # K x 1 x M
     # termination
-    Q = np.zeros((M, T)).astype(np.int)
+    Q = np.zeros((M, T)).astype(int)
     L = np.max(delta.squeeze(), axis=0) # M,
     Q[:,-1] = np.argmax(delta.squeeze(), axis=0) # M,
     # path backtracking

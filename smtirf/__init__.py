@@ -21,7 +21,7 @@ class SMJsonEncoder(json.JSONEncoder):
             return obj.tolist()
         elif isinstance(obj, slice):
             return (obj.start, obj.stop)
-        elif np.issubdtype(obj, np.signedinteger):#np.int):
+        elif np.issubdtype(obj, np.signedinteger):
             return int(obj)
         elif np.issubdtype(obj, np.float):
             return float(obj)
