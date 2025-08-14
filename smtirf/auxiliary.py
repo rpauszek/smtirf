@@ -4,11 +4,12 @@ from datetime import datetime
 from collections import OrderedDict
 from . import SMJsonEncoder
 
-class SMTraceID():
+
+class SMTraceID:
     """
-        lightweight class implementing unique Trace identifier
-        coded by hex representation of recording time
-        and index of spot within movie
+    lightweight class implementing unique Trace identifier
+    coded by hex representation of recording time
+    and index of spot within movie
     """
 
     def __init__(self, s):
@@ -16,11 +17,11 @@ class SMTraceID():
 
     @staticmethod
     def time2hex(dt):
-        return hex(int(dt.timestamp()))[2:] # trim 0x
+        return hex(int(dt.timestamp()))[2:]  # trim 0x
 
     @classmethod
     def from_datetime(cls, dt, trcIndex=None):
-        """ instantiate from datetime object """
+        """instantiate from datetime object"""
         hxdt = SMTraceID.time2hex(dt)
         try:
             return cls(f"{hxdt}:{trcIndex:04d}")
@@ -52,7 +53,7 @@ class SMTraceID():
         return dt.strftime(fmt)
 
 
-class SMMovie():
+class SMMovie:
 
     def __init__(self, movID, img, info):
         self._id = movID
@@ -78,7 +79,7 @@ class SMMovieList(OrderedDict):
     def load(cls, images, movInfo):
         movies = cls()
         for item in movInfo:
-            movies.append(item["id"], images[:,:,item["position"]], item["contents"])
+            movies.append(item["id"], images[:, :, item["position"]], item["contents"])
         return movies
 
     def append(self, key, img, info):
@@ -90,22 +91,27 @@ class SMMovieList(OrderedDict):
     def __getitem__(self, key):
         try:
             return super().__getitem__(key)
-        except KeyError: # lookup by index
+        except KeyError:  # lookup by index
             keys = [k for k in self.keys()]
             return self[keys[key]]
 
     def _as_image_stack(self):
-        """ return stack of images (ndarray) """
+        """return stack of images (ndarray)"""
         images = [mov.img for j, (key, mov) in enumerate(self.items())]
         return np.stack(images, axis=2)
 
     def _as_json(self):
-        """ json-serialized list of info dicts  """
-        return json.dumps([{"id": str(mov._id), "position": j, "contents": mov.info}
-                            for j, (key, mov) in enumerate(self.items())], cls=SMJsonEncoder)
+        """json-serialized list of info dicts"""
+        return json.dumps(
+            [
+                {"id": str(mov._id), "position": j, "contents": mov.info}
+                for j, (key, mov) in enumerate(self.items())
+            ],
+            cls=SMJsonEncoder,
+        )
 
 
-class SMSpotCoordinate():
+class SMSpotCoordinate:
 
     def __init__(self, coords):
         self._coords = coords
@@ -124,7 +130,7 @@ def where(condition):
     """
     # Find the indices of changes in "condition"
     d = np.diff(condition)
-    idx, = d.nonzero()
+    (idx,) = d.nonzero()
     # We need to start things after the change in "condition". Therefore,
     # we'll shift the index by 1 to the right.
     idx += 1
@@ -135,5 +141,5 @@ def where(condition):
         # If the end of condition is True, append the length of the array
         idx = np.r_[idx, condition.size]
     # Reshape the result into two columns
-    idx.shape = (-1,2)
+    idx.shape = (-1, 2)
     return idx

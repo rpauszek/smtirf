@@ -9,14 +9,28 @@ from . import HiddenMarkovModel
 
 class BaseTrace(ABC):
 
-    def __init__(self, trcID, data, frameLength, pk, bleed, gamma, clusterIndex=-1,
-                 isSelected=False, limits=None, offsets=None, model=None, deBlur=False, deSpike=False):
+    def __init__(
+        self,
+        trcID,
+        data,
+        frameLength,
+        pk,
+        bleed,
+        gamma,
+        clusterIndex=-1,
+        isSelected=False,
+        limits=None,
+        offsets=None,
+        model=None,
+        deBlur=False,
+        deSpike=False,
+    ):
         self._id = trcID
         self._set_data(data)
-        self.set_frame_length(frameLength) # => set self.t
+        self.set_frame_length(frameLength)  # => set self.t
         self._bleed = bleed
         self._gamma = gamma
-        self.set_offsets(offsets) # => triggers _correct_signals()
+        self.set_offsets(offsets)  # => triggers _correct_signals()
         self.set_limits(limits, refreshStatePath=False)
 
         self.pk = SMSpotCoordinate(pk)
@@ -25,7 +39,9 @@ class BaseTrace(ABC):
         self.model = HiddenMarkovModel.from_json(model)
         self.deBlur = deBlur
         self.deSpike = deSpike
-        self.dwells = smtirf.results.DwellTable(self) if self.model is not None else None
+        self.dwells = (
+            smtirf.results.DwellTable(self) if self.model is not None else None
+        )
 
     def __str__(self):
         return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
@@ -42,23 +58,24 @@ class BaseTrace(ABC):
 
     @property
     def _attr_dict(self):
-        return {"pk" : self.pk,
-                "clusterIndex" : self.clusterIndex,
-                "frameLength" : self.frameLength,
-                "bleed" : self.bleed,
-                "gamma" : self.gamma,
-                "limits" : self.limits,
-                "offsets" : self.offsets,
-                "isSelected" : self.isSelected,
-                "deBlur" : self.deBlur,
-                "deSpike" : self.deSpike}
+        return {
+            "pk": self.pk,
+            "clusterIndex": self.clusterIndex,
+            "frameLength": self.frameLength,
+            "bleed": self.bleed,
+            "gamma": self.gamma,
+            "limits": self.limits,
+            "offsets": self.offsets,
+            "isSelected": self.isSelected,
+            "deBlur": self.deBlur,
+            "deSpike": self.deSpike,
+        }
 
     def _as_json(self):
         return json.dumps(self._attr_dict, cls=SMJsonEncoder)
 
-
     @property
-    def SP(self): # state path
+    def SP(self):  # state path
         return self._SP[self.limits].astype(int)
 
     def set_statepath(self, sp):
@@ -80,17 +97,17 @@ class BaseTrace(ABC):
 
     def set_frame_length(self, val):
         self._frameLength = val
-        self.t = np.arange(len(self))*self._frameLength
+        self.t = np.arange(len(self)) * self._frameLength
 
     def set_bleed(self, val):
-        if val >= 0 and val <=1:
+        if val >= 0 and val <= 1:
             self._bleed = val
             self._correct_signals()
         else:
             raise ValueError("donor bleedthrough must be between 0 and 1")
 
     def set_gamma(self, val):
-        if val > 0 and val <=2:
+        if val > 0 and val <= 2:
             self._gamma = val
             self._correct_signals()
         else:
@@ -103,8 +120,8 @@ class BaseTrace(ABC):
     def set_offsets(self, values):
         if values is None:
             values = np.zeros(2)
-        elif len(values) !=2:
-                raise ValueError("must provide offsets for both (2) channels")
+        elif len(values) != 2:
+            raise ValueError("must provide offsets for both (2) channels")
         self._offsets = np.array(values)
         self._correct_signals()
 
@@ -112,26 +129,28 @@ class BaseTrace(ABC):
         D = self.D0 - self._offsets[0]
         A = self.A0 - self._offsets[1]
         self.D = D * self._gamma
-        self.A = A - (D*self._bleed)
+        self.A = A - (D * self._bleed)
         self.I = self.D + self.A
 
     @property
     def limits(self):
-        return self._limits # Slice instance
+        return self._limits  # Slice instance
 
     def set_limits(self, values, refreshStatePath=True):
         if values is None:
             self._limits = slice(*np.array([0, len(self)]))
         elif not isinstance(values, slice):
             values = np.array(values)
-            if values.size !=2:
+            if values.size != 2:
                 raise ValueError("must provide offsets for both (2) channels")
             values = np.sort(values)
-            if values[0] < 0: values[0] = 0                 # TODO: add warning?
-            if values[1] > len(self): values[1] = len(self) # TODO: add warning?
+            if values[0] < 0:
+                values[0] = 0  # TODO: add warning?
+            if values[1] > len(self):
+                values[1] = len(self)  # TODO: add warning?
             if np.diff(values) <= 2:
                 warnings.warn("range must be >2 frames. resetting to full trace")
-                values = np.array([0, len(self)]) # TODO: maybe just don't update?
+                values = np.array([0, len(self)])  # TODO: maybe just don't update?
             self._limits = slice(*values)
         else:
             self._limits = values
@@ -143,7 +162,7 @@ class BaseTrace(ABC):
         return self._clusterIndex
 
     def set_cluster_index(self, val):
-        #TODO => catch ValueError for non-int val
+        # TODO => catch ValueError for non-int val
         self._clusterIndex = int(val)
 
     @property
@@ -158,9 +177,9 @@ class BaseTrace(ABC):
     def corrcoef(self):
         return scipy.stats.pearsonr(self.D[self.limits], self.A[self.limits])[0]
 
-    def _time2frame(self, t): # copy from old
+    def _time2frame(self, t):  # copy from old
         # find frame index closest to time t
-        return np.argmin(np.abs(self.t-t))
+        return np.argmin(np.abs(self.t - t))
 
     def set_offset_time_window(self, start, stop):
         rng = slice(self._time2frame(start), self._time2frame(stop))
@@ -181,9 +200,9 @@ class BaseTrace(ABC):
         self.S0 = sp
         if correctOffsets:
             if np.any(sp == 2):
-                rng, = np.where(sp == 2)
+                (rng,) = np.where(sp == 2)
             elif np.any(sp == 1):
-                rng, = np.where(sp == 1)
+                (rng,) = np.where(sp == 1)
             try:
                 self.set_offsets([np.median(self.D0[rng]), np.median(self.A0[rng])])
             except UnboundLocalError:
@@ -214,17 +233,20 @@ class BaseTrace(ABC):
 
     @property
     @abstractmethod
-    def X(self):
-        ...
+    def X(self): ...
 
     def train(self, modelType, K, sharedVariance=True, **kwargs):
-        theta = smtirf.HiddenMarkovModel.train_new(modelType, self.X, K, sharedVariance, **kwargs)
+        theta = smtirf.HiddenMarkovModel.train_new(
+            modelType, self.X, K, sharedVariance, **kwargs
+        )
         self.model = theta
         self.label_statepath()
 
     def label_statepath(self):
         if self.model is not None:
-            self.set_statepath(self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike))
+            self.set_statepath(
+                self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike)
+            )
             self.dwells = smtirf.results.DwellTable(self)
 
     @property
@@ -232,12 +254,11 @@ class BaseTrace(ABC):
         return self.model.get_emission_path(self.SP)
 
     @abstractmethod
-    def get_export_data(self):
-        ...
+    def get_export_data(self): ...
 
     def export(self, savename):
         data, fmt, header = self.get_export_data()
-        np.savetxt(savename, data, fmt=fmt, delimiter='\t', header=header)
+        np.savetxt(savename, data, fmt=fmt, delimiter="\t", header=header)
 
 
 class SingleColorTrace(BaseTrace):
@@ -261,6 +282,7 @@ class SingleColorTrace(BaseTrace):
     def X(self):
         return self.D[self.limits] if self.channel == 1 else self.A[self.limits]
 
+
 class PifeTrace(SingleColorTrace):
     classLabel = "pife"
 
@@ -272,7 +294,9 @@ class MultimerTrace(SingleColorTrace):
     classLabel = "multimer"
 
     def train(self, K, sharedVariance=True, **kwargs):
-        theta = smtirf.HiddenMarkovModel.train_new("multimer", self.X, K, sharedVariance, **kwargs)
+        theta = smtirf.HiddenMarkovModel.train_new(
+            "multimer", self.X, K, sharedVariance, **kwargs
+        )
         self.model = theta
         self.label_statepath()
 
@@ -289,7 +313,7 @@ class FretTrace(BaseTrace):
 
     def _correct_signals(self):
         super()._correct_signals()
-        with np.errstate(divide='ignore', invalid='ignore'):
+        with np.errstate(divide="ignore", invalid="ignore"):
             self.E = self.A / self.I
 
     def get_export_data(self):
@@ -303,7 +327,7 @@ class FretTrace(BaseTrace):
         except AttributeError:
             pass
         data = np.vstack((self.t, self.D, self.A, E, S, F)).T
-        fmt = ('%.3f', '%.3f', '%.3f', '%.5f', '%3d', '%.5f')
+        fmt = ("%.3f", "%.3f", "%.3f", "%.5f", "%3d", "%.5f")
         header = "Time (sec)\tDonor\tAcceptor\tFRET\tState\tFit"
         return data, fmt, header
 
@@ -317,5 +341,7 @@ class PiecewiseTrace(FretTrace):
 
     def _correct_signals(self):
         super()._correct_signals()
-        self._E = self.E.copy() # store a normal version of FRET efficiency, without masking
+        self._E = (
+            self.E.copy()
+        )  # store a normal version of FRET efficiency, without masking
         self.E[self.S0 != 0] = np.nan

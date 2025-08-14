@@ -10,7 +10,7 @@ from . import io
 from .results import Results
 
 
-class BaseExperiment():
+class BaseExperiment:
 
     def __init__(self, movies, traces, frameLength, comments="", results=None):
         self._movies = movies
@@ -35,9 +35,17 @@ class BaseExperiment():
     def nSelected(self):
         return sum(1 for trc in self if trc.isSelected)
 
-    def detect_baseline(self, baselineCutoff=100, nComponents=5, nPoints=1e4,
-                        maxIter=50, tol=1e-3, printWarnings=False,
-                        where="first", correctOffsets=True):
+    def detect_baseline(
+        self,
+        baselineCutoff=100,
+        nComponents=5,
+        nPoints=1e4,
+        maxIter=50,
+        tol=1e-3,
+        printWarnings=False,
+        where="first",
+        correctOffsets=True,
+    ):
         M = smtirf.util.AutoBaselineModel(self, baselineCutoff=baselineCutoff)
         M.train_gmm(nComponents=nComponents, nPoints=nPoints)
         M.train_hmm(maxIter=maxIter, tol=tol, printWarnings=printWarnings)
@@ -46,17 +54,17 @@ class BaseExperiment():
 
     def sort(self, key="corrcoef"):
         if key == "corrcoef":
-            fcn = lambda x : x.corrcoef
+            fcn = lambda x: x.corrcoef
             reverse = False  # ascending
         elif key == "index":
-            fcn = lambda x : str(x._id)
-            reverse = False # ascending
+            fcn = lambda x: str(x._id)
+            reverse = False  # ascending
         elif key == "cluster":
-            fcn = lambda x : str(x.clusterIndex)
-            reverse = False # ascending
+            fcn = lambda x: str(x.clusterIndex)
+            reverse = False  # ascending
         elif key == "selected":
-            fcn = lambda x : x.isSelected
-            reverse = True # descending
+            fcn = lambda x: x.isSelected
+            reverse = True  # descending
         else:
             raise KeyError(f"cannot sort by key '{key}'")
         self._traces.sort(key=fcn, reverse=reverse)
@@ -79,42 +87,71 @@ class FretExperiment(BaseExperiment):
     traceClass = traces.FretTrace
     classLabel = "fret"
 
+
 class PiecewiseExperiment(BaseExperiment):
     traceClass = traces.PiecewiseTrace
     classLabel = "piecewise"
+
 
 class PifeExperiment(BaseExperiment):
     traceClass = traces.PifeTrace
     classLabel = "pife"
 
+
 # class PifeCh2Experiment(BaseExperiment):
 #     traceClass = traces.PifeCh2Trace
 #     classLabel = "pife2"
+
 
 class MultimerExperiment(BaseExperiment):
     traceClass = traces.MultimerTrace
     classLabel = "multimer"
 
 
-class Experiment():
+class Experiment:
 
-    CLASS_TYPES = {"fret": FretExperiment,
-                   "piecewise": PiecewiseExperiment,
-                   "pife": PifeExperiment,
-                   # "pife2": PifeCh2Experiment,
-                   "multimer": MultimerExperiment}
+    CLASS_TYPES = {
+        "fret": FretExperiment,
+        "piecewise": PiecewiseExperiment,
+        "pife": PifeExperiment,
+        # "pife2": PifeCh2Experiment,
+        "multimer": MultimerExperiment,
+    }
 
     @staticmethod
-    def build(cls, D0, A0, S0, SP, pks, recordTime, frameLength,
-                          info, img, bleed, gamma, comments="", trcArgs=None):
+    def build(
+        cls,
+        D0,
+        A0,
+        S0,
+        SP,
+        pks,
+        recordTime,
+        frameLength,
+        info,
+        img,
+        bleed,
+        gamma,
+        comments="",
+        trcArgs=None,
+    ):
 
         movID = SMTraceID.from_datetime(recordTime)
         movies = SMMovieList()
         movies.append(movID, img, info)
 
-        traces = [cls.traceClass(movID.new_trace(j), np.vstack((d, a, s0, sp)),
-                                 frameLength, pk=pk, bleed=bleed, gamma=gamma, **trcArgs)
-                  for j, (d, a, s0, sp, pk) in enumerate(zip(D0, A0, S0, SP, pks))]
+        traces = [
+            cls.traceClass(
+                movID.new_trace(j),
+                np.vstack((d, a, s0, sp)),
+                frameLength,
+                pk=pk,
+                bleed=bleed,
+                gamma=gamma,
+                **trcArgs,
+            )
+            for j, (d, a, s0, sp, pk) in enumerate(zip(D0, A0, S0, SP, pks))
+        ]
         return cls(movies, traces, frameLength, comments)
 
     @staticmethod
@@ -122,7 +159,9 @@ class Experiment():
         filename = Path(filename)
         data = io.pma.read(filename.absolute())
         cls = Experiment.CLASS_TYPES[experimentType.lower()]
-        return Experiment.build(cls, bleed=bleed, gamma=gamma, comments=comments, trcArgs=kwargs, **data)
+        return Experiment.build(
+            cls, bleed=bleed, gamma=gamma, comments=comments, trcArgs=kwargs, **data
+        )
 
     @staticmethod
     def write_to_hdf(filename, experiment):
@@ -134,17 +173,23 @@ class Experiment():
             HF.attrs["comments"] = experiment.comments
 
             # store MovieList
-            dataset = HF.create_dataset("movies", data=experiment._movies._as_image_stack(), compression="gzip")
+            dataset = HF.create_dataset(
+                "movies", data=experiment._movies._as_image_stack(), compression="gzip"
+            )
             dataset.attrs["movies"] = experiment._movies._as_json()
 
             # store Traces
             traceGroup = HF.create_group("traces")
             for trc in experiment:
-                dataset = traceGroup.create_dataset(str(trc._id), data=trc._raw_data, compression="gzip")
+                dataset = traceGroup.create_dataset(
+                    str(trc._id), data=trc._raw_data, compression="gzip"
+                )
                 dataset.attrs["properties"] = trc._as_json()
                 try:
-                    dataset.attrs["model"] = json.dumps(trc.model._as_json(), cls=SMJsonEncoder)
-                except AttributeError: # model is None
+                    dataset.attrs["model"] = json.dumps(
+                        trc.model._as_json(), cls=SMJsonEncoder
+                    )
+                except AttributeError:  # model is None
                     pass
 
             # store results
@@ -152,16 +197,20 @@ class Experiment():
             try:
                 h = experiment.results.hist
                 if not h.isEmpty:
-                    dataset = resultsGroup.create_dataset("histogram", data=h._raw_data, compression="gzip")
+                    dataset = resultsGroup.create_dataset(
+                        "histogram", data=h._raw_data, compression="gzip"
+                    )
                     dataset.attrs["properties"] = h._as_json()
-            except AttributeError: # no result calculated
+            except AttributeError:  # no result calculated
                 pass
             try:
                 t = experiment.results.tdp
                 if not t.isEmpty:
-                    dataset = resultsGroup.create_dataset("tdp", data=t._raw_data, compression="gzip")
+                    dataset = resultsGroup.create_dataset(
+                        "tdp", data=t._raw_data, compression="gzip"
+                    )
                     dataset.attrs["properties"] = t._as_json()
-            except AttributeError: # no result calculated
+            except AttributeError:  # no result calculated
                 pass
 
             # store auxiliary attributes
@@ -182,11 +231,11 @@ class Experiment():
             # load MovieList
             images = HF["movies"][:]
             movInfo = json.loads(HF["movies"].attrs["movies"])
-            if isinstance(movInfo, dict): # re-format if < v0.1.3
+            if isinstance(movInfo, dict):  # re-format if < v0.1.3
                 tmp = [None] * len(movInfo)
                 for key, item in movInfo.items():
                     pos = item.pop("position")
-                    d = {"id": key+":XXXX", "position": pos, "contents": item}
+                    d = {"id": key + ":XXXX", "position": pos, "contents": item}
                     tmp[pos] = d
                 movInfo = tmp
             movies = SMMovieList().load(images, movInfo)
@@ -204,12 +253,16 @@ class Experiment():
 
             # load Results
             try:
-                hist = json.loads(HF["results"]["histogram"].attrs["properties"], cls=SMJsonDecoder)
+                hist = json.loads(
+                    HF["results"]["histogram"].attrs["properties"], cls=SMJsonDecoder
+                )
                 hist["data"] = HF["results"]["histogram"][:]
             except KeyError:
                 hist = None
             try:
-                tdp = json.loads(HF["results"]["tdp"].attrs["properties"], cls=SMJsonDecoder)
+                tdp = json.loads(
+                    HF["results"]["tdp"].attrs["properties"], cls=SMJsonDecoder
+                )
                 tdp["data"] = HF["results"]["tdp"][:]
             except KeyError:
                 tdp = None
@@ -251,8 +304,8 @@ class Experiment():
             with h5py.File(filename, "r") as HF:
                 frameLengths.add(HF.attrs["frameLength"])
                 experimentTypes.add(HF.attrs["experimentType"])
-        if not len(frameLengths)==1:
+        if not len(frameLengths) == 1:
             raise ValueError("Integration times are not compatible for all files")
-        if not len(experimentTypes)==1:
+        if not len(experimentTypes) == 1:
             raise ValueError("Experiment types are not compatible for all files")
         return frameLengths.pop(), experimentTypes.pop()

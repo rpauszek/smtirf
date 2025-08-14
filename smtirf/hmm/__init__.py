@@ -4,29 +4,32 @@ from numpy.exceptions import AxisError
 
 def row(x):
     try:
-        return x[np.newaxis,:]
+        return x[np.newaxis, :]
     except IndexError:
         return x
     except TypeError:
         return x
+
 
 def col(x):
     try:
-        return x[:,np.newaxis]
+        return x[:, np.newaxis]
     except IndexError:
         return x
     except TypeError:
         return x
 
+
 def normalize_rows(x):
     try:
-        return x/col(x.sum(axis=1))
+        return x / col(x.sum(axis=1))
     except AxisError:
-        return x/x.sum()
+        return x / x.sum()
     except AttributeError:
         return normalize_rows(np.array(x))
 
-class ExitFlag():
+
+class ExitFlag:
 
     def __init__(self, L, isConverged):
         self.L = L
