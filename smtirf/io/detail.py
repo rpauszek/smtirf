@@ -1,6 +1,26 @@
 from dataclasses import dataclass
 from typing import Optional
 
+import numpy as np
+
+
+@dataclass(frozen=True)
+class RawTrace:
+    donor: np.ndarray
+    acceptor: np.ndarray
+
+    @property
+    def n_frames(self):
+        return len(self.donor)
+
+    @property
+    def signal_statepath(self):
+        return np.full(self.n_frames, 0)
+
+    @property
+    def statepath(self):
+        return np.full(self.n_frames, -1)
+
 
 @dataclass(frozen=True)
 class Point:

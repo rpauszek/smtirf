@@ -4,7 +4,7 @@ import numpy as np
 from skimage import color
 from skimage.io import imread
 
-from .detail import Coordinates
+from .detail import Coordinates, RawTrace
 
 
 def read(filename):
@@ -42,32 +42,21 @@ def read(filename):
 
 def _read_traces(filename):
     with open(filename.with_suffix(".traces"), "rb") as F:
-        nFrames = np.fromfile(F, dtype=np.int32, count=1)[0]
-        nRecords = np.fromfile(F, dtype=np.int16, count=1)[0]
+        n_frames = np.fromfile(F, dtype=np.int32, count=1)[0]
+        n_records = np.fromfile(F, dtype=np.int16, count=1)[0]
         # check number of traces is integer
-        if (nRecords % 1) != 0:
-            raise ValueError(f"non-integer number of traces in dataset [{nRecords}]")
-        else:
-            nTraces = (nRecords / 2).astype(int)
+        if (n_records % 1) != 0:
+            raise ValueError(f"non-integer number of traces in dataset [{n_records}]")
+
         # read data, records as columns
         data = np.fromfile(F, dtype=np.int16, count=-1).reshape(
-            (nFrames, nRecords), order="C"
+            (n_frames, n_records), order="C"
         )
+
     # split channels, traces as rows
-    D0 = data[:, 0::2].T
-    A0 = data[:, 1::2].T
-    # default signal state label
-    S0 = np.zeros((nTraces, nFrames)).astype(int)
-    # default HMM statepath
-    SP = np.ones((nTraces, nFrames)).astype(int) * -1
-    return {
-        "D0": D0,
-        "A0": A0,
-        "S0": S0,
-        "SP": SP,
-        "nTraces": nTraces,
-        "nFrames": nFrames,
-    }
+    donor_traces = data[:, 0::2].T
+    acceptor_traces = data[:, 1::2].T
+    return [RawTrace(d, a) for d, a in zip(donor_traces, acceptor_traces)]
 
 
 def _read_pks(filename):
