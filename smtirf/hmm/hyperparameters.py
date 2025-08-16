@@ -1,11 +1,12 @@
-import numpy as np
 import copy
+
+import numpy as np
+
 from . import row
 from .distributions import *
 
 
 class HMMHyperParameters:
-
     def __init__(self, K, rho, alpha, m, beta, a, b):
         self._K = K
         self._rho = Dirichlet(rho)
@@ -99,7 +100,6 @@ class HMMHyperParameters:
 
 
 class HMMHyperParametersSharedVariance(HMMHyperParameters):
-
     def __init__(self, K, rho, alpha, m, beta, a, b):
         self._K = K
         self._rho = Dirichlet(rho)
@@ -118,7 +118,6 @@ class HMMHyperParametersSharedVariance(HMMHyperParameters):
 
 
 class HmmHyperParametersMultimer(HMMHyperParametersSharedVariance):
-
     def __init__(self, K, rho, alpha, d0, epsilon, m0, beta, a, b):
         self._K = K
         self._rho = Dirichlet(rho)

@@ -1,14 +1,17 @@
+import json
+import warnings
+from abc import ABC, abstractmethod
+
 import numpy as np
 import scipy.stats
-import json, warnings
-from abc import ABC, abstractmethod
+
 import smtirf
-from . import SMSpotCoordinate, SMJsonEncoder
-from . import HiddenMarkovModel
+
+from . import SMJsonEncoder, SMSpotCoordinate
+from .hmm.models import HiddenMarkovModel
 
 
 class BaseTrace(ABC):
-
     def __init__(
         self,
         trcID,
@@ -233,7 +236,8 @@ class BaseTrace(ABC):
 
     @property
     @abstractmethod
-    def X(self): ...
+    def X(self):
+        ...
 
     def train(self, modelType, K, sharedVariance=True, **kwargs):
         theta = smtirf.HiddenMarkovModel.train_new(
@@ -254,7 +258,8 @@ class BaseTrace(ABC):
         return self.model.get_emission_path(self.SP)
 
     @abstractmethod
-    def get_export_data(self): ...
+    def get_export_data(self):
+        ...
 
     def export(self, savename):
         data, fmt, header = self.get_export_data()
@@ -262,7 +267,6 @@ class BaseTrace(ABC):
 
 
 class SingleColorTrace(BaseTrace):
-
     def __init__(self, trcID, data, frameLength, pk, bleed, gamma, channel=1, **kwargs):
         self.channel = channel
         super().__init__(trcID, data, frameLength, pk, bleed, gamma, **kwargs)

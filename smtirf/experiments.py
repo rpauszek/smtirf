@@ -1,17 +1,17 @@
-import numpy as np
-from pathlib import Path
+import json
 from datetime import datetime
-import h5py, json
+from pathlib import Path
+
+import h5py
+import numpy as np
+
 import smtirf
-from . import SMTraceID, SMMovieList
-from . import SMJsonDecoder, SMJsonEncoder
-from . import traces
-from . import io
+
+from . import SMJsonDecoder, SMJsonEncoder, SMMovieList, SMTraceID, io, traces
 from .results import Results
 
 
 class BaseExperiment:
-
     def __init__(self, movies, traces, frameLength, comments="", results=None):
         self._movies = movies
         self._traces = traces
@@ -109,7 +109,6 @@ class MultimerExperiment(BaseExperiment):
 
 
 class Experiment:
-
     CLASS_TYPES = {
         "fret": FretExperiment,
         "piecewise": PiecewiseExperiment,
@@ -135,7 +134,6 @@ class Experiment:
         comments="",
         trcArgs=None,
     ):
-
         movID = SMTraceID.from_datetime(recordTime)
         movies = SMMovieList()
         movies.append(movID, img, info)

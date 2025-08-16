@@ -1,13 +1,14 @@
 import json
+
 import numpy as np
 from sklearn.neighbors import KernelDensity
 
-from . import SMJsonEncoder
 import smtirf
+
+from . import SMJsonEncoder
 
 
 class Results:
-
     def __init__(self, expt, hist=None, tdp=None):
         self._expt = expt
         self.hist = Histogram(expt) if hist is None else Histogram(expt, **hist)
@@ -15,7 +16,6 @@ class Results:
 
 
 class Histogram:
-
     def __init__(
         self, expt, data=None, populations=None, minimum=-0.2, maximum=1.2, nBins=75
     ):
@@ -105,7 +105,6 @@ class Histogram:
 
 
 class Tdp:
-
     def __init__(
         self,
         expt,
