@@ -1,14 +1,17 @@
-import numpy as np
 import json
-from .. import SMJsonEncoder, SMJsonDecoder
-from . import row, col, normalize_rows, ExitFlag
+
+import numpy as np
+
+from .. import SMJsonDecoder, SMJsonEncoder
+from . import ExitFlag
 from . import algorithms as hmmalg
-from .distributions import *
+from . import col
 from . import hyperparameters as hyper
+from . import normalize_rows, row
+from .distributions import *
 
 
 class BaseHiddenMarkovModel:
-
     def simulate(self, M=1, T=1000):
         """simulate M traces of length T from model"""
         S = [hmmalg.sample_statepath(self.K, self.pi, self.A, T=T) for m in range(M)]
@@ -314,7 +317,6 @@ class MultimerHiddenMarkovModel(VariationalHiddenMarkovModel):
 
 
 class HiddenMarkovModel:
-
     MODEL_TYPES = {
         "em": ClassicHiddenMarkovModel,
         "vb": VariationalHiddenMarkovModel,

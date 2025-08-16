@@ -1,7 +1,9 @@
-import numpy as np
 import json
-from datetime import datetime
 from collections import OrderedDict
+from datetime import datetime
+
+import numpy as np
+
 from . import SMJsonEncoder
 
 
@@ -54,7 +56,6 @@ class SMTraceID:
 
 
 class SMMovie:
-
     def __init__(self, movID, img, info):
         self._id = movID
         if img.ndim != 2:
@@ -71,7 +72,6 @@ class SMMovie:
 
 
 class SMMovieList(OrderedDict):
-
     def __init__(self):
         super().__init__(self)
 
@@ -112,7 +112,6 @@ class SMMovieList(OrderedDict):
 
 
 class SMSpotCoordinate:
-
     def __init__(self, coords):
         self._coords = coords
 

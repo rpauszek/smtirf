@@ -1,7 +1,8 @@
 import numpy as np
-from scipy.special import gammaln, digamma
+from scipy.special import digamma, gammaln
 from sklearn.cluster import KMeans
-from . import row, col, normalize_rows
+
+from . import col, normalize_rows, row
 
 __all__ = [
     "Categorical",
@@ -183,7 +184,6 @@ class Normal:
 
 
 class NormalSharedVariance(Normal):
-
     def __init__(self, mu, tau):
         assert mu.ndim == 1
         assert not isinstance(tau, (np.ndarray, list, tuple))
@@ -330,7 +330,6 @@ class NormalGamma(Normal):
 
 
 class NormalGammaSharedVariance(NormalGamma):
-
     def __init__(self, m, beta, a, b):
         assert m.ndim == 1 and beta.ndim == 1
         assert not isinstance(a, (np.ndarray, list, tuple))
@@ -352,7 +351,6 @@ class NormalGammaSharedVariance(NormalGamma):
 
 
 class MultimerNormalGamma(NormalGammaSharedVariance):
-
     def __init__(self, K, d0, epsilon, m0, beta, a, b):
         self._K = K
         self._d0 = d0

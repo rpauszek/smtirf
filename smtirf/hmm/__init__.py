@@ -30,7 +30,6 @@ def normalize_rows(x):
 
 
 class ExitFlag:
-
     def __init__(self, L, isConverged):
         self.L = L
         self.isConverged = isConverged
@@ -57,6 +56,5 @@ class ExitFlag:
         return self.L[-1]
 
 
-from . import hyperparameters
-from . import models
+from . import hyperparameters, models
 from .models import HiddenMarkovModel

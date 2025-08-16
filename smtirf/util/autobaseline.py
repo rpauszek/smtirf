@@ -1,8 +1,9 @@
-import numpy as np
-from sklearn import mixture
 import warnings
 
-from smtirf.hmm import row, col, normalize_rows
+import numpy as np
+from sklearn import mixture
+
+from smtirf.hmm import col, normalize_rows, row
 
 
 class AutoBaselineModel:
