@@ -1,6 +1,7 @@
-import numpy as np
 import json
 from importlib.metadata import version
+
+import numpy as np
 
 __version__ = version("smtirf")
 
@@ -37,10 +38,8 @@ class SMJsonDecoder(json.JSONDecoder):
         return obj
 
 
-from . import hmm
-from . import util
-from . import results
-from .auxiliary import SMTraceID, SMMovieList, SMSpotCoordinate
-from .auxiliary import where
-from .hmm.models import HiddenMarkovModel
+from . import hmm, results, util
+from .auxiliary import SMMovieList, SMSpotCoordinate, SMTraceID, where
 from .experiments import Experiment
+from .hmm.models import HiddenMarkovModel
+from .io.import_dispatch import load_from_pma

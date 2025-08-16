@@ -1,7 +1,10 @@
-import numpy as np
-from skimage.io import imread
-from skimage import color
 from datetime import datetime
+
+import numpy as np
+from skimage import color
+from skimage.io import imread
+
+from .detail import Coordinates
 
 
 def read(filename):
@@ -68,10 +71,9 @@ def _read_traces(filename):
 
 
 def _read_pks(filename):
-    with open(filename.with_suffix(".pks"), "r") as F:
-        data = np.loadtxt(F)
-    # [dx, dy, ax, ay]
-    return np.hstack((data[::2, 1:-1], data[1::2, 1:-1]))
+    with open(filename, "r") as file:
+        data = np.loadtxt(file, dtype=float)
+    return [Coordinates.from_array(line) for line in data]
 
 
 def _read_log(filename):
