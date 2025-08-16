@@ -1,0 +1,36 @@
+name: Python package (Poetry)
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.12"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Poetry
+      uses: abatilo/actions-poetry@v3
+      with:
+        poetry-version: "2.1.2"  # Or latest version you're using
+
+    - name: Disable Poetry virtualenvs (install into system Python)
+      run: poetry config virtualenvs.create false
+
+    - name: Install dependencies
+      run: poetry install --with dev
+
+    - name: Run tests
+      run: pytest

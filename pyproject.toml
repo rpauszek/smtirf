@@ -5,7 +5,6 @@ description = ""
 authors = ["Ray Pauszek <ray.pauszek@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-python = ">=3.12"
 
 [tool.poetry.dependencies]
 python = ">=3.12"
@@ -17,7 +16,7 @@ numba = "*"
 scikit-learn = "*"
 scikit-image = "*"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = ">8.0"
 
 [build-system]
