@@ -18,6 +18,16 @@ scikit-image = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">8.0"
+pre-commit = "^4.3.0"
+black = "^24.0.0"
+isort = "^6.0.0"
+
+[tool.isort]
+profile = "black"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
