@@ -24,7 +24,7 @@ jobs:
     - name: Install Poetry
       uses: abatilo/actions-poetry@v3
       with:
-        poetry-version: "2.1.2"  # Or latest version you're using
+        poetry-version: "2.1.2"
 
     - name: Disable Poetry virtualenvs (install into system Python)
       run: poetry config virtualenvs.create false
@@ -32,5 +32,8 @@ jobs:
     - name: Install dependencies
       run: poetry install --with dev
 
+    - name: Run pre-commit hooks
+      run: poetry run pre-commit run --all-files --show-diff-on-failure
+
     - name: Run tests
-      run: pytest
+      run: poetry run pytest
