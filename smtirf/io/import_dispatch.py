@@ -9,5 +9,6 @@ def load_from_pma(filename, *, savename=None):
 
     traces = pma._read_traces(filename.with_suffix(".traces"))
     coordinates = pma._read_pks(filename.with_suffix(".pks"))
+    log = pma._read_log(filename.with_suffix(".log"))
 
-    print(traces[0])
+    print(log)

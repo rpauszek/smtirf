@@ -3,6 +3,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import numpy as np
+import pytest
 
 
 def test_read_traces():
@@ -58,3 +59,168 @@ def test_read_pks():
             assert coord.donor.y == expected[1]
             assert coord.acceptor.x == expected[2]
             assert coord.acceptor.y == expected[3]
+
+
+def test_read_log():
+    fake_log = """
+    Filming Date and Time
+    Fri Aug 31 11:44:19 2018
+
+    Server Index
+    4434
+    Frame Resolution
+    512 512
+    Background
+    408
+    Data Scaler
+    800
+    Byte Per Pixel
+    1
+    Camera Information
+    Andor Ixon DU897_BV
+    Camera Bit Depth
+    14
+    Gain
+    300
+    Exposure Time [ms]
+    100.000
+    Kinetic Cycle Time [ms]
+    101.740
+    Lag Beetween Images	[ms]
+    1.740
+    Active Area
+    1 512 1 512
+    """
+
+    with patch("builtins.open", return_value=StringIO(fake_log)):
+        from smtirf.io.pma import _read_log
+
+        log = _read_log(Path("dummy.log"))
+        assert len(log["unknown_entries"]) == 0
+        assert log["exposure_time"] == 0.1
+
+
+def test_read_log_unknown_entry():
+    fake_log = """
+    Filming Date and Time
+    Fri Aug 31 11:44:19 2018
+
+    Server Index
+    4434
+    Frame Resolution
+    512 512
+    Background
+    408
+    Data Scaler
+    800
+    Byte Per Pixel
+    1
+    Camera Information
+    Andor Ixon DU897_BV
+    Camera Bit Depth
+    14
+    Gain
+    300
+    Exposure Time [ms]
+    100.000
+    Kinetic Cycle Time [ms]
+    101.740
+    Lag Beetween Images	[ms]
+    1.740
+    Active Area
+    1 512 1 512
+
+    Some other thing
+    42
+    My extra key
+    extra
+    """
+
+    with patch("builtins.open", return_value=StringIO(fake_log)):
+        from smtirf.io.pma import _read_log
+
+        with pytest.warns(UserWarning) as record:
+            log = _read_log(Path("dummy.log"))
+
+        assert (
+            str(record[0].message) == 'unknown entry "Some other thing" found in log.'
+        )
+        assert str(record[1].message) == 'unknown entry "My extra key" found in log.'
+
+        assert len(log["unknown_entries"]) == 2
+        assert log["unknown_entries"]["some_other_thing"] == "42"
+        assert "some_extra_thing" not in log
+
+        assert log["unknown_entries"]["my_extra_key"] == "extra"
+        assert "my_extra_key" not in log
+
+
+def test_read_log_missing_entry():
+    fake_log = """
+    Filming Date and Time
+    Fri Aug 31 11:44:19 2018
+
+    Server Index
+    4434
+    Frame Resolution
+    512 512
+    Background
+    408
+    Byte Per Pixel
+    1
+    Camera Information
+    Andor Ixon DU897_BV
+    Camera Bit Depth
+    14
+    Gain
+    300
+    Exposure Time [ms]
+    100.000
+    Kinetic Cycle Time [ms]
+    101.740
+    Lag Beetween Images	[ms]
+    1.740
+    Active Area
+    1 512 1 512
+    """
+
+    with patch("builtins.open", return_value=StringIO(fake_log)):
+        from smtirf.io.pma import _read_log
+
+        with pytest.raises(KeyError, match=r"missing required keys: data_scaler."):
+            _read_log(Path("dummy.log"))
+
+    fake_log = """
+    Filming Date and Time
+    Fri Aug 31 11:44:19 2018
+
+    Server Index
+    4434
+    Frame Resolution
+    512 512
+    Background
+    408
+    Byte Per Pixel
+    1
+    Camera Information
+    Andor Ixon DU897_BV
+    Camera Bit Depth
+    14
+
+    Exposure Time [ms]
+    100.000
+    Kinetic Cycle Time [ms]
+    101.740
+    Lag Beetween Images	[ms]
+    1.740
+    Active Area
+    1 512 1 512
+    """
+
+    with patch("builtins.open", return_value=StringIO(fake_log)):
+        from smtirf.io.pma import _read_log
+
+        with pytest.raises(
+            KeyError, match=r"missing required keys: data_scaler, gain."
+        ):
+            _read_log(Path("dummy.log"))
