@@ -1,3 +1,6 @@
+import re
+import warnings
+from collections import namedtuple
 from datetime import datetime
 
 import numpy as np
@@ -66,21 +69,52 @@ def _read_pks(filename):
 
 
 def _read_log(filename):
-    info = {"filename": str(filename)}
-    log = {}
-    with open(filename.with_suffix(".log"), "r") as f:
-        for line in f:
-            if "Gain" in line:
-                info["ccdGain"] = int(next(f))
-            elif "Exposure Time" in line:
-                log["frameLength"] = float(next(f)) / 1000  # msec => sec
-            elif "Filming Date and Time" in line:
-                log["recordTime"] = datetime.strptime(
-                    next(f).strip(), "%a %b %d %H:%M:%S %Y"
-                )
-            elif "Data Scaler" in line:
-                info["dataScaler"] = int(next(f))
-    return log, info
+    Alias = namedtuple("Alias", ("name", "parser", "required"))
+    msec_to_sec = lambda t: float(t) / 1000
+    int_array = lambda s: [int(item) for item in s.split(" ")]
+
+    KEY_ALIASES = {
+        "filming_date_and_time": Alias(
+            "timestamp", lambda s: datetime.strptime(s, "%a %b %d %H:%M:%S %Y"), True
+        ),
+        "server_index": Alias("server_index", int, False),
+        "frame_resolution": Alias("frame_resolution", int_array, False),
+        "background": Alias("background", int, True),
+        "data_scaler": Alias("data_scaler", int, True),
+        "byte_per_pixel": Alias("byte_per_pixel", int, False),
+        "camera_information": Alias("camera", str, False),
+        "camera_bit_depth": Alias("bit_depth", int, False),
+        "gain": Alias("gain", int, True),
+        "exposure_time_ms": Alias("exposure_time", msec_to_sec, True),
+        "kinetic_cycle_time_ms": Alias("cycle_time", msec_to_sec, False),
+        "lag_beetween_images_ms": Alias("lag_time", msec_to_sec, False),
+        "active_area": Alias("active_area", int_array, False),
+    }
+
+    with open(filename, "r") as file:
+        text = [
+            stripped for line in file.readlines() if len(stripped := line.strip()) > 0
+        ]
+
+    keys = text[::2]
+    parsed_keys = [re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_") for key in keys]
+    values = text[1::2]
+
+    log_dict = {"unknown_entries": {}}
+    for key, value, original_key in zip(parsed_keys, values, keys):
+        alias = KEY_ALIASES.get(key, None)
+        if alias is None:
+            warnings.warn(f'unknown entry "{original_key}" found in log.', stacklevel=3)
+            log_dict["unknown_entries"][key] = value
+            continue
+        log_dict[alias.name] = alias.parser(value)
+
+    # todo: message with original expected keys
+    required_keys = [alias.name for alias in KEY_ALIASES.values() if alias.required]
+    if missing_keys := sorted(required_keys - log_dict.keys()):
+        raise KeyError(f"missing required keys: {", ".join(missing_keys)}.")
+
+    return log_dict
 
 
 def _read_tif(filename):
