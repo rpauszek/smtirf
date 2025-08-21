@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum, unique
 from typing import Optional
 
 import numpy as np
@@ -12,14 +14,6 @@ class RawTrace:
     @property
     def n_frames(self):
         return len(self.donor)
-
-    @property
-    def signal_statepath(self):
-        return np.full(self.n_frames, 0)
-
-    @property
-    def statepath(self):
-        return np.full(self.n_frames, -1)
 
 
 @dataclass(frozen=True)
@@ -55,3 +49,19 @@ class Coordinates:
         donor = Point(*arr[:2])
         acceptor = Point(*arr[2:])
         return cls(donor, acceptor)
+
+
+UNASSIGNED_CONFORMATIONAL_STATE = -1
+
+
+@unique
+class PhotophysicsEnum(Enum):
+    SIGNAL = 0
+    BLINK = 1
+    BLEACH = 2
+
+
+def json_default(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {obj.__class__.__name__} is not JSON serializable")

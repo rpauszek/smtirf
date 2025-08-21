@@ -7,7 +7,7 @@ import numpy as np
 from skimage import color
 from skimage.io import imread
 
-from ..detail.io_detail import Coordinates, RawTrace
+from ..detail.definitions import Coordinates, RawTrace
 
 
 def _read_traces(filename):
@@ -67,6 +67,7 @@ def _read_log(filename):
     parsed_keys = [re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_") for key in keys]
     values = text[1::2]
 
+    # todo: remove unknown entries if empty
     log_dict = {"unknown_entries": {}}
     for key, value, original_key in zip(parsed_keys, values, keys):
         alias = KEY_ALIASES.get(key, None)

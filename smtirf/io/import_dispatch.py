@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from ..detail.metadata import MovieMetadata
+from ..detail.writer import write_movie_to_hdf
 from . import pma
 
 
@@ -30,7 +31,10 @@ def load_from_pma(filename, *, savename=None):
         n_frames=traces[0].n_frames,
         src_filename=required_files["traces"].name,
         timestamp=log["timestamp"],
+        frame_length=log["exposure_time"],  # todo: use kinetic cycle?
         ccd_gain=log["gain"],
         data_scaler=log["data_scaler"],
         log=log,
     )
+
+    write_movie_to_hdf(savename, traces, peaks, metadata)
