@@ -118,6 +118,5 @@ def _read_log(filename):
 
 
 def _read_tif(filename):
-    filename = filename.parent / (filename.stem + "_ave.tif")
     image = imread(filename)
     return image if image.ndim == 2 else color.rgb2gray(image)
