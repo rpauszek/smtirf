@@ -7,7 +7,7 @@ import numpy as np
 from skimage import color
 from skimage.io import imread
 
-from .detail import Coordinates, RawTrace
+from ..detail.io_detail import Coordinates, RawTrace
 
 
 def _read_traces(filename):
