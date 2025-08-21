@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from ..detail.metadata import MovieMetadata
 from . import pma
 
 
@@ -23,3 +24,13 @@ def load_from_pma(filename, *, savename=None):
     peaks = pma._read_pks(required_files["peaks"])
     log = pma._read_log(required_files["log"])
     image = pma._read_tif(required_files["image"])
+
+    metadata = MovieMetadata(
+        n_traces=len(traces),
+        n_frames=traces[0].n_frames,
+        src_filename=required_files["traces"].name,
+        timestamp=log["timestamp"],
+        ccd_gain=log["gain"],
+        data_scaler=log["data_scaler"],
+        log=log,
+    )
