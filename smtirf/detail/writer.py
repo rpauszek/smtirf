@@ -10,6 +10,7 @@ from ..detail.definitions import (
     PhotophysicsEnum,
     json_default,
 )
+from ..detail.metadata import TRACE_DTYPE, TraceMetadata
 
 SCHEMA_VERSION = "2.0.0"
 
@@ -34,8 +35,10 @@ def write_movie_to_hdf(savename, traces, peaks, metadata, image=None):
             metadata.log, default=json_default, sort_keys=True, separators=(",", ":")
         )
 
+        trace_metadata = TraceMetadata(mov_id, metadata.n_frames)
         trace_ids = np.array(
-            [f"{mov_id}_{i:04d}" for i in range(metadata.n_traces)], dtype="S32"
+            [trace_metadata.make_trace_uid(i) for i in range(metadata.n_traces)],
+            dtype="S32",
         )
         mov_group.create_dataset(
             "trace_ids",
@@ -74,43 +77,14 @@ def write_movie_to_hdf(savename, traces, peaks, metadata, image=None):
                 fletcher32=True,
             )
 
-        trace_dtype = np.dtype(
-            [
-                ("trace_id", h5py.string_dtype("utf-8", length=32)),
-                ("donor_x", np.float32),
-                ("donor_y", np.float32),
-                ("acceptor_x", np.float32),
-                ("acceptor_y", np.float32),
-                ("start", np.uint32),
-                ("stop", np.uint32),
-                ("donor_offset", np.float32),
-                ("acceptor_offset", np.float32),
-                ("is_selected", bool),
-            ]
-        )
-
-        records = np.zeros(metadata.n_traces, dtype=trace_dtype)
-        for k, (peak, trace_id) in enumerate(zip(peaks, trace_ids)):
-            # todo: simplify, precompute last part and unpack peak; peak.as_list
-            # todo: dataclass with index and peak None -> expose method record.make_default(idx, pk, n_frames)
-            records[k] = (
-                trace_id,
-                peak.donor.x,
-                peak.donor.y,
-                peak.acceptor.x,
-                peak.acceptor.y,
-                0,
-                metadata.n_frames,
-                0,
-                0,
-                False,
-            )
+        records = np.zeros(metadata.n_traces, dtype=TRACE_DTYPE)
+        for k, peak in enumerate(peaks):
+            records[k] = trace_metadata.make_record(index=k, peak=peak)
 
         mov_group.create_dataset(
             "traces/metadata",
-            # shape=(n_traces,),
             data=records,
-            dtype=trace_dtype,
+            dtype=TRACE_DTYPE,
             compression="gzip",
             compression_opts=5,
             shuffle=True,
