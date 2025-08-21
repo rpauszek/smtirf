@@ -10,39 +10,6 @@ from skimage.io import imread
 from .detail import Coordinates, RawTrace
 
 
-def read(filename):
-    """import data from IDL-generated files of .pma movies
-    N traces of length T frames
-    output = {
-        D0          : raw donor (ch1) signal [NxT]
-        A0          : raw acceptor (ch2) signal [NxT]
-        S0          : initial signal state-labels [NxT] -> 0
-        SP          : initial state-path [NxT] -> -1
-        nTraces     : N
-        nFrames     : T
-        pks         : spot coordinates (ch1_x, ch1_y, ch2_x, ch2_y) [Nx4]
-        info =      {filename   : original .trace file path
-                     nTraces    : N
-                     nFrames    : T
-                     ccdGain    : camera gain
-                     dataScaler : PMA data scaler option
-                    }
-        frameLength : camera integration time, sec
-        recordTime  : recording timestamp -> datetime instance
-        img         : static average image (first 10 frames, 512x512 pixels)
-    }
-    """
-    output = _read_traces(filename)
-    output["pks"] = _read_pks(filename)
-    log, info = _read_log(filename)
-    info["nTraces"] = output.pop("nTraces")
-    info["nFrames"] = output.pop("nFrames")
-    output["info"] = info
-    output = {**output, **log}
-    output["img"] = _read_tif(filename)
-    return output
-
-
 def _read_traces(filename):
     with open(filename.with_suffix(".traces"), "rb") as F:
         n_frames = np.fromfile(F, dtype=np.int32, count=1)[0]
