@@ -1,6 +1,6 @@
 import numpy as np
 
-from smtirf.io.detail import Coordinates
+from smtirf.detail.io_detail import Coordinates
 
 
 def test_coordinates():
