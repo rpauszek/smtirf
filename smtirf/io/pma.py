@@ -30,9 +30,18 @@ def _read_traces(filename):
 
 
 def _read_pks(filename):
+    """
+    Read coordinates from .pks file and return in structured format.
+
+    The file format is
+        1      donor_1_x      donor_1_y      donor_1_background (?)
+        2   acceptor_1_x   acceptor_1_y   acceptor_1_background (?)
+        3      donor_2_x      donor_2_y      donor_2_background (?)
+        4   acceptor_2_x   acceptor_2_y   acceptor_2_background (?)
+    """
     with open(filename, "r") as file:
-        data = np.loadtxt(file, dtype=float)
-    return [Coordinates.from_array(line) for line in data]
+        data = np.loadtxt(file, dtype=float)[:, 1:-1]  # remove first and last columns
+    return [Coordinates.from_array(line) for line in data.reshape((-1, 4))]
 
 
 def _read_log(filename):
