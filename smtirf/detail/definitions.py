@@ -50,6 +50,9 @@ class Coordinates:
         acceptor = Point(*arr[2:])
         return cls(donor, acceptor)
 
+    def as_list(self):
+        return [self.donor.x, self.donor.y, self.acceptor.x, self.acceptor.y]
+
 
 UNASSIGNED_CONFORMATIONAL_STATE = -1
 
