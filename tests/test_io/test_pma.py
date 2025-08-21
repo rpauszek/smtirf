@@ -36,7 +36,6 @@ def test_read_traces():
 
         assert n_traces == n_records // 2
         for k in range(n_traces):
-            print(results[k])
             np.testing.assert_array_equal(results[k].donor, fake_data[:, k * 2])
             np.testing.assert_array_equal(results[k].acceptor, fake_data[:, k * 2 + 1])
 
