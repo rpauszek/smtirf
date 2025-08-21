@@ -42,10 +42,12 @@ def test_read_traces():
 
 def test_read_pks():
     fake_pks_str = """
-       1    15.000   311.000  6.34e+000
-       2   268.500   313.000  5.01e+000
+       1     1.000     2.000  6.34e+000
+       2     3.500     4.000  5.01e+000
+       3     5.000     6.000  6.34e+000
+       4     7.500     8.000  5.01e+000
     """
-    expected_coordinates = [[1.0, 15.0, 311.0, 6.34], [2.0, 268.5, 313.0, 5.01]]
+    expected_coordinates = [[1.0, 2.0, 3.5, 4.0], [5.0, 6, 7.5, 8.0]]
 
     with patch("builtins.open", return_value=StringIO(fake_pks_str)):
         from smtirf.io.pma import _read_pks
