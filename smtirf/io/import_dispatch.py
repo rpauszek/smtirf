@@ -13,7 +13,7 @@ def load_from_pma(filename, *, savename=None):
         "traces": filename.with_suffix(".traces"),
         "peaks": filename.with_suffix(".pks"),
         "log": filename.with_suffix(".log"),
-        "image": filename.with_name(f"{filename.stem}_ave.tif"),
+        "snapshot": filename.with_name(f"{filename.stem}_ave.tif"),
     }
 
     missing_files = [str(path) for path in required_files.values() if not path.exists()]
@@ -24,7 +24,7 @@ def load_from_pma(filename, *, savename=None):
     traces = pma._read_traces(required_files["traces"])
     peaks = pma._read_pks(required_files["peaks"])
     log = pma._read_log(required_files["log"])
-    image = pma._read_tif(required_files["image"])
+    snapshot = pma._read_tif(required_files["snapshot"])
 
     metadata = MovieMetadata(
         n_traces=len(traces),
@@ -37,4 +37,4 @@ def load_from_pma(filename, *, savename=None):
         log=log,
     )
 
-    write_movie_to_hdf(savename, traces, peaks, metadata)
+    write_movie_to_hdf(savename, traces, peaks, metadata, snapshot)

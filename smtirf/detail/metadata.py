@@ -52,6 +52,11 @@ class TraceMetadata:
     acceptor_offset: Optional[int] = 0
     is_selected: Optional[bool] = False
 
+    @classmethod
+    def from_movie_metadata(cls, movie_metadata):
+        """Make a factory based on movie UID and length."""
+        return cls(movie_metadata.uid, movie_metadata.n_frames)
+
     @property
     def trace_uid(self):
         if self.index is None:

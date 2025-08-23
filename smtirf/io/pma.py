@@ -95,5 +95,5 @@ def _read_log(filename):
 
 
 def _read_tif(filename):
-    image = imread(filename)
-    return image if image.ndim == 2 else color.rgb2gray(image)
+    snapshot = imread(filename)
+    return snapshot if snapshot.ndim == 2 else color.rgb2gray(snapshot)
