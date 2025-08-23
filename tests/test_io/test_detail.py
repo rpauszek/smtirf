@@ -9,3 +9,6 @@ def test_coordinates():
     assert coord.donor.y == 3.1
     assert coord.acceptor.x == 5.1
     assert coord.acceptor.y == 3.1
+
+
+# todo: test json_default
