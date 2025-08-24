@@ -22,7 +22,7 @@ class Trace:
         self._bleed = 0.05
 
         self._raw_dispatcher = DataDispatcher(
-            lambda: np.arange(self._metadata.n_frames),
+            lambda: np.arange(self._metadata.n_frames) * self.frame_length,
             lambda: self._dispatcher.get_data("donor"),
             lambda: self._dispatcher.get_data("acceptor"),
         )
@@ -40,16 +40,12 @@ class Trace:
             - (self._baselined_dispatcher.donor * self._bleed),
         )
 
-        # self._id = trcID
-        # self._set_data(data)
-        # self.set_frame_length(frameLength)  # => set self.t
-        # self._bleed = bleed
-        # self._gamma = gamma
-        # self.set_offsets(offsets)  # => triggers _correct_signals()
-        # self.set_limits(limits, refreshStatePath=False)
+        self._final_dispatcher = DataDispatcher(
+            lambda: self.raw.time[self._metadata.selected_slice],
+            lambda: self.corrected.donor[self._metadata.selected_slice],
+            lambda: self.corrected.acceptor[self._metadata.selected_slice],
+        )
 
-        # self.pk = SMSpotCoordinate(pk)
-        # self.isSelected = isSelected
         # self.set_cluster_index(clusterIndex)
         # self.model = HiddenMarkovModel.from_json(model)
         # self.deBlur = deBlur
@@ -65,7 +61,7 @@ class Trace:
         )
 
     def __len__(self):
-        return self.D0.size
+        return self._dispatcher.n_frames
 
     @property
     def raw(self):
@@ -74,6 +70,26 @@ class Trace:
     @property
     def corrected(self):
         return self._corrected_dispatcher
+
+    @property
+    def time(self):
+        return self._final_dispatcher.time
+
+    @property
+    def donor(self):
+        return self._final_dispatcher.donor
+
+    @property
+    def acceptor(self):
+        return self._final_dispatcher.acceptor
+
+    @property
+    def total(self):
+        return self._final_dispatcher.total
+
+    @property
+    def fret(self):
+        return self._final_dispatcher.fret
 
     @property
     def is_selected(self):
@@ -110,8 +126,8 @@ class Trace:
         self._SP = SP
 
     @property
-    def frameLength(self):
-        return self._frameLength
+    def frame_length(self):
+        return self._dispatcher.frame_length
 
     @property
     def bleed(self):
@@ -120,10 +136,6 @@ class Trace:
     @property
     def gamma(self):
         return self._gamma
-
-    def set_frame_length(self, val):
-        self._frameLength = val
-        self.t = np.arange(len(self)) * self._frameLength
 
     @property
     def offsets(self):
@@ -138,16 +150,9 @@ class Trace:
     def reset_offsets(self):
         self.set_offsets((0, 0))
 
-    def _correct_signals(self):
-        D = self.D0 - self._offsets[0]
-        A = self.A0 - self._offsets[1]
-        self.D = D * self._gamma
-        self.A = A - (D * self._bleed)
-        self.I = self.D + self.A
-
     @property
     def limits(self):
-        return self._limits  # Slice instance
+        return [self._metadata.start, self._metadata.stop]
 
     def set_limits(self, values, refreshStatePath=True):
         if values is None:
@@ -183,12 +188,8 @@ class Trace:
         return self._id.movID
 
     @property
-    def I0(self):
-        return self.D0 + self.A0
-
-    @property
     def corrcoef(self):
-        return scipy.stats.pearsonr(self.D[self.limits], self.A[self.limits])[0]
+        return scipy.stats.pearsonr(self.donor, self.acceptor)[0]
 
     def _time2frame(self, t):  # copy from old
         # find frame index closest to time t
@@ -233,11 +234,6 @@ class Trace:
 
     def reset_limits(self):
         self.set_limits((0, len(self)))
-
-    @property
-    @abstractmethod
-    def X(self):
-        ...
 
     def train(self, modelType, K, sharedVariance=True, **kwargs):
         theta = smtirf.HiddenMarkovModel.train_new(
