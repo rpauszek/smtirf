@@ -64,7 +64,7 @@ TRACE_DTYPE = np.dtype(
 )
 
 
-@dataclass(frozen=True)
+@dataclass
 class TraceMetadata:
     movie_uid: str
     n_frames: int
@@ -117,3 +117,7 @@ class TraceMetadata:
                 self.is_selected,
             ]
         )
+
+    # todo: add validators
+    def set_selected(self, value):
+        self.is_selected = value
