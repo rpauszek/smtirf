@@ -97,8 +97,8 @@ def test_read_log():
         from smtirf.io.pma import _read_log
 
         log = _read_log(Path("dummy.log"))
-        assert len(log["unknown_entries"]) == 0
-        assert log["exposure_time"] == 0.1
+        assert "unknown_entries" not in log
+        assert log["exposure_time_ms"] == 0.1
 
 
 def test_read_log_unknown_entry():
@@ -188,7 +188,7 @@ def test_read_log_missing_entry():
     with patch("builtins.open", return_value=StringIO(fake_log)):
         from smtirf.io.pma import _read_log
 
-        with pytest.raises(KeyError, match=r"missing required keys: data_scaler."):
+        with pytest.raises(KeyError, match=r"missing required entries: Data Scaler."):
             _read_log(Path("dummy.log"))
 
     fake_log = """
@@ -222,6 +222,6 @@ def test_read_log_missing_entry():
         from smtirf.io.pma import _read_log
 
         with pytest.raises(
-            KeyError, match=r"missing required keys: data_scaler, gain."
+            KeyError, match=r"missing required entries: Data Scaler, Gain."
         ):
             _read_log(Path("dummy.log"))

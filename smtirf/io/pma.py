@@ -45,26 +45,32 @@ def _read_pks(filename):
 
 
 def _read_log(filename):
-    Alias = namedtuple("Alias", ("name", "parser", "required"))
+    EntryInfo = namedtuple("EntryInfo", ("expected_key", "parser", "required"))
     msec_to_sec = lambda t: float(t) / 1000
     int_array = lambda s: [int(item) for item in s.split(" ")]
 
-    KEY_ALIASES = {
-        "filming_date_and_time": Alias(
-            "timestamp", lambda s: datetime.strptime(s, "%a %b %d %H:%M:%S %Y"), True
+    EXPECTED_ENTRIES = {
+        "filming_date_and_time": EntryInfo(
+            "Filming Date and Time",
+            lambda s: datetime.strptime(s, "%a %b %d %H:%M:%S %Y"),
+            True,
         ),
-        "server_index": Alias("server_index", int, False),
-        "frame_resolution": Alias("frame_resolution", int_array, False),
-        "background": Alias("background", int, True),
-        "data_scaler": Alias("data_scaler", int, True),
-        "byte_per_pixel": Alias("byte_per_pixel", int, False),
-        "camera_information": Alias("camera", str, False),
-        "camera_bit_depth": Alias("bit_depth", int, False),
-        "gain": Alias("gain", int, True),
-        "exposure_time_ms": Alias("exposure_time", msec_to_sec, True),
-        "kinetic_cycle_time_ms": Alias("cycle_time", msec_to_sec, False),
-        "lag_beetween_images_ms": Alias("lag_time", msec_to_sec, False),
-        "active_area": Alias("active_area", int_array, False),
+        "server_index": EntryInfo("Server Index", int, False),
+        "frame_resolution": EntryInfo("Frame Resolution", int_array, False),
+        "background": EntryInfo("Background", int, True),
+        "data_scaler": EntryInfo("Data Scaler", int, True),
+        "byte_per_pixel": EntryInfo("Byte Per Pixel", int, False),
+        "camera_information": EntryInfo("Camera Information", str, False),
+        "camera_bit_depth": EntryInfo("Camera Bit Depth", int, False),
+        "gain": EntryInfo("Gain", int, True),
+        "exposure_time_ms": EntryInfo("Exposure Time [ms]", msec_to_sec, True),
+        "kinetic_cycle_time_ms": EntryInfo(
+            "Kinetic Cycle Time [ms]", msec_to_sec, False
+        ),
+        "lag_beetween_images_ms": EntryInfo(
+            "Lag Beetween Images	[ms]", msec_to_sec, False
+        ),
+        "active_area": EntryInfo("Active Area", int_array, False),
     }
 
     with open(filename, "r") as file:
@@ -76,20 +82,25 @@ def _read_log(filename):
     parsed_keys = [re.sub(r"[^a-z0-9]+", "_", key.lower()).strip("_") for key in keys]
     values = text[1::2]
 
-    # todo: remove unknown entries if empty
     log_dict = {"unknown_entries": {}}
-    for key, value, original_key in zip(parsed_keys, values, keys):
-        alias = KEY_ALIASES.get(key, None)
-        if alias is None:
+    for parsed_key, value, original_key in zip(parsed_keys, values, keys):
+        entry = EXPECTED_ENTRIES.get(parsed_key, None)
+        if entry is None:
             warnings.warn(f'unknown entry "{original_key}" found in log.', stacklevel=3)
-            log_dict["unknown_entries"][key] = value
+            log_dict["unknown_entries"][parsed_key] = value
             continue
-        log_dict[alias.name] = alias.parser(value)
+        log_dict[parsed_key] = entry.parser(value)
+    if len(log_dict["unknown_entries"]) == 0:
+        log_dict.pop("unknown_entries")
 
-    # todo: message with original expected keys
-    required_keys = [alias.name for alias in KEY_ALIASES.values() if alias.required]
-    if missing_keys := sorted(required_keys - log_dict.keys()):
-        raise KeyError(f"missing required keys: {", ".join(missing_keys)}.")
+    required_keys = {
+        parsed_key for parsed_key, entry in EXPECTED_ENTRIES.items() if entry.required
+    }
+    if missing := required_keys - log_dict.keys():
+        missing_original_keys = [
+            EXPECTED_ENTRIES[key].expected_key for key in sorted(missing)
+        ]
+        raise KeyError(f"missing required entries: {", ".join(missing_original_keys)}.")
 
     return log_dict
 
