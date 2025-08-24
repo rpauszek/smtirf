@@ -1,6 +1,7 @@
 import json
 import warnings
 from abc import ABC, abstractmethod
+from functools import wraps
 
 import numpy as np
 import scipy.stats
@@ -10,6 +11,21 @@ import smtirf
 from . import SMJsonEncoder, SMSpotCoordinate
 from .detail.data_dispatch import DataDispatcher, TraceDataDispatcher
 from .hmm.models import HiddenMarkovModel
+
+
+def with_statepath_update(func):
+    """
+    Decorator to ensure that the model statepath is updated when the signal is changed
+    (eg, channel offsets or range limits changed).
+    """
+
+    @wraps(func)
+    def wrapper(self, *args, **kwargs):
+        result = func(self, *args, **kwargs)  # run original method
+        self._update_statepath()
+        return result
+
+    return wrapper
 
 
 class Trace:
@@ -102,6 +118,12 @@ class Trace:
         # todo: test, ensure int
         return self._statepath[self._metadata.selected_slice]
 
+    def _update_statepath(self):
+        # todo: check old implementation, label_statepath()
+        # todo: potentially include clearing statepath if model is removed
+        if self.is_selected and self._model is not None:
+            print("updating statepath...")
+
     @property
     def emission_path(self):
         return self.model.get_emission_path(self.state_path)
@@ -110,6 +132,13 @@ class Trace:
     def is_selected(self):
         return self._metadata.is_selected
 
+    @with_statepath_update
+    def set_selected(self, value):
+        if not isinstance(value, bool):
+            raise ValueError("value must be of type bool.")
+        self._metadata.is_selected = value
+
+    @with_statepath_update
     def toggle_selected(self):
         self._metadata.is_selected = not self.is_selected
 
@@ -147,6 +176,7 @@ class Trace:
     def offsets(self):
         return [self._metadata.donor_offset, self._metadata.acceptor_offset]
 
+    @with_statepath_update
     def set_offsets(self, values):
         if len(values) != 2:
             raise ValueError("must provide offsets for both (2) channels")
