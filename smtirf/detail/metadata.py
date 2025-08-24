@@ -117,7 +117,3 @@ class TraceMetadata:
                 self.is_selected,
             ]
         )
-
-    # todo: add validators
-    def set_selected(self, value):
-        self.is_selected = value

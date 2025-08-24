@@ -17,10 +17,27 @@ class Trace:
         self._dispatcher = TraceDataDispatcher(file_handle, uid)
         self._metadata = self._dispatcher.get_metadata()
 
+        # todo: handle this properly
+        self._gamma = 1
+        self._bleed = 0.05
+
         self._raw_dispatcher = DataDispatcher(
             lambda: np.arange(self._metadata.n_frames),
             lambda: self._dispatcher.get_data("donor"),
             lambda: self._dispatcher.get_data("acceptor"),
+        )
+
+        self._baselined_dispatcher = DataDispatcher(
+            lambda: self.raw.time,
+            lambda: self.raw.donor - self._metadata.donor_offset,
+            lambda: self.raw.acceptor - self._metadata.acceptor_offset,
+        )
+
+        self._corrected_dispatcher = DataDispatcher(
+            lambda: self.raw.time,
+            lambda: self._baselined_dispatcher.donor * self._gamma,
+            lambda: self._baselined_dispatcher.acceptor
+            - (self._baselined_dispatcher.donor * self._bleed),
         )
 
         # self._id = trcID
@@ -53,6 +70,10 @@ class Trace:
     @property
     def raw(self):
         return self._raw_dispatcher
+
+    @property
+    def corrected(self):
+        return self._corrected_dispatcher
 
     @property
     def is_selected(self):
@@ -104,31 +125,18 @@ class Trace:
         self._frameLength = val
         self.t = np.arange(len(self)) * self._frameLength
 
-    def set_bleed(self, val):
-        if val >= 0 and val <= 1:
-            self._bleed = val
-            self._correct_signals()
-        else:
-            raise ValueError("donor bleedthrough must be between 0 and 1")
-
-    def set_gamma(self, val):
-        if val > 0 and val <= 2:
-            self._gamma = val
-            self._correct_signals()
-        else:
-            raise ValueError("gamma must be between 0 and 2")
-
     @property
     def offsets(self):
-        return self._offsets
+        return [self._metadata.donor_offset, self._metadata.acceptor_offset]
 
     def set_offsets(self, values):
-        if values is None:
-            values = np.zeros(2)
-        elif len(values) != 2:
+        if len(values) != 2:
             raise ValueError("must provide offsets for both (2) channels")
-        self._offsets = np.array(values)
-        self._correct_signals()
+        self._metadata.donor_offset = values[0]
+        self._metadata.acceptor_offset = values[1]
+
+    def reset_offsets(self):
+        self.set_offsets((0, 0))
 
     def _correct_signals(self):
         D = self.D0 - self._offsets[0]
@@ -222,9 +230,6 @@ class Trace:
             pass
         else:
             raise ValueError("where keyword unrecognized")
-
-    def reset_offsets(self):
-        self.set_offsets((0, 0))
 
     def reset_limits(self):
         self.set_limits((0, len(self)))
