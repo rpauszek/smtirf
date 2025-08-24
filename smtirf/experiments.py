@@ -1,13 +1,9 @@
-import json
-from datetime import datetime
 from pathlib import Path
 
 import h5py
-import numpy as np
 
 import smtirf
 
-from . import SMJsonDecoder, SMJsonEncoder, SMMovieList, SMTraceID, io, traces
 from .detail.metadata import MovieMetadata
 from .results import Results
 from .traces import Trace
@@ -15,13 +11,7 @@ from .traces import Trace
 
 class Experiment:
     def __init__(self, filename):
-        # self._movies = movies
-        # self._traces = traces
-        # self.frameLength = frameLength
-        # self.comments = comments
-        # self.results = Results(self) if results is None else Results(self, **results)
-
-        self._file_handle = h5py.File(filename, "r")
+        self._file_handle = h5py.File(Path(filename), "r")
 
         self._movies = {
             key: MovieMetadata._from_group(group)
@@ -32,9 +22,12 @@ class Experiment:
         self._traces = []
         for key, group in self._file_handle["movies"].items():
             trace_ids = group["trace_ids"][:]
-            for uid in trace_ids[:5]:
+            for uid in trace_ids:
                 trace = Trace(self._file_handle, uid.decode("utf-8"))
                 self._traces.append(trace)
+
+        # self.comments = comments
+        # self.results = Results(self) if results is None else Results(self, **results)
 
     def save(self, savename):
         Experiment.write_to_hdf(savename, self)
@@ -87,12 +80,12 @@ class Experiment:
         self._traces.sort(key=fcn, reverse=reverse)
 
     def select_all(self):
-        for trc in self:
-            trc.isSelected = True
+        for trace in self:
+            trace.set_selected(True)
 
     def select_none(self):
-        for trc in self:
-            trc.isSelected = False
+        for trace in self:
+            trace.set_selected(False)
 
     def update_results(self):
         # self.results = smtirf.results.Results(self)
