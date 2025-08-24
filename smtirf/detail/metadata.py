@@ -1,11 +1,22 @@
+import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
+import dacite
 import h5py
 import numpy as np
 
 from .definitions import Coordinates
+
+# todo: look into log timestamp is still string -> json decoder?
+config = dacite.Config(
+    type_hooks={
+        int: lambda v: int(v) if isinstance(v, np.integer) else v,
+        datetime: lambda t: datetime.fromisoformat(t),
+        dict: lambda d: json.loads(d),
+    }
+)
 
 
 @dataclass(frozen=True)
@@ -18,6 +29,10 @@ class MovieMetadata:
     ccd_gain: int
     data_scaler: Optional[int] = None
     log: Optional[dict] = field(default_factory=dict, repr=False)
+
+    @classmethod
+    def _from_group(cls, group):
+        return dacite.from_dict(cls, dict(group.attrs), config=config)
 
     @property
     def uid(self):

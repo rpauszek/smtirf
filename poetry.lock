@@ -194,6 +194,21 @@ docs = ["ipython", "matplotlib", "numpydoc", "sphinx"]
 tests = ["pytest", "pytest-cov", "pytest-xdist"]
 
 [[package]]
+name = "dacite"
+version = "1.9.2"
+description = "Simple creation of data classes from dictionaries."
+optional = false
+python-versions = ">=3.7"
+groups = ["main"]
+files = [
+    {file = "dacite-1.9.2-py3-none-any.whl", hash = "sha256:053f7c3f5128ca2e9aceb66892b1a3c8936d02c686e707bee96e19deef4bc4a0"},
+    {file = "dacite-1.9.2.tar.gz", hash = "sha256:6ccc3b299727c7aa17582f0021f6ae14d5de47c7227932c47fec4cdfefd26f09"},
+]
+
+[package.extras]
+dev = ["black", "coveralls", "mypy", "pre-commit", "pylint", "pytest (>=5)", "pytest-benchmark", "pytest-cov"]
+
+[[package]]
 name = "distlib"
 version = "0.4.0"
 description = "Distribution utilities"
@@ -1388,4 +1403,4 @@ test = ["covdefaults (>=2.3)", "coverage (>=7.2.7)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.12"
-content-hash = "613c701bdcecbbcac406aa68bdebccf70ac5da663f2ba19f6c9ed569c9f368c6"
+content-hash = "c5f51e6f028ee215fa273dc43a4134502cb276dd3ffef38de54cc4cd89896994"
