@@ -48,7 +48,16 @@ class TraceDataDispatcher:
         return TraceMetadata.from_record_dict(record)
 
     def get_data(self, kind):
+        if kind not in ("donor, acceptor"):
+            raise ValueError(f"kind must be 'donor' or 'acceptor; got '{kind}'")
         return self.file_handle[self.movie_path][f"traces/{kind}_traces"][self.index]
+
+    def get_statepath(self, kind):
+        if kind not in ("conformation, photophysics"):
+            raise ValueError(
+                f"kind must be 'conformation' or 'photophysics; got '{kind}'"
+            )
+        return self.file_handle[self.movie_path][f"statepaths/conformation"][self.index]
 
     @property
     def frame_length(self):
