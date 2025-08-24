@@ -42,10 +42,18 @@ class TraceDataDispatcher:
         # todo: validate trace uid matches expected
         record = self.file_handle[self.movie_path]["traces/metadata"][self.index]
         record = dict(zip(record.dtype.names, record))
-        record["n_frames"] = self.file_handle[self.movie_path].attrs["n_frames"]
+        record["n_frames"] = self.n_frames
         record["movie_uid"] = self.movie_uid
         record["index"] = self.index
         return TraceMetadata.from_record_dict(record)
 
     def get_data(self, kind):
         return self.file_handle[self.movie_path][f"traces/{kind}_traces"][self.index]
+
+    @property
+    def frame_length(self):
+        return self.file_handle[self.movie_path].attrs["frame_length"]
+
+    @property
+    def n_frames(self):
+        return self.file_handle[self.movie_path].attrs["n_frames"]

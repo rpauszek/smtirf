@@ -93,6 +93,10 @@ class TraceMetadata:
 
         return f"{self.movie_uid}_{self.index:04d}"
 
+    @property
+    def selected_slice(self):
+        return slice(self.start, self.stop)
+
     def make_trace_uid(self, index):
         """Return a Trace UID for a given index using the current Movie UID"""
         return f"{self.movie_uid}_{index:04d}"
