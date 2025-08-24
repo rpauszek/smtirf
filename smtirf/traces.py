@@ -8,7 +8,7 @@ import scipy.stats
 import smtirf
 
 from . import SMJsonEncoder, SMSpotCoordinate
-from .detail.data_dispatch import TraceDataDispatcher
+from .detail.data_dispatch import DataDispatcher, TraceDataDispatcher
 from .hmm.models import HiddenMarkovModel
 
 
@@ -16,6 +16,12 @@ class Trace:
     def __init__(self, file_handle, uid):
         self._dispatcher = TraceDataDispatcher(file_handle, uid)
         self._metadata = self._dispatcher.get_metadata()
+
+        self._raw_dispatcher = DataDispatcher(
+            lambda: np.arange(self._metadata.n_frames),
+            lambda: self._dispatcher.get_data("donor"),
+            lambda: self._dispatcher.get_data("acceptor"),
+        )
 
         # self._id = trcID
         # self._set_data(data)
@@ -36,17 +42,24 @@ class Trace:
         # )
 
     def __str__(self):
-        return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
+        return (
+            f"{self.__class__.__name__}\tID={self._metadata.trace_uid}"
+            f"\tselected={self._metadata.is_selected}"
+        )
 
     def __len__(self):
         return self.D0.size
 
-    def _set_data(self, data):
-        self.D0, self.A0, self.S0, self._SP = data
+    @property
+    def raw(self):
+        return self._raw_dispatcher
 
     @property
-    def _raw_data(self):
-        return np.vstack((self.D0, self.A0, self.S0, self._SP))
+    def is_selected(self):
+        return self._metadata.is_selected
+
+    def toggle_selected(self):
+        self._metadata.is_selected = not self.is_selected
 
     @property
     def _attr_dict(self):
@@ -185,9 +198,6 @@ class Trace:
         fr = self._time2frame(time)
         self.set_limits([self.limits.start, fr], refreshStatePath=refreshStatePath)
 
-    def toggle(self):
-        self.isSelected = not self.isSelected
-
     def set_signal_labels(self, sp, where="first", correctOffsets=True):
         self.S0 = sp
         if correctOffsets:
@@ -213,10 +223,6 @@ class Trace:
         else:
             raise ValueError("where keyword unrecognized")
 
-    # def reset_signal_labels(self):
-    #     self.S0 = np.zeros(self.S0.shape)
-    #     self._correct_signals() # this really should be implemented as a setter for all S0 changes
-    #
     def reset_offsets(self):
         self.set_offsets((0, 0))
 

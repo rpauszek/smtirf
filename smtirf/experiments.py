@@ -28,11 +28,13 @@ class Experiment:
             for key, group in self._file_handle["movies"].items()
         }
 
+        # todo: cleanup
+        self._traces = []
         for key, group in self._file_handle["movies"].items():
-            print(key)
             trace_ids = group["trace_ids"][:]
-            for uid in trace_ids[:1]:
-                Trace(self._file_handle, uid.decode("utf-8"))
+            for uid in trace_ids[:5]:
+                trace = Trace(self._file_handle, uid.decode("utf-8"))
+                self._traces.append(trace)
 
     def save(self, savename):
         Experiment.write_to_hdf(savename, self)
@@ -44,11 +46,11 @@ class Experiment:
         return len(self._traces)
 
     def __str__(self):
-        return f"{self.__class__.__name__}\t{self.nSelected}/{len(self)} selected"
+        return f"{self.__class__.__name__}\t{self.n_selected}/{len(self)} selected"
 
     @property
-    def nSelected(self):
-        return sum(1 for trc in self if trc.isSelected)
+    def n_selected(self):
+        return sum(1 for trace in self if trace.is_selected)
 
     def detect_baseline(
         self,
