@@ -50,6 +50,12 @@ class Coordinates:
         acceptor = Point(*arr[2:])
         return cls(donor, acceptor)
 
+    @classmethod
+    def from_record_dict(cls, record):
+        donor = Point(record["donor_x"], record["donor_y"])
+        acceptor = Point(record["acceptor_x"], record["acceptor_y"])
+        return cls(donor, acceptor)
+
     def as_list(self):
         return [self.donor.x, self.donor.y, self.acceptor.x, self.acceptor.y]
 

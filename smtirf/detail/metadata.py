@@ -10,12 +10,21 @@ import numpy as np
 from .definitions import Coordinates
 
 # todo: look into log timestamp is still string -> json decoder?
-config = dacite.Config(
+MOVIE_CONFIG = dacite.Config(
     type_hooks={
         int: lambda v: int(v) if isinstance(v, np.integer) else v,
         datetime: lambda t: datetime.fromisoformat(t),
         dict: lambda d: json.loads(d),
     }
+)
+
+TRACE_CONFIG = dacite.Config(
+    type_hooks={
+        int: lambda v: int(v) if isinstance(v, np.integer) else v,
+        float: lambda v: float(v),
+        bool: lambda v: bool(v) if v is not None else None,
+    },
+    strict=False,
 )
 
 
@@ -32,7 +41,7 @@ class MovieMetadata:
 
     @classmethod
     def _from_group(cls, group):
-        return dacite.from_dict(cls, dict(group.attrs), config=config)
+        return dacite.from_dict(cls, dict(group.attrs), config=MOVIE_CONFIG)
 
     @property
     def uid(self):
@@ -63,14 +72,19 @@ class TraceMetadata:
     peak: Optional[Coordinates] = None
     start: Optional[int] = 0
     stop: Optional[int] = None
-    donor_offset: Optional[int] = 0
-    acceptor_offset: Optional[int] = 0
+    donor_offset: Optional[float] = 0
+    acceptor_offset: Optional[float] = 0
     is_selected: Optional[bool] = False
 
     @classmethod
     def from_movie_metadata(cls, movie_metadata):
         """Make a factory based on movie UID and length."""
         return cls(movie_metadata.uid, movie_metadata.n_frames)
+
+    @classmethod
+    def from_record_dict(cls, record):
+        record["peak"] = Coordinates.from_record_dict(record)
+        return dacite.from_dict(cls, record, config=TRACE_CONFIG)
 
     @property
     def trace_uid(self):

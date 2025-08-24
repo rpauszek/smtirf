@@ -8,43 +8,32 @@ import scipy.stats
 import smtirf
 
 from . import SMJsonEncoder, SMSpotCoordinate
+from .detail.data_dispatch import TraceDataDispatcher
 from .hmm.models import HiddenMarkovModel
 
 
-class BaseTrace(ABC):
-    def __init__(
-        self,
-        trcID,
-        data,
-        frameLength,
-        pk,
-        bleed,
-        gamma,
-        clusterIndex=-1,
-        isSelected=False,
-        limits=None,
-        offsets=None,
-        model=None,
-        deBlur=False,
-        deSpike=False,
-    ):
-        self._id = trcID
-        self._set_data(data)
-        self.set_frame_length(frameLength)  # => set self.t
-        self._bleed = bleed
-        self._gamma = gamma
-        self.set_offsets(offsets)  # => triggers _correct_signals()
-        self.set_limits(limits, refreshStatePath=False)
+class Trace:
+    def __init__(self, file_handle, uid):
+        self._dispatcher = TraceDataDispatcher(file_handle, uid)
+        self._metadata = self._dispatcher.get_metadata()
 
-        self.pk = SMSpotCoordinate(pk)
-        self.isSelected = isSelected
-        self.set_cluster_index(clusterIndex)
-        self.model = HiddenMarkovModel.from_json(model)
-        self.deBlur = deBlur
-        self.deSpike = deSpike
-        self.dwells = (
-            smtirf.results.DwellTable(self) if self.model is not None else None
-        )
+        # self._id = trcID
+        # self._set_data(data)
+        # self.set_frame_length(frameLength)  # => set self.t
+        # self._bleed = bleed
+        # self._gamma = gamma
+        # self.set_offsets(offsets)  # => triggers _correct_signals()
+        # self.set_limits(limits, refreshStatePath=False)
+
+        # self.pk = SMSpotCoordinate(pk)
+        # self.isSelected = isSelected
+        # self.set_cluster_index(clusterIndex)
+        # self.model = HiddenMarkovModel.from_json(model)
+        # self.deBlur = deBlur
+        # self.deSpike = deSpike
+        # self.dwells = (
+        #     smtirf.results.DwellTable(self) if self.model is not None else None
+        # )
 
     def __str__(self):
         return f"{self.__class__.__name__}\tID={self._id}  selected={self.isSelected}"
@@ -266,7 +255,7 @@ class BaseTrace(ABC):
         np.savetxt(savename, data, fmt=fmt, delimiter="\t", header=header)
 
 
-class SingleColorTrace(BaseTrace):
+class SingleColorTrace:
     def __init__(self, trcID, data, frameLength, pk, bleed, gamma, channel=1, **kwargs):
         self.channel = channel
         super().__init__(trcID, data, frameLength, pk, bleed, gamma, **kwargs)
@@ -287,14 +276,14 @@ class SingleColorTrace(BaseTrace):
         return self.D[self.limits] if self.channel == 1 else self.A[self.limits]
 
 
-class PifeTrace(SingleColorTrace):
+class PifeTrace:
     classLabel = "pife"
 
     def get_export_data(self):
         pass
 
 
-class MultimerTrace(SingleColorTrace):
+class MultimerTrace:
     classLabel = "multimer"
 
     def train(self, K, sharedVariance=True, **kwargs):
@@ -308,7 +297,7 @@ class MultimerTrace(SingleColorTrace):
         pass
 
 
-class FretTrace(BaseTrace):
+class FretTrace:
     classLabel = "fret"
 
     @property

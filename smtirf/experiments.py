@@ -10,6 +10,7 @@ import smtirf
 from . import SMJsonDecoder, SMJsonEncoder, SMMovieList, SMTraceID, io, traces
 from .detail.metadata import MovieMetadata
 from .results import Results
+from .traces import Trace
 
 
 class Experiment:
@@ -26,7 +27,12 @@ class Experiment:
             key: MovieMetadata._from_group(group)
             for key, group in self._file_handle["movies"].items()
         }
-        print(self._movies)
+
+        for key, group in self._file_handle["movies"].items():
+            print(key)
+            trace_ids = group["trace_ids"][:]
+            for uid in trace_ids[:1]:
+                Trace(self._file_handle, uid.decode("utf-8"))
 
     def save(self, savename):
         Experiment.write_to_hdf(savename, self)
