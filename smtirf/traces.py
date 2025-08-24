@@ -46,6 +46,10 @@ class Trace:
             lambda: self.corrected.acceptor[self._metadata.selected_slice],
         )
 
+        self._photophysics_statepath = self._dispatcher.get_statepath("photophysics")
+        self._statepath = self._dispatcher.get_statepath("conformation")
+        self._model = None  # todo: placeholder until HMM refactor
+
         # self.set_cluster_index(clusterIndex)
         # self.model = HiddenMarkovModel.from_json(model)
         # self.deBlur = deBlur
@@ -92,6 +96,17 @@ class Trace:
         return self._final_dispatcher.fret
 
     @property
+    def state_path(self):
+        if self._model is None:
+            raise ValueError("No model exists for this trace.")
+        # todo: test, ensure int
+        return self._statepath[self._metadata.selected_slice]
+
+    @property
+    def emission_path(self):
+        return self.model.get_emission_path(self.state_path)
+
+    @property
     def is_selected(self):
         return self._metadata.is_selected
 
@@ -115,15 +130,6 @@ class Trace:
 
     def _as_json(self):
         return json.dumps(self._attr_dict, cls=SMJsonEncoder)
-
-    @property
-    def SP(self):  # state path
-        return self._SP[self.limits].astype(int)
-
-    def set_statepath(self, sp):
-        SP = np.full(self._SP.shape, -1)
-        SP[self.limits] = sp
-        self._SP = SP
 
     @property
     def frame_length(self):
@@ -248,10 +254,6 @@ class Trace:
                 self.model.label(self.X, deBlur=self.deBlur, deSpike=self.deSpike)
             )
             self.dwells = smtirf.results.DwellTable(self)
-
-    @property
-    def EP(self):
-        return self.model.get_emission_path(self.SP)
 
     @abstractmethod
     def get_export_data(self):
