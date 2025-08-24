@@ -186,30 +186,41 @@ class Trace:
     def reset_offsets(self):
         self.set_offsets((0, 0))
 
+    # todo: set_offsets_from_time_range()
+
     @property
     def limits(self):
         return [self._metadata.start, self._metadata.stop]
 
-    def set_limits(self, values, refreshStatePath=True):
-        if values is None:
-            self._limits = slice(*np.array([0, len(self)]))
-        elif not isinstance(values, slice):
-            values = np.array(values)
-            if values.size != 2:
-                raise ValueError("must provide offsets for both (2) channels")
-            values = np.sort(values)
-            if values[0] < 0:
-                values[0] = 0  # TODO: add warning?
-            if values[1] > len(self):
-                values[1] = len(self)  # TODO: add warning?
-            if np.diff(values) <= 2:
-                warnings.warn("range must be >2 frames. resetting to full trace")
-                values = np.array([0, len(self)])  # TODO: maybe just don't update?
-            self._limits = slice(*values)
-        else:
-            self._limits = values
-        if refreshStatePath:
-            self.label_statepath()
+    # todo: set_start_time()
+    # todo: set_stop_time()
+
+    @with_statepath_update
+    def set_limits(self, start=None, stop=None):
+        """Set start/stop limits of analysis range by frame index."""
+        # todo: original function had bool refreshStatePath
+        # todo: check that unneccessary viterbi doesn't happen on construction
+
+        match (start, stop):
+            case (None, None):
+                raise ValueError(
+                    "At least one of start/stop must be provided. If you wish to reset "
+                    "the limits to the full trace call the reset_limits() method."
+                )
+            case (s, _) if s is not None and s < 0:
+                raise ValueError("Start must be non-negative.")
+            case (_, e) if e is not None and e < 0:
+                raise ValueError("Stop must be non-negative.")
+            case (s, e) if s is not None and e is not None and s >= e:
+                raise ValueError("Start must be less than stop.")
+            case (_, e) if e is not None and e >= len(self):
+                raise ValueError("Stop must be less than trace length.")
+            case _:
+                self._metadata.start = start
+                self._metadata.stop = stop
+
+    def reset_limits(self):
+        self.set_limits((0, len(self)))
 
     @property
     def clusterIndex(self):
@@ -226,22 +237,6 @@ class Trace:
     @property
     def corrcoef(self):
         return scipy.stats.pearsonr(self.donor, self.acceptor)[0]
-
-    def _time2frame(self, t):  # copy from old
-        # find frame index closest to time t
-        return np.argmin(np.abs(self.t - t))
-
-    def set_offset_time_window(self, start, stop):
-        rng = slice(self._time2frame(start), self._time2frame(stop))
-        self.set_offsets([np.median(self.D0[rng]), np.median(self.A0[rng])])
-
-    def set_start_time(self, time, refreshStatePath=True):
-        fr = self._time2frame(time)
-        self.set_limits([fr, self.limits.stop], refreshStatePath=refreshStatePath)
-
-    def set_stop_time(self, time, refreshStatePath=True):
-        fr = self._time2frame(time)
-        self.set_limits([self.limits.start, fr], refreshStatePath=refreshStatePath)
 
     def set_signal_labels(self, sp, where="first", correctOffsets=True):
         self.S0 = sp
@@ -267,9 +262,6 @@ class Trace:
             pass
         else:
             raise ValueError("where keyword unrecognized")
-
-    def reset_limits(self):
-        self.set_limits((0, len(self)))
 
     def train(self, modelType, K, sharedVariance=True, **kwargs):
         theta = smtirf.HiddenMarkovModel.train_new(
