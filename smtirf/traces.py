@@ -1,6 +1,3 @@
-import json
-import warnings
-from abc import ABC, abstractmethod
 from functools import wraps
 
 import numpy as np
@@ -8,7 +5,6 @@ import scipy.stats
 
 import smtirf
 
-from . import SMJsonEncoder, SMSpotCoordinate
 from .detail.data_dispatch import DataDispatcher, TraceDataDispatcher
 from .hmm.models import HiddenMarkovModel
 
@@ -66,14 +62,6 @@ class Trace:
         self._statepath = self._dispatcher.get_statepath("conformation")
         self._model = None  # todo: placeholder until HMM refactor
 
-        # self.set_cluster_index(clusterIndex)
-        # self.model = HiddenMarkovModel.from_json(model)
-        # self.deBlur = deBlur
-        # self.deSpike = deSpike
-        # self.dwells = (
-        #     smtirf.results.DwellTable(self) if self.model is not None else None
-        # )
-
     def __str__(self):
         return (
             f"{self.__class__.__name__}\tID={self._metadata.trace_uid}"
@@ -82,6 +70,18 @@ class Trace:
 
     def __len__(self):
         return self._dispatcher.n_frames
+
+    @property
+    def frame_length(self):
+        return self._dispatcher.frame_length
+
+    @property
+    def bleed(self):
+        return self._bleed
+
+    @property
+    def gamma(self):
+        return self._gamma
 
     @property
     def raw(self):
@@ -112,6 +112,10 @@ class Trace:
         return self._final_dispatcher.fret
 
     @property
+    def corrcoef(self):
+        return scipy.stats.pearsonr(self.donor, self.acceptor)[0]
+
+    @property
     def state_path(self):
         if self._model is None:
             raise ValueError("No model exists for this trace.")
@@ -119,7 +123,7 @@ class Trace:
         return self._statepath[self._metadata.selected_slice]
 
     def _update_statepath(self):
-        # todo: check old implementation, label_statepath()
+        # todo: check old implementation, label_statepath(), recalculate dwell table ?
         # todo: potentially include clearing statepath if model is removed
         if self.is_selected and self._model is not None:
             print("updating statepath...")
@@ -141,36 +145,6 @@ class Trace:
     @with_statepath_update
     def toggle_selected(self):
         self._metadata.is_selected = not self.is_selected
-
-    @property
-    def _attr_dict(self):
-        return {
-            "pk": self.pk,
-            "clusterIndex": self.clusterIndex,
-            "frameLength": self.frameLength,
-            "bleed": self.bleed,
-            "gamma": self.gamma,
-            "limits": self.limits,
-            "offsets": self.offsets,
-            "isSelected": self.isSelected,
-            "deBlur": self.deBlur,
-            "deSpike": self.deSpike,
-        }
-
-    def _as_json(self):
-        return json.dumps(self._attr_dict, cls=SMJsonEncoder)
-
-    @property
-    def frame_length(self):
-        return self._dispatcher.frame_length
-
-    @property
-    def bleed(self):
-        return self._bleed
-
-    @property
-    def gamma(self):
-        return self._gamma
 
     @property
     def offsets(self):
@@ -222,22 +196,7 @@ class Trace:
     def reset_limits(self):
         self.set_limits((0, len(self)))
 
-    @property
-    def clusterIndex(self):
-        return self._clusterIndex
-
-    def set_cluster_index(self, val):
-        # TODO => catch ValueError for non-int val
-        self._clusterIndex = int(val)
-
-    @property
-    def movID(self):
-        return self._id.movID
-
-    @property
-    def corrcoef(self):
-        return scipy.stats.pearsonr(self.donor, self.acceptor)[0]
-
+    # todo: fixup with autobaseline refactor
     def set_signal_labels(self, sp, where="first", correctOffsets=True):
         self.S0 = sp
         if correctOffsets:
@@ -277,9 +236,8 @@ class Trace:
             )
             self.dwells = smtirf.results.DwellTable(self)
 
-    @abstractmethod
     def get_export_data(self):
-        ...
+        raise NotImplementedError("Base class does not implement this method.")
 
     def export(self, savename):
         data, fmt, header = self.get_export_data()
@@ -305,13 +263,6 @@ class SingleColorTrace:
     @property
     def X(self):
         return self.D[self.limits] if self.channel == 1 else self.A[self.limits]
-
-
-class PifeTrace:
-    classLabel = "pife"
-
-    def get_export_data(self):
-        pass
 
 
 class MultimerTrace:
