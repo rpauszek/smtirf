@@ -23,7 +23,9 @@ DATASET_OPTS = dict(
 )
 
 
-def write_movie_to_hdf(savename, traces, peaks, metadata, snapshot=None):
+def write_movie_to_hdf(
+    savename, experiment_type, traces, peaks, metadata, snapshot=None
+):
     """Write a movie to HDF5 from raw data import.
 
     To be called from helper functions in smtirf.io.import_dispatch
@@ -32,6 +34,8 @@ def write_movie_to_hdf(savename, traces, peaks, metadata, snapshot=None):
     ----------
     savename: Path
         file path to write HDF5
+    experiment_type: {"fret"}
+        experiment type, controls trace class
     traces: List[RawTrace]
         list of raw trace data
     peaks: List[Coordinates]
@@ -46,6 +50,7 @@ def write_movie_to_hdf(savename, traces, peaks, metadata, snapshot=None):
         hf.attrs["smtirf_version"] = current_version
         hf.attrs["smtrc_version"] = SCHEMA_VERSION
         hf.attrs["date_modified"] = datetime.now().strftime(r"%Y-%m-%d %H:%M:%S")
+        hf.attrs["experiment_type"] = experiment_type
 
         mov_group = _initialize_movie(hf, metadata, snapshot)
         _write_trace_data(mov_group, metadata, traces)

@@ -6,6 +6,8 @@ import pytest
 
 from smtirf.io.import_dispatch import load_from_pma
 
+# todo: test happy path!
+
 
 def generate_missing_file_permutations():
     n = [(n_true, 4 - n_true) for n_true in range(1, 4)]
@@ -48,3 +50,12 @@ def test_load_from_pma_missing_files(exists_flags):
 
     n_breaks = msg.count("\n")
     assert n_breaks == 4 - sum(exists_flags)
+
+
+def test_unknown_experiment_type(tmp_path):
+    filename = Path("experiment.traces")
+    savename = Path(tmp_path) / "bad_experiment.smtrc"
+
+    with pytest.raises(ValueError) as e:
+        load_from_pma(filename, experiment_type="bozo")
+    assert str(e.value) == "experiment type must be in ('fret',); got bozo"

@@ -5,8 +5,17 @@ from ..detail.writer import write_movie_to_hdf
 from . import pma
 
 
+def _validate_experiment_type(experiment_type):
+    if experiment_type not in (defined_experiments := ("fret",)):
+        raise ValueError(
+            f"experiment type must be in {defined_experiments}; got {experiment_type}"
+        )
+
+
 # todo: bleed, gamma
-def load_from_pma(filename, *, savename=None):
+def load_from_pma(filename, experiment_type="fret", *, savename=None):
+    _validate_experiment_type(experiment_type)
+
     filename = Path(filename)
     savename = filename.with_suffix(".smtrc") if savename is None else Path(savename)
 
@@ -38,4 +47,4 @@ def load_from_pma(filename, *, savename=None):
         log=log,
     )
 
-    write_movie_to_hdf(savename, traces, peaks, metadata, snapshot)
+    write_movie_to_hdf(savename, experiment_type, traces, peaks, metadata, snapshot)

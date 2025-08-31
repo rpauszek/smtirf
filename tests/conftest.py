@@ -50,6 +50,7 @@ def smtrc_file(tmp_path_factory, mock_data):
 
     write_movie_to_hdf(
         filepath,
+        "fret",
         mock_data.traces,
         mock_data.peaks,
         mock_data.movie_metadata,
