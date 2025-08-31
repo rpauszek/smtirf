@@ -58,4 +58,4 @@ def test_unknown_experiment_type(tmp_path):
 
     with pytest.raises(ValueError) as e:
         load_from_pma(filename, experiment_type="bozo")
-    assert str(e.value) == "experiment type must be in ('fret',); got bozo"
+    assert str(e.value) == "experiment type must be in ('fret', 'twocolor'); got bozo"

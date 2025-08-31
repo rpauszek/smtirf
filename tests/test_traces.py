@@ -47,7 +47,7 @@ def expected_signals(mock_data):
 
 def test_trace_basic_properties(mock_trace, mock_data):
     trace = mock_trace
-    assert str(trace) == r"Trace	ID=20250824T163642_0000	selected=False"
+    assert str(trace) == r"FretTrace	ID=20250824T163642_0000	selected=False"
     assert len(trace) == mock_data.movie_metadata.n_frames
     assert trace.frame_length == mock_data.movie_metadata.frame_length
 
