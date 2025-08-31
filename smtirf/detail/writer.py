@@ -24,7 +24,14 @@ DATASET_OPTS = dict(
 
 
 def write_movie_to_hdf(
-    savename, experiment_type, traces, peaks, metadata, snapshot=None
+    savename,
+    experiment_type,
+    bleedthrough,
+    gamma,
+    traces,
+    peaks,
+    metadata,
+    snapshot=None,
 ):
     """Write a movie to HDF5 from raw data import.
 
@@ -36,6 +43,10 @@ def write_movie_to_hdf(
         file path to write HDF5
     experiment_type: {"fret"}
         experiment type, controls trace class
+    bleedthrough: float
+        fractional bleedthrough of channel 1 emission to channel 2
+    gamma: float
+        gamma correction
     traces: List[RawTrace]
         list of raw trace data
     peaks: List[Coordinates]
@@ -51,6 +62,8 @@ def write_movie_to_hdf(
         hf.attrs["smtrc_version"] = SCHEMA_VERSION
         hf.attrs["date_modified"] = datetime.now().strftime(r"%Y-%m-%d %H:%M:%S")
         hf.attrs["experiment_type"] = experiment_type
+        hf.attrs["bleedthrough"] = bleedthrough
+        hf.attrs["gamma"] = gamma
 
         mov_group = _initialize_movie(hf, metadata, snapshot)
         _write_trace_data(mov_group, metadata, traces)

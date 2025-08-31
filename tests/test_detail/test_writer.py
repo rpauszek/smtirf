@@ -60,7 +60,7 @@ def test_write_movie_to_hdf(
     metadata = make_movie_metadata(
         log={"key1": "value1", "key2": 50, "key3": timestamp}
     )
-    write_movie_to_hdf(savename, "fret", traces, peaks, metadata, snapshot)
+    write_movie_to_hdf(savename, "fret", 0.05, 1, traces, peaks, metadata, snapshot)
     with h5py.File(savename, "r") as hf:
         assert hf.attrs["date_modified"]
         assert hf.attrs["smtirf_version"] == "0.1.5"
@@ -102,7 +102,7 @@ def test_write_movie_to_hdf_no_snapshot(
 ):
     savename = Path(tmp_path) / "imported_movie_no_snapshot.smtrc"
     metadata = make_movie_metadata(log={"1": 1})
-    write_movie_to_hdf(savename, "fret", traces, peaks, metadata)
+    write_movie_to_hdf(savename, "fret", 0.05, 1, traces, peaks, metadata)
 
     with h5py.File(savename, "r") as hf:
         assert f"movies/movie_{metadata.uid}/snapshot" not in hf
@@ -116,7 +116,7 @@ def test_movie_metadata_written(
     metadata = make_movie_metadata(
         log={"key1": "value1", "key2": 50, "key3": timestamp, "key4": None}
     )
-    write_movie_to_hdf(savename, "fret", traces, peaks, metadata, snapshot)
+    write_movie_to_hdf(savename, "fret", 0.05, 1, traces, peaks, metadata, snapshot)
     with h5py.File(savename, "r") as hf:
         group = hf[f"movies/movie_{metadata.uid}"]
         assert group.attrs["ccd_gain"] == 300
@@ -136,7 +136,7 @@ def test_movie_metadata_written(
     metadata = make_movie_metadata(
         log={"key1": "value1", "key2": 50, "key3": timestamp}, include_data_scaler=False
     )
-    write_movie_to_hdf(savename, "fret", traces, peaks, metadata, snapshot)
+    write_movie_to_hdf(savename, "fret", 0.05, 1, traces, peaks, metadata, snapshot)
     with h5py.File(savename, "r") as hf:
         group = hf[f"movies/movie_{metadata.uid}"]
         assert "data_scaler" not in group.attrs
@@ -144,7 +144,7 @@ def test_movie_metadata_written(
     # no log
     savename = Path(tmp_path) / "imported_movie_no_log.smtrc"
     metadata = make_movie_metadata(log={})
-    write_movie_to_hdf(savename, "fret", traces, peaks, metadata, snapshot)
+    write_movie_to_hdf(savename, "fret", 0.05, 1, traces, peaks, metadata, snapshot)
     with h5py.File(savename, "r") as hf:
         group = hf[f"movies/movie_{metadata.uid}"]
         assert group.attrs["log"] == r"{}"
