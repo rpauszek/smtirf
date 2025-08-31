@@ -5,7 +5,7 @@ import scipy.stats
 
 import smtirf
 
-from .detail.data_dispatch import FretDispatcher, TraceLoader
+from .detail.data_dispatch import FretDispatcher, TraceLoader, TwoColorDispatcher
 from .hmm.models import HiddenMarkovModel
 
 
@@ -33,7 +33,15 @@ class Trace:
         self._gamma = self._loader.gamma
         self._bleed = self._loader.bleedthrough
 
-        dispatcher_cls = FretDispatcher
+        match (t := self._loader.experiment_type):
+            case "fret":
+                dispatcher_cls = FretDispatcher
+            case "twocolor":
+                dispatcher_cls = TwoColorDispatcher
+            case _:
+                raise NotImplementedError(
+                    f"dispatcher is not implemented for experiment type {t}"
+                )
 
         self._raw_dispatcher = dispatcher_cls(
             lambda: np.arange(self._metadata.n_frames) * self.frame_length,
@@ -98,20 +106,8 @@ class Trace:
         return self._final_dispatcher.time
 
     @property
-    def donor(self):
-        return self._final_dispatcher.donor
-
-    @property
-    def acceptor(self):
-        return self._final_dispatcher.acceptor
-
-    @property
     def total(self):
         return self._final_dispatcher.total
-
-    @property
-    def fret(self):
-        return self._final_dispatcher.fret
 
     @property
     def corrcoef(self):
@@ -246,79 +242,25 @@ class Trace:
         np.savetxt(savename, data, fmt=fmt, delimiter="\t", header=header)
 
 
-class SingleColorTrace:
-    def __init__(self, trcID, data, frameLength, pk, bleed, gamma, channel=1, **kwargs):
-        self.channel = channel
-        super().__init__(trcID, data, frameLength, pk, bleed, gamma, **kwargs)
+class FretTrace(Trace):
+    @property
+    def donor(self):
+        return self._final_dispatcher.donor
 
     @property
-    def _attr_dict(self):
-        d = super()._attr_dict
-        d["channel"] = self.channel
-        return d
-
-    def __str__(self):
-        s = super().__str__()
-        s += f" [Channel {self.channel}]"
-        return s
+    def acceptor(self):
+        return self._final_dispatcher.acceptor
 
     @property
-    def X(self):
-        return self.D[self.limits] if self.channel == 1 else self.A[self.limits]
+    def fret(self):
+        return self._final_dispatcher.fret
 
 
-class MultimerTrace:
-    classLabel = "multimer"
-
-    def train(self, K, sharedVariance=True, **kwargs):
-        theta = smtirf.HiddenMarkovModel.train_new(
-            "multimer", self.X, K, sharedVariance, **kwargs
-        )
-        self.model = theta
-        self.label_statepath()
-
-    def get_export_data(self):
-        pass
-
-
-class FretTrace:
-    classLabel = "fret"
+class TwoColorTrace(Trace):
+    @property
+    def channel_1(self):
+        return self._final_dispatcher.channel_1
 
     @property
-    def X(self):
-        return self.E[self.limits]
-
-    def _correct_signals(self):
-        super()._correct_signals()
-        with np.errstate(divide="ignore", invalid="ignore"):
-            self.E = self.A / self.I
-
-    def get_export_data(self):
-        E = np.full(self.E.shape, np.nan)
-        S = np.full(self.E.shape, -1)
-        F = E.copy()
-        E[self.limits] = self.X
-        try:
-            S[self.limits] = self.SP
-            F[self.limits] = self.EP
-        except AttributeError:
-            pass
-        data = np.vstack((self.t, self.D, self.A, E, S, F)).T
-        fmt = ("%.3f", "%.3f", "%.3f", "%.5f", "%3d", "%.5f")
-        header = "Time (sec)\tDonor\tAcceptor\tFRET\tState\tFit"
-        return data, fmt, header
-
-
-class PiecewiseTrace(FretTrace):
-    classLabel = "piecewise"
-
-    @property
-    def X(self):
-        return 1
-
-    def _correct_signals(self):
-        super()._correct_signals()
-        self._E = (
-            self.E.copy()
-        )  # store a normal version of FRET efficiency, without masking
-        self.E[self.S0 != 0] = np.nan
+    def channel_2(self):
+        return self._final_dispatcher.channel_2

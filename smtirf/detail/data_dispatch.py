@@ -14,6 +14,10 @@ class SignalDispatcher:
     def time(self):
         return self._time()
 
+    @property
+    def total(self):
+        return self._channel_1() + self._channel_2()
+
 
 @dataclass(repr=False)
 class FretDispatcher(SignalDispatcher):
@@ -26,12 +30,19 @@ class FretDispatcher(SignalDispatcher):
         return self._channel_2()
 
     @property
-    def total(self):
-        return self.donor + self.acceptor
-
-    @property
     def fret(self):
         return self.acceptor / self.total
+
+
+@dataclass(repr=False)
+class TwoColorDispatcher(SignalDispatcher):
+    @property
+    def channel_1(self):
+        return self._channel_1()
+
+    @property
+    def channel_2(self):
+        return self._channel_2()
 
 
 class TraceLoader:
@@ -61,6 +72,10 @@ class TraceLoader:
                 f"kind must be 'conformation' or 'photophysics; got '{kind}'"
             )
         return self.file_handle[self.movie_path][f"statepaths/conformation"][self.index]
+
+    @property
+    def experiment_type(self):
+        return self.file_handle.attrs["experiment_type"]
 
     @property
     def frame_length(self):

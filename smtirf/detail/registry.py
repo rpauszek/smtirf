@@ -1,5 +1,6 @@
-from ..traces import Trace
+from ..traces import FretTrace, TwoColorTrace
 
 TRACE_REGISTRY = {
-    "fret": Trace,
+    "fret": FretTrace,
+    "twocolor": TwoColorTrace,
 }
