@@ -69,3 +69,11 @@ class TraceLoader:
     @property
     def n_frames(self):
         return self.file_handle[self.movie_path].attrs["n_frames"]
+
+    @property
+    def bleedthrough(self):
+        return self.file_handle.attrs["bleedthrough"]
+
+    @property
+    def gamma(self):
+        return self.file_handle.attrs["gamma"]

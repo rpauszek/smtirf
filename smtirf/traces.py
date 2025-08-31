@@ -29,9 +29,9 @@ class Trace:
         self._loader = TraceLoader(file_handle, uid)
         self._metadata = self._loader.get_metadata()
 
-        # todo: handle this properly
-        self._gamma = 1
-        self._bleed = 0.05
+        # todo: should this be mutable?
+        self._gamma = self._loader.gamma
+        self._bleed = self._loader.bleedthrough
 
         dispatcher_cls = FretDispatcher
 

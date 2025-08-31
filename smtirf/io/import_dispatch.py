@@ -14,7 +14,9 @@ def _validate_experiment_type(experiment_type):
 
 
 # todo: bleed, gamma
-def load_from_pma(filename, experiment_type="fret", *, savename=None):
+def load_from_pma(
+    filename, experiment_type="fret", *, savename=None, bleedthrough=0.0, gamma=1.0
+):
     _validate_experiment_type(experiment_type)
 
     filename = Path(filename)
@@ -48,4 +50,13 @@ def load_from_pma(filename, experiment_type="fret", *, savename=None):
         log=log,
     )
 
-    write_movie_to_hdf(savename, experiment_type, traces, peaks, metadata, snapshot)
+    write_movie_to_hdf(
+        savename,
+        experiment_type,
+        bleedthrough,
+        gamma,
+        traces,
+        peaks,
+        metadata,
+        snapshot,
+    )
