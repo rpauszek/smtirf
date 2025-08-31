@@ -25,13 +25,13 @@ def expected_signals(mock_data):
 
     trace = mock_data.traces[USE_TRACE_INDEX]
 
-    raw = trace.donor
+    raw = trace.channel_1
     offset = 5
     baselined = raw - offset
     corrected = baselined * gamma
     donor = signal(raw, offset, baselined, corrected)
 
-    raw = trace.acceptor
+    raw = trace.channel_2
     offset = 10
     baselined = raw - offset
     corrected = baselined - (donor.baselined * bleed)

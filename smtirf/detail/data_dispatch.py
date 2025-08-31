@@ -5,14 +5,18 @@ from .metadata import TraceMetadata
 
 
 @dataclass(repr=False)
-class DataDispatcher:
+class TimeDispatcherMixin:
     _time: Callable
-    _donor: Callable
-    _acceptor: Callable
 
     @property
     def time(self):
         return self._time()
+
+
+@dataclass(repr=False)
+class FretDispatcher(TimeDispatcherMixin):
+    _donor: Callable
+    _acceptor: Callable
 
     @property
     def donor(self):
@@ -31,7 +35,7 @@ class DataDispatcher:
         return self.acceptor / self.total
 
 
-class TraceDataDispatcher:
+class TraceLoader:
     def __init__(self, file_handle, uid):
         self.file_handle = file_handle
         self.movie_uid, index = uid.split("_")
@@ -48,9 +52,9 @@ class TraceDataDispatcher:
         return TraceMetadata.from_record_dict(record)
 
     def get_data(self, kind):
-        if kind not in ("donor, acceptor"):
-            raise ValueError(f"kind must be 'donor' or 'acceptor; got '{kind}'")
-        return self.file_handle[self.movie_path][f"traces/{kind}_traces"][self.index]
+        if kind not in ("channel_1, channel_2"):
+            raise ValueError(f"kind must be 'channel_1' or 'channel_2; got '{kind}'")
+        return self.file_handle[self.movie_path][f"traces/{kind}"][self.index]
 
     def get_statepath(self, kind):
         if kind not in ("conformation, photophysics"):
