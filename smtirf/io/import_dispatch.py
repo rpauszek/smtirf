@@ -1,12 +1,13 @@
 from pathlib import Path
 
 from ..detail.metadata import MovieMetadata
+from ..detail.registry import TRACE_REGISTRY
 from ..detail.writer import write_movie_to_hdf
 from . import pma
 
 
 def _validate_experiment_type(experiment_type):
-    if experiment_type not in (defined_experiments := ("fret",)):
+    if experiment_type not in (defined_experiments := tuple(TRACE_REGISTRY.keys())):
         raise ValueError(
             f"experiment type must be in {defined_experiments}; got {experiment_type}"
         )
