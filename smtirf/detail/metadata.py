@@ -64,7 +64,7 @@ TRACE_DTYPE = np.dtype(
 )
 
 
-@dataclass
+@dataclass(slots=True)
 class TraceMetadata:
     movie_uid: str
     n_frames: int
