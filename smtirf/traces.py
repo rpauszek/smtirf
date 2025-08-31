@@ -33,29 +33,31 @@ class Trace:
         self._gamma = 1
         self._bleed = 0.05
 
-        self._raw_dispatcher = FretDispatcher(
+        dispatcher_cls = FretDispatcher
+
+        self._raw_dispatcher = dispatcher_cls(
             lambda: np.arange(self._metadata.n_frames) * self.frame_length,
             lambda: self._loader.get_data("channel_1"),
             lambda: self._loader.get_data("channel_2"),
         )
 
-        self._baselined_dispatcher = FretDispatcher(
+        self._baselined_dispatcher = dispatcher_cls(
             lambda: self.raw.time,
-            lambda: self.raw.donor - self._metadata.donor_offset,
-            lambda: self.raw.acceptor - self._metadata.acceptor_offset,
+            lambda: self.raw._channel_1() - self._metadata.ch1_offset,
+            lambda: self.raw._channel_2() - self._metadata.ch2_offset,
         )
 
-        self._corrected_dispatcher = FretDispatcher(
+        self._corrected_dispatcher = dispatcher_cls(
             lambda: self.raw.time,
-            lambda: self._baselined_dispatcher.donor * self._gamma,
-            lambda: self._baselined_dispatcher.acceptor
-            - (self._baselined_dispatcher.donor * self._bleed),
+            lambda: self._baselined_dispatcher._channel_1() * self._gamma,
+            lambda: self._baselined_dispatcher._channel_2()
+            - (self._baselined_dispatcher._channel_1() * self._bleed),
         )
 
-        self._final_dispatcher = FretDispatcher(
+        self._final_dispatcher = dispatcher_cls(
             lambda: self.raw.time[self._metadata.selected_slice],
-            lambda: self.corrected.donor[self._metadata.selected_slice],
-            lambda: self.corrected.acceptor[self._metadata.selected_slice],
+            lambda: self.corrected._channel_1()[self._metadata.selected_slice],
+            lambda: self.corrected._channel_2()[self._metadata.selected_slice],
         )
 
         self._photophysics_statepath = self._loader.get_statepath("photophysics")
@@ -154,8 +156,8 @@ class Trace:
     def set_offsets(self, values):
         if len(values) != 2:
             raise ValueError("must provide offsets for both (2) channels")
-        self._metadata.donor_offset = values[0]
-        self._metadata.acceptor_offset = values[1]
+        self._metadata.ch1_offset = values[0]
+        self._metadata.ch2_offset = values[1]
 
     def reset_offsets(self):
         self.set_offsets((0, 0))

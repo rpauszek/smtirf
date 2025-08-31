@@ -5,8 +5,10 @@ from .metadata import TraceMetadata
 
 
 @dataclass(repr=False)
-class TimeDispatcherMixin:
+class SignalDispatcher:
     _time: Callable
+    _channel_1: Callable
+    _channel_2: Callable
 
     @property
     def time(self):
@@ -14,17 +16,14 @@ class TimeDispatcherMixin:
 
 
 @dataclass(repr=False)
-class FretDispatcher(TimeDispatcherMixin):
-    _donor: Callable
-    _acceptor: Callable
-
+class FretDispatcher(SignalDispatcher):
     @property
     def donor(self):
-        return self._donor()
+        return self._channel_1()
 
     @property
     def acceptor(self):
-        return self._acceptor()
+        return self._channel_2()
 
     @property
     def total(self):
