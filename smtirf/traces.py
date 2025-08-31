@@ -5,7 +5,7 @@ import scipy.stats
 
 import smtirf
 
-from .detail.data_dispatch import DataDispatcher, TraceDataDispatcher
+from .detail.data_dispatch import FretDispatcher, TraceLoader
 from .hmm.models import HiddenMarkovModel
 
 
@@ -26,40 +26,40 @@ def with_statepath_update(func):
 
 class Trace:
     def __init__(self, file_handle, uid):
-        self._dispatcher = TraceDataDispatcher(file_handle, uid)
-        self._metadata = self._dispatcher.get_metadata()
+        self._loader = TraceLoader(file_handle, uid)
+        self._metadata = self._loader.get_metadata()
 
         # todo: handle this properly
         self._gamma = 1
         self._bleed = 0.05
 
-        self._raw_dispatcher = DataDispatcher(
+        self._raw_dispatcher = FretDispatcher(
             lambda: np.arange(self._metadata.n_frames) * self.frame_length,
-            lambda: self._dispatcher.get_data("donor"),
-            lambda: self._dispatcher.get_data("acceptor"),
+            lambda: self._loader.get_data("channel_1"),
+            lambda: self._loader.get_data("channel_2"),
         )
 
-        self._baselined_dispatcher = DataDispatcher(
+        self._baselined_dispatcher = FretDispatcher(
             lambda: self.raw.time,
             lambda: self.raw.donor - self._metadata.donor_offset,
             lambda: self.raw.acceptor - self._metadata.acceptor_offset,
         )
 
-        self._corrected_dispatcher = DataDispatcher(
+        self._corrected_dispatcher = FretDispatcher(
             lambda: self.raw.time,
             lambda: self._baselined_dispatcher.donor * self._gamma,
             lambda: self._baselined_dispatcher.acceptor
             - (self._baselined_dispatcher.donor * self._bleed),
         )
 
-        self._final_dispatcher = DataDispatcher(
+        self._final_dispatcher = FretDispatcher(
             lambda: self.raw.time[self._metadata.selected_slice],
             lambda: self.corrected.donor[self._metadata.selected_slice],
             lambda: self.corrected.acceptor[self._metadata.selected_slice],
         )
 
-        self._photophysics_statepath = self._dispatcher.get_statepath("photophysics")
-        self._statepath = self._dispatcher.get_statepath("conformation")
+        self._photophysics_statepath = self._loader.get_statepath("photophysics")
+        self._statepath = self._loader.get_statepath("conformation")
         self._model = None  # todo: placeholder until HMM refactor
 
     def __str__(self):
@@ -69,11 +69,11 @@ class Trace:
         )
 
     def __len__(self):
-        return self._dispatcher.n_frames
+        return self._loader.n_frames
 
     @property
     def frame_length(self):
-        return self._dispatcher.frame_length
+        return self._loader.frame_length
 
     @property
     def bleed(self):
