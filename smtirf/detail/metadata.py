@@ -51,14 +51,14 @@ class MovieMetadata:
 TRACE_DTYPE = np.dtype(
     [
         ("trace_id", h5py.string_dtype("utf-8", length=32)),
-        ("donor_x", np.float32),
-        ("donor_y", np.float32),
-        ("acceptor_x", np.float32),
-        ("acceptor_y", np.float32),
+        ("ch1_x", np.float32),
+        ("ch1_y", np.float32),
+        ("ch2_x", np.float32),
+        ("ch2_y", np.float32),
         ("start", np.uint32),
         ("stop", np.uint32),
-        ("donor_offset", np.float32),
-        ("acceptor_offset", np.float32),
+        ("ch1_offset", np.float32),
+        ("ch2_offset", np.float32),
         ("is_selected", bool),
     ]
 )
@@ -72,8 +72,8 @@ class TraceMetadata:
     peak: Optional[Coordinates] = None
     start: Optional[int] = 0
     stop: Optional[int] = None
-    donor_offset: Optional[float] = 0
-    acceptor_offset: Optional[float] = 0
+    ch1_offset: Optional[float] = 0
+    ch2_offset: Optional[float] = 0
     is_selected: Optional[bool] = False
 
     @classmethod
@@ -102,6 +102,12 @@ class TraceMetadata:
         return f"{self.movie_uid}_{index:04d}"
 
     def make_record(self, *, index=None, peak=None):
+        """Return instance attributes as tuple defined by TRACE_DTYPE.
+
+        If self.index and self.peak are None, index and peak arguments must be supplied.
+        This is used for initial data import where HDF5 is not yet written.
+        Essentially acts as a factory to generate metadata records to be written to initial HDF5.
+        """
         # todo: throw if kwargs but already set in instance
 
         trace_uid = [
@@ -116,8 +122,8 @@ class TraceMetadata:
             + [
                 self.start,
                 stop,
-                self.donor_offset,
-                self.acceptor_offset,
+                self.ch1_offset,
+                self.ch2_offset,
                 self.is_selected,
             ]
         )

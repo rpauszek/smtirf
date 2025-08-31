@@ -8,12 +8,12 @@ import numpy as np
 
 @dataclass(frozen=True)
 class RawTrace:
-    donor: np.ndarray
-    acceptor: np.ndarray
+    channel_1: np.ndarray
+    channel_2: np.ndarray
 
     @property
     def n_frames(self):
-        return len(self.donor)
+        return len(self.channel_1)
 
 
 @dataclass(frozen=True)
@@ -24,18 +24,18 @@ class Point:
 
 @dataclass
 class Coordinates:
-    """Donor/Acceptor peak coordinates.
+    """Peak coordinates for channel 1 (left) and channel 2 (right).
 
     Attributes
     ----------
-    donor : Point or None
-        Coordinates of the donor spot.
-    acceptor : Point or None
-        Coordinates of the acceptor spot.
+    channel_1 : Point or None
+        Coordinates of the spot in channel 1 (left-side).
+    channel_2 : Point or None
+        Coordinates of the spot in channel 2 (right-side).
     """
 
-    donor: Optional[Point]
-    acceptor: Optional[Point]
+    channel_1: Optional[Point]
+    channel_2: Optional[Point]
 
     @classmethod
     def from_array(cls, arr):
@@ -44,20 +44,20 @@ class Coordinates:
         Parameters
         ----------
         arr: np.ndarray
-            Array of coordinaetes in the form [donor_x, donor_y, acceptor_x, acceptor_y]
+            Array of coordinaetes in the form [ch1_x, ch1_y, ch2_x, ch2_y]
         """
-        donor = Point(*arr[:2])
-        acceptor = Point(*arr[2:])
-        return cls(donor, acceptor)
+        channel_1 = Point(*arr[:2])
+        channel_2 = Point(*arr[2:])
+        return cls(channel_1, channel_2)
 
     @classmethod
     def from_record_dict(cls, record):
-        donor = Point(record["donor_x"], record["donor_y"])
-        acceptor = Point(record["acceptor_x"], record["acceptor_y"])
-        return cls(donor, acceptor)
+        channel_1 = Point(record["ch1_x"], record["ch1_y"])
+        channel_2 = Point(record["ch2_x"], record["ch2_y"])
+        return cls(channel_1, channel_2)
 
     def as_list(self):
-        return [self.donor.x, self.donor.y, self.acceptor.x, self.acceptor.y]
+        return [self.channel_1.x, self.channel_1.y, self.channel_2.x, self.channel_2.y]
 
 
 UNASSIGNED_CONFORMATIONAL_STATE = -1

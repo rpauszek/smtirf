@@ -130,11 +130,11 @@ def _write_trace_data(group, movie_metadata, traces):
     traces: List[RawTrace]
         list of raw trace data
     """
-    donor_data = np.vstack([trace.donor for trace in traces])
-    acceptor_data = np.vstack([trace.acceptor for trace in traces])
-    for name, data in zip(("donor", "acceptor"), (donor_data, acceptor_data)):
+    ch1_data = np.vstack([trace.channel_1 for trace in traces])
+    ch2_data = np.vstack([trace.channel_2 for trace in traces])
+    for name, data in zip(("channel_1", "channel_2"), (ch1_data, ch2_data)):
         group.create_dataset(
-            f"traces/{name}_traces",
+            f"traces/{name}",
             data=data,
             dtype="int16",
             chunks=(1, movie_metadata.n_frames),  # row-wise chunking

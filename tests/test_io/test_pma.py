@@ -36,8 +36,8 @@ def test_read_traces():
 
         assert n_traces == n_records // 2
         for k in range(n_traces):
-            np.testing.assert_array_equal(results[k].donor, fake_data[:, k * 2])
-            np.testing.assert_array_equal(results[k].acceptor, fake_data[:, k * 2 + 1])
+            np.testing.assert_array_equal(results[k].channel_1, fake_data[:, k * 2])
+            np.testing.assert_array_equal(results[k].channel_2, fake_data[:, k * 2 + 1])
 
 
 def test_read_pks():
@@ -56,10 +56,10 @@ def test_read_pks():
 
         assert len(results) == 2
         for coord, expected in zip(results, expected_coordinates):
-            assert coord.donor.x == expected[0]
-            assert coord.donor.y == expected[1]
-            assert coord.acceptor.x == expected[2]
-            assert coord.acceptor.y == expected[3]
+            assert coord.channel_1.x == expected[0]
+            assert coord.channel_1.y == expected[1]
+            assert coord.channel_2.x == expected[2]
+            assert coord.channel_2.y == expected[3]
 
 
 def test_read_log():

@@ -24,9 +24,9 @@ def _read_traces(filename):
         )
 
     # split channels, traces as rows
-    donor_traces = data[:, 0::2].T
-    acceptor_traces = data[:, 1::2].T
-    return [RawTrace(d, a) for d, a in zip(donor_traces, acceptor_traces)]
+    ch1_traces = data[:, 0::2].T
+    ch2_traces = data[:, 1::2].T
+    return [RawTrace(d, a) for d, a in zip(ch1_traces, ch2_traces)]
 
 
 def _read_pks(filename):
@@ -34,10 +34,10 @@ def _read_pks(filename):
     Read coordinates from .pks file and return in structured format.
 
     The file format is
-        1      donor_1_x      donor_1_y      donor_1_background (?)
-        2   acceptor_1_x   acceptor_1_y   acceptor_1_background (?)
-        3      donor_2_x      donor_2_y      donor_2_background (?)
-        4   acceptor_2_x   acceptor_2_y   acceptor_2_background (?)
+        1   ch1_1_x   ch1_1_y   ch1_1_background (?)
+        2   ch2_1_x   ch2_1_y   ch2_1_background (?)
+        3   ch1_2_x   ch1_2_y   ch1_2_background (?)
+        4   ch2_2_x   ch2_2_y   ch2_2_background (?)
     """
     with open(filename, "r") as file:
         data = np.loadtxt(file, dtype=float)[:, 1:-1]  # remove first and last columns
