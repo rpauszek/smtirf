@@ -73,16 +73,16 @@ def test_write_movie_to_hdf(
         assert trace_ids[0].decode("utf-8") == f"{metadata.uid}_0000"
         assert trace_ids[1].decode("utf-8") == f"{metadata.uid}_0001"
 
-        donor_data = group["traces/donor_traces"][:]
-        assert donor_data.shape == (2, 5)
+        ch1_data = group["traces/channel_1"][:]
+        assert ch1_data.shape == (2, 5)
         np.testing.assert_equal(
-            donor_data, np.vstack([trace.donor for trace in traces])
+            ch1_data, np.vstack([trace.channel_1 for trace in traces])
         )
 
-        acceptor_data = group["traces/acceptor_traces"][:]
-        assert acceptor_data.shape == (2, 5)
+        ch2_data = group["traces/channel_2"][:]
+        assert ch2_data.shape == (2, 5)
         np.testing.assert_equal(
-            acceptor_data, np.vstack([trace.acceptor for trace in traces])
+            ch2_data, np.vstack([trace.channel_2 for trace in traces])
         )
 
         conf_sp_data = group["statepaths/conformation"][:]
