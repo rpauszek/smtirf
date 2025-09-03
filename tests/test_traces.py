@@ -4,7 +4,6 @@ import numpy as np
 import pytest
 
 from smtirf import Experiment
-from smtirf.traces import Trace
 
 USE_TRACE_INDEX = 0
 

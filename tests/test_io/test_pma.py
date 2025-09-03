@@ -26,8 +26,9 @@ def test_read_traces():
     dummy_file = MagicMock()
     dummy_path = Path("dummyfile.traces")
 
-    with patch("builtins.open", return_value=dummy_file, create=True), patch(
-        "numpy.fromfile", side_effect=fromfile_side_effect
+    with (
+        patch("builtins.open", return_value=dummy_file, create=True),
+        patch("numpy.fromfile", side_effect=fromfile_side_effect),
     ):
         from smtirf.io.pma import _read_traces
 
@@ -55,7 +56,7 @@ def test_read_pks():
         results = _read_pks(Path("dummy.pks"))
 
         assert len(results) == 2
-        for coord, expected in zip(results, expected_coordinates):
+        for coord, expected in zip(results, expected_coordinates, strict=False):
             assert coord.channel_1.x == expected[0]
             assert coord.channel_1.y == expected[1]
             assert coord.channel_2.x == expected[2]

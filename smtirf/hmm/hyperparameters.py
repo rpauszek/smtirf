@@ -2,8 +2,14 @@ import copy
 
 import numpy as np
 
-from . import row
-from .distributions import *
+from .detail import row
+from .distributions import (
+    Dirichlet,
+    DirichletArray,
+    MultimerNormalGamma,
+    NormalGamma,
+    NormalGammaSharedVariance,
+)
 
 
 class HMMHyperParameters:

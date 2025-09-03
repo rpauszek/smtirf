@@ -33,7 +33,7 @@ def test_load_from_pma_missing_files(exists_flags):
     )
 
     existing_files = {
-        f for f, exists in zip(possible_filenames, exists_flags) if exists
+        f for f, exists in zip(possible_filenames, exists_flags, strict=False) if exists
     }
     missing_files = set(possible_filenames) - existing_files
 
@@ -54,7 +54,7 @@ def test_load_from_pma_missing_files(exists_flags):
 
 def test_unknown_experiment_type(tmp_path):
     filename = Path("experiment.traces")
-    savename = Path(tmp_path) / "bad_experiment.smtrc"
+    _ = Path(tmp_path) / "bad_experiment.smtrc"
 
     with pytest.raises(ValueError) as e:
         load_from_pma(filename, experiment_type="bozo")

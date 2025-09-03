@@ -5,7 +5,43 @@ on:
   pull_request:
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12"]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Poetry
+      uses: abatilo/actions-poetry@v3
+      with:
+        poetry-version: "2.1.2"
+
+    - name: Disable Poetry virtualenvs (install into system Python)
+      run: poetry config virtualenvs.create false
+
+    - name: Install dependencies
+      run: poetry install --with dev
+
+    - name: Check formatting with Black
+      run: poetry run black --check .
+
+    - name: Lint with Ruff
+      run: poetry run ruff check .
+
+    - name: Run pre-commit hooks
+      run: poetry run pre-commit run --all-files --show-diff-on-failure
+
   test:
+    needs: lint        # 🔹 only run if lint passes
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -31,9 +67,6 @@ jobs:
 
     - name: Install dependencies
       run: poetry install --with dev
-
-    - name: Run pre-commit hooks
-      run: poetry run pre-commit run --all-files --show-diff-on-failure
 
     - name: Run tests
       run: poetry run pytest

@@ -26,7 +26,7 @@ def _read_traces(filename):
     # split channels, traces as rows
     ch1_traces = data[:, 0::2].T
     ch2_traces = data[:, 1::2].T
-    return [RawTrace(d, a) for d, a in zip(ch1_traces, ch2_traces)]
+    return [RawTrace(d, a) for d, a in zip(ch1_traces, ch2_traces, strict=False)]
 
 
 def _read_pks(filename):
@@ -46,8 +46,12 @@ def _read_pks(filename):
 
 def _read_log(filename):
     EntryInfo = namedtuple("EntryInfo", ("expected_key", "parser", "required"))
-    msec_to_sec = lambda t: float(t) / 1000
-    int_array = lambda s: [int(item) for item in s.split(" ")]
+
+    def msec_to_sec(t):
+        return float(t) / 1000
+
+    def int_array(s):
+        return [int(item) for item in s.split(" ")]
 
     EXPECTED_ENTRIES = {
         "filming_date_and_time": EntryInfo(
@@ -83,7 +87,7 @@ def _read_log(filename):
     values = text[1::2]
 
     log_dict = {"unknown_entries": {}}
-    for parsed_key, value, original_key in zip(parsed_keys, values, keys):
+    for parsed_key, value, original_key in zip(parsed_keys, values, keys, strict=False):
         entry = EXPECTED_ENTRIES.get(parsed_key, None)
         if entry is None:
             warnings.warn(f'unknown entry "{original_key}" found in log.', stacklevel=3)
