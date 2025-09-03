@@ -3,12 +3,9 @@ import json
 import numpy as np
 
 from .. import SMJsonDecoder, SMJsonEncoder
-from . import ExitFlag
-from . import algorithms as hmmalg
-from . import col
-from . import hyperparameters as hyper
-from . import normalize_rows, row
-from .distributions import *
+from . import algorithms as hmmalg, hyperparameters as hyper
+from .detail import ExitFlag, col, normalize_rows, row
+from .distributions import Categorical, CategoricalArray, Normal, NormalSharedVariance
 
 
 class BaseHiddenMarkovModel:
@@ -16,7 +13,7 @@ class BaseHiddenMarkovModel:
         """simulate M traces of length T from model"""
         S = [hmmalg.sample_statepath(self.K, self.pi, self.A, T=T) for m in range(M)]
         Y = [np.random.normal(loc=self.mu[s], scale=self.sigma[s]) for s in S]
-        return [(s, y) for s, y in zip(S, Y)]
+        return [(s, y) for s, y in zip(S, Y, strict=False)]
 
     def label(self, x, deBlur=False, deSpike=False):
         SP = hmmalg._viterbi(x, self.pi, self.A, self.p_X(x).T).astype(int)

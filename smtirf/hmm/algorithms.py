@@ -3,8 +3,8 @@ import warnings
 import numpy as np
 from numba import jit
 
-from . import ExitFlag
-from .distributions import *
+from .detail import ExitFlag
+from .distributions import Dirichlet, DirichletArray, NormalGamma
 
 
 def train_baumwelch(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
@@ -18,7 +18,10 @@ def train_baumwelch(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
         if itr > 1:
             deltaL = L[itr] - L[itr - 1]
             if deltaL < 0 and printWarnings:
-                warnings.warn(f"log likelihood decreasing by {np.abs(deltaL):0.4f}")
+                # todo: check stacklevel, pytest
+                warnings.warn(
+                    f"log likelihood decreasing by {np.abs(deltaL):0.4f}", stacklevel=1
+                )
             if np.abs(deltaL) < tol:
                 isConverged = True
                 break
@@ -43,7 +46,10 @@ def train_variational(x, theta, maxIter=250, tol=1e-5, printWarnings=True):
         if itr > 0:
             deltaL = L[itr] - L[itr - 1]
             if deltaL < 0 and printWarnings:
-                warnings.warn(f"lower bound decreasing by {np.abs(deltaL):0.4f}")
+                # todo: check stacklevel, pytest
+                warnings.warn(
+                    f"lower bound decreasing by {np.abs(deltaL):0.4f}", stacklevel=1
+                )
             if np.abs(deltaL) < tol:
                 isConverged = True
                 break
@@ -114,7 +120,8 @@ def _viterbi(x, pi, A, B):
             delta[k] = np.max(R[:, k]) + B[t, k]
 
     # termination
-    psiStar = np.max(delta)
+    # todo: check if this is still needed
+    # psiStar = np.max(delta)
     Q[-1] = np.argmax(delta)
     # path backtracking
     for t in range(1, T):

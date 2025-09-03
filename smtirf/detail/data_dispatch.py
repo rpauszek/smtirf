@@ -55,7 +55,7 @@ class TraceLoader:
     def get_metadata(self):
         # todo: validate trace uid matches expected
         record = self.file_handle[self.movie_path]["traces/metadata"][self.index]
-        record = dict(zip(record.dtype.names, record))
+        record = dict(zip(record.dtype.names, record, strict=False))
         record["n_frames"] = self.n_frames
         record["movie_uid"] = self.movie_uid
         record["index"] = self.index
@@ -71,7 +71,7 @@ class TraceLoader:
             raise ValueError(
                 f"kind must be 'conformation' or 'photophysics; got '{kind}'"
             )
-        return self.file_handle[self.movie_path][f"statepaths/conformation"][self.index]
+        return self.file_handle[self.movie_path]["statepaths/conformation"][self.index]
 
     @property
     def experiment_type(self):

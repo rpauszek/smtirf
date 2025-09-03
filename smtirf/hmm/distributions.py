@@ -2,7 +2,7 @@ import numpy as np
 from scipy.special import digamma, gammaln
 from sklearn.cluster import KMeans
 
-from . import col, normalize_rows, row
+from .detail import col, normalize_rows, row
 
 __all__ = [
     "Categorical",
@@ -113,7 +113,7 @@ class DirichletArray(Dirichlet):
     @staticmethod
     def kldiv(u, w):
         DKL = 0
-        for p, q in zip(u.alpha, w.alpha):
+        for p, q in zip(u.alpha, w.alpha, strict=False):
             DKL += (
                 gammaln(p.sum())
                 - gammaln(q.sum())

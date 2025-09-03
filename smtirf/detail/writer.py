@@ -150,7 +150,9 @@ def _write_trace_data(group, movie_metadata, traces):
     """
     ch1_data = np.vstack([trace.channel_1 for trace in traces])
     ch2_data = np.vstack([trace.channel_2 for trace in traces])
-    for name, data in zip(("channel_1", "channel_2"), (ch1_data, ch2_data)):
+    for name, data in zip(
+        ("channel_1", "channel_2"), (ch1_data, ch2_data), strict=False
+    ):
         group.create_dataset(
             f"traces/{name}",
             data=data,
@@ -174,6 +176,7 @@ def _write_default_statepaths(group, movie_metadata):
         ("photophysics", "conformation"),
         (PhotophysicsEnum.SIGNAL.value, UNASSIGNED_CONFORMATIONAL_STATE),
         (np.uint8, np.int8),
+        strict=False,
     ):
         data = np.full(
             (movie_metadata.n_traces, movie_metadata.n_frames), value, dtype=dtype

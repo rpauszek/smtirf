@@ -6,7 +6,6 @@ import scipy.stats
 import smtirf
 
 from .detail.data_dispatch import FretDispatcher, TraceLoader, TwoColorDispatcher
-from .hmm.models import HiddenMarkovModel
 
 
 def with_statepath_update(func):

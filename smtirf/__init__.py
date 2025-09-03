@@ -1,3 +1,5 @@
+# ruff: noqa
+# todo: turn on linting after refactor
 import json
 from importlib.metadata import version
 

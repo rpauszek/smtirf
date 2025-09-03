@@ -6,7 +6,6 @@ import smtirf
 
 from .detail.metadata import MovieMetadata
 from .detail.registry import TRACE_REGISTRY
-from .results import Results
 
 
 class Experiment:
@@ -22,7 +21,7 @@ class Experiment:
         # todo: cleanup
         trace_class = TRACE_REGISTRY[self._experiment_type]
         self._traces = []
-        for key, group in self._file_handle["movies"].items():
+        for group in self._file_handle["movies"].values():
             trace_ids = group["trace_ids"][:]
             for uid in trace_ids:
                 trace = trace_class(self._file_handle, uid.decode("utf-8"))
@@ -61,25 +60,20 @@ class Experiment:
         M = smtirf.util.AutoBaselineModel(self, baselineCutoff=baselineCutoff)
         M.train_gmm(nComponents=nComponents, nPoints=nPoints)
         M.train_hmm(maxIter=maxIter, tol=tol, printWarnings=printWarnings)
-        for trc, sp in zip(self, M.SP):
+        for trc, sp in zip(self, M.SP, strict=False):
             trc.set_signal_labels(sp, where=where, correctOffsets=correctOffsets)
 
     def sort(self, key="corrcoef"):
         if key == "corrcoef":
-            fcn = lambda x: x.corrcoef
-            reverse = False  # ascending
+            self._traces.sort(key=lambda x: x.corrcoef, reverse=False)
         elif key == "index":
-            fcn = lambda x: str(x._id)
-            reverse = False  # ascending
+            self._traces.sort(key=lambda x: str(x._id), reverse=False)
         elif key == "cluster":
-            fcn = lambda x: str(x.clusterIndex)
-            reverse = False  # ascending
+            self._traces.sort(key=lambda x: str(x.clusterIndex), reverse=False)
         elif key == "selected":
-            fcn = lambda x: x.isSelected
-            reverse = True  # descending
+            self._traces.sort(key=lambda x: x.isSelected, reverse=True)  # descending
         else:
             raise KeyError(f"cannot sort by key '{key}'")
-        self._traces.sort(key=fcn, reverse=reverse)
 
     def select_all(self):
         for trace in self:

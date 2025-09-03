@@ -3,7 +3,7 @@ import warnings
 import numpy as np
 from sklearn import mixture
 
-from smtirf.hmm import col, normalize_rows, row
+from smtirf.hmm.detail import col, normalize_rows, row
 
 
 class AutoBaselineModel:
@@ -78,7 +78,7 @@ class AutoBaselineModel:
         p_X = self._calc_emission_prob()
 
         L = np.zeros(maxIter)
-        isConverged = False
+        # isConverged = False
         for itr in range(maxIter):
             # E-step
             sp, Li = viterbi_batch(self.pi, self.A, p_X)  # sp = M x T
@@ -87,9 +87,13 @@ class AutoBaselineModel:
             if itr > 1:
                 deltaL = L[itr] - L[itr - 1]
                 if deltaL < 0 and printWarnings:
-                    warnings.warn(f"log likelihood decreasing by {np.abs(deltaL):0.4f}")
+                    # todo: check stacklevel, pytest
+                    warnings.warn(
+                        f"log likelihood decreasing by {np.abs(deltaL):0.4f}",
+                        stacklevel=1,
+                    )
                 if np.abs(deltaL) < tol:
-                    isConverged = True
+                    # isConverged = True
                     break
             # M-step
             self.pi = np.array([np.sum(sp[:, 0] == i) for i in range(self.Q)]) / M
